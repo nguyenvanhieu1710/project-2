@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Table</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- <link href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,700' rel='stylesheet' type='text/css'> -->
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../css/bootstrap-v4dot3dot1.css">
+    <link rel="stylesheet" href="../adminPages/css/global.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+    <section class="">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6 text-center mb-5">
+                    <h2 class="heading-section">News List</h2>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <div class="trash-container mt-2">
+                    <i class="fas fa-trash"></i>
+                    <span class="badge">3</span>
+                </div>
+                <div class="mb-2 d-flex justify-content-end ">
+                    <button onclick="" data-toggle="modal" data-target="#exampleModal" type="button"
+                        class="btn btn-primary btn-add-news">Add</button>
+                    <button onclick="" type="button" class="btn btn-warning mr-1 ml-1 btn-update-news">Update</button>
+                    <button onclick="" type="button" class="btn btn-danger btn-delete-news">Delete</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="table-wrap">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">News ID</th>
+                                    <th scope="col">News Name</th>
+                                    <th scope="col">Content</th>
+                                    <th scope="col">Image</th>
+                                    <th scope="col">Posting Date</th>
+                                    <th scope="col">Person Posting ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">
+                                        <input type="checkbox" class="news-checkbox">
+                                    </th>
+                                    <td>1</td>
+                                    <td>Breaking News</td>
+                                    <td>This is the content of the news.</td>
+                                    <td><img src="image.jpg" alt="News Image" width="50"></td>
+                                    <td>11/11/2024</td>
+                                    <td>1001</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination justify-content-end">
+                                <li class="page-item disabled btn-previous">
+                                    <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                </li>
+                                <li class="page-item btn-onePage"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item btn-twoPage"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item btn-ThreePage"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item btn-next">
+                                    <a class="page-link" href="#">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Create news</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <form action="#">
+                                <div class="mb-3">
+                                    <label for="newsId">News ID</label>
+                                    <input type="number" name="newsId" class="form-control border"
+                                        placeholder="Enter News ID">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="newsName">News Name</label>
+                                    <input type="text" name="newsName" class="form-control"
+                                        placeholder="Enter News Name">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="content">Content</label>
+                                    <textarea name="content" class="form-control border" rows="4"
+                                        placeholder="Enter content of the news"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="newsImage" class="form-label">News Image</label>
+                                    <input class="form-control" type="file" name="newsImage" id="newsImage">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="postingDate">Posting Date</label>
+                                    <input type="date" name="postingDate" class="form-control">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="personPostingId">Person Posting ID</label>
+                                    <input type="number" name="personPostingId" class="form-control border"
+                                        placeholder="Enter Person Posting ID">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary btn-handle-func">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="../adminPages/js/newsManagement.js"></script>
+
+</body>
+
+</html>

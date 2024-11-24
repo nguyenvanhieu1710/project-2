@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Admin</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/bootstrap-v4dot3dot1.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/admin.css">
+
+    <!-- AJAX -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<body>
+
+    <div class="wrapper d-flex align-items-stretch">
+        <nav id="sidebar">
+            <div class="custom-menu">
+                <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                    <i class="fa fa-bars"></i>
+                    <span class="sr-only">Toggle Menu</span>
+                </button>
+            </div>
+            <h1><a href="#" class="logo">Phone Shop</a></h1>
+            <ul class="list-unstyled components mb-5 list-item">
+                <li class="active">
+                    <a href="#" data-page="adminPages/user.html"><span class="fa fa-user mr-3"></span> Users</a>
+                </li>
+                <li>
+                    <a href="#" data-page="adminPages/staff.html"><span class="fa fa-user mr-3"></span> Staff</a>
+                </li>
+                <li>
+                    <a href="#" data-page="adminPages/supplier.html"><span class="fa fa-user mr-3"></span> Supplier</a>
+                </li>
+                <li>
+                    <a href="#" data-page="adminPages/news.html"><span class="fa fa-sticky-note mr-3"></span> News</a>
+                </li>
+                <li>
+                    <a href="#" data-page="adminPages/advertisements.html"><span class="fas fa-ad mr-3"></span>
+                        Advertisements</a>
+                </li>
+                <li>
+                    <a href="#" data-page="adminPages/products.html"><span class="fa fa-box mr-3"></span> Products</a>
+                </li>
+                <li>
+                    <a href="#" data-page="adminPages/category.html"><span class="fa fa-icons mr-3"></span> Category</a>
+                </li>
+                <li>
+                    <a href="#" data-page="adminPages/voucher.html"><span class="fa fa-ticket mr-3"></span> Voucher</a>
+                </li>
+                <li>
+                    <a href="#" data-page="adminPages/importBill.html"><span class="fa fa-newspaper mr-3"></span> Import
+                        Bill</a>
+                </li>
+                <li>
+                    <a href="#" data-page="adminPages/sellBill.html"><span class="fa fa-newspaper mr-3"></span> Sell
+                        Bill</a>
+                </li>
+                <li>
+                    <a href="#" data-page="adminPages/orders.html"><span class="fa fa-newspaper mr-3"></span> Orders</a>
+                </li>
+                <li>
+                    <a href="#" data-page="adminPages/dashboard.html"><span class="fa fa-chart-line mr-3"></span>
+                        Dashboard</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Page Content  -->
+        <div id="content" class="p-4 p-md-5 pt-5">
+            <h2 class="mb-4">Content</h2>
+        </div>
+    </div>
+
+    <!-- <script src="js/jquery.min.js"></script> -->
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        $(document).ready(function () {
+            var defaultPage = $('a[data-page]').first().data('page');
+
+            if (defaultPage) {
+                $.ajax({
+                    url: defaultPage,
+                    success: function (result) {
+                        $('#content').html(result);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error loading default page:", error);
+                    }
+                });
+            }
+            $('a[data-page]').on('click', function (e) {
+                e.preventDefault();
+                var page = $(this).data('page');
+
+                $.ajax({
+                    url: page,
+                    success: function (result) {
+                        $('#content').html(result);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error loading page:", error);
+                    }
+                });
+            });
+
+            // handle click nav change active
+            $('ul.list-item li').on('click', function () {
+                $('ul.list-item li').removeClass('active');
+
+                $(this).addClass('active');
+            });
+        });
+    </script>
+
+    <!-- ApexCharts for dashboard -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.35.3/apexcharts.min.js"></script>
+</body>
+
+</html>

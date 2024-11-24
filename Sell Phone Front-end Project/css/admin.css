@@ -1,0 +1,32 @@
+/* #sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100vh;
+} */
+
+.list-item {
+  height: 80vh;
+  overflow-y: auto;
+}
+
+.list-item::-webkit-scrollbar {
+  width: 5px;
+}
+
+.list-item::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 10px;
+}
+
+.list-item::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+.list-item::-webkit-scrollbar-track {
+  background: #343a40;
+}
+
+/* #content {
+    margin-left: 300px;
+} */
