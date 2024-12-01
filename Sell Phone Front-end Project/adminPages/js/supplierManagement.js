@@ -2,6 +2,9 @@ $(document).ready(function () {
   var token = localStorage.getItem("admin");
   var supplierId = "";
 
+  let currentPage = 1;
+  const pageSize = 5;
+
   var status = 1;
   $(".btn-add-supplier").click(function () {
     status = 1;
@@ -243,8 +246,43 @@ $(document).ready(function () {
       });
   }
 
+  function searchSupplier(name, currentPage, pageSize) {
+    $.ajax({
+      type: "GET",
+      url:
+        "http://localhost:4006/api-admin/supplier/search-and-pagination?pageNumber=" +
+        currentPage +
+        "&pageSize=" +
+        pageSize +
+        "&name=" +
+        name,
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        updateTable(data);
+      })
+      .fail(function () {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  document
+    .getElementById("searchForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const searchValue = document.getElementById("searchInput").value;
+
+      searchSupplier(searchValue, currentPage, pageSize);
+    });
+
   function updateTable(data) {
-    var tbody = $("tbody");
+    var tbody = $("#activeTable tbody");
     tbody.empty();
     data.forEach(function (supplier, index) {
       var row = `<tr>
@@ -260,10 +298,23 @@ $(document).ready(function () {
     });
   }
 
-  let currentPage = 1;
-  const pageSize = 5;
-
-  fetchSuppliers(currentPage, pageSize);
+  function updateTableDeleted(data) {
+    var tbody = $("#deletedTable tbody");
+    tbody.empty();
+    data.forEach(function (supplier, index) {
+      var row = `<tr>
+                     <td scope="row">${supplier.supplierId}</td>
+                     <td>${supplier.supplierName}</td>
+                     <td>${supplier.phoneNumber}</td>
+                     <td>${supplier.address}</td>
+                     <td>
+                      <button type="button" class="btn btn-primary">Restore</button>
+                      <button type="button" class="btn btn-danger">Delete</button>
+                     </td>
+                   </tr>`;
+      tbody.append(row);
+    });
+  }
 
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
@@ -316,6 +367,27 @@ $(document).ready(function () {
       },
     });
   }
+
+  fetchSuppliers(currentPage, pageSize);
+
+  function fetchDeletedSuppliers(pageNumber, pageSize) {
+    $.ajax({
+      type: "GET",
+      url: `http://localhost:4006/api-admin/supplier/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      headers: { Authorization: "Bearer " + token },
+      success: function (response) {
+        // debugger;
+        updateTableDeleted(response);
+        updatePaginationButtons();
+        // debugger;
+      },
+      error: function (error) {
+        console.error("Request failed: ", error);
+      },
+    });
+  }
+
+  fetchDeletedSuppliers(currentPage, pageSize);
 
   // Update pagination button states
   function updatePaginationButtons() {

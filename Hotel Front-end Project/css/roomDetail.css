@@ -1,0 +1,106 @@
+body {
+  font-family: "Work Sans", sans-serif;
+  background-color: #f4f4f9;
+  color: #333;
+}
+
+.btn-back-to-home {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+}
+
+.room-header {
+  font-family: "Playfair Display";
+  background: linear-gradient(to right, #1f4037, #99f2c8);
+  color: white;
+  padding: 50px 20px;
+  text-align: center;
+}
+
+.room-header h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.room-header p {
+  font-size: 1.2rem;
+}
+
+.room-details {
+  margin: 30px auto;
+  padding: 20px;
+  max-width: 1200px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.room-image {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.room-image img {
+  width: 100%;
+  max-width: 800px;
+  border-radius: 10px;
+}
+
+.room-info {
+  padding: 20px;
+}
+
+.room-info h2 {
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+.room-info p {
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+.room-amenities {
+  margin-top: 20px;
+}
+
+.room-amenities h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.room-amenities ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.room-amenities ul li {
+  font-size: 1rem;
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+}
+
+.room-amenities ul li i {
+  color: #1f4037;
+  margin-right: 10px;
+}
+
+.btn-book-now {
+  margin-top: 20px;
+  background: #1f4037;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-book-now:hover {
+  background: #99f2c8;
+  color: #1f4037;
+}

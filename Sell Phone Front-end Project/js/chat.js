@@ -11,6 +11,8 @@ setTimeout(function () {
 
 element.click(openElement);
 
+// hàm mở cửa sổ chat
+// Functions open chat dialog
 function openElement() {
   var messages = element.find(".messages");
   var textInput = element.find(".text-box");
@@ -25,6 +27,8 @@ function openElement() {
   messages.scrollTop(messages.prop("scrollHeight"));
 }
 
+// hàm đóng cửa sổ chat
+// Functions close chat dialog
 function closeElement() {
   element.find(".chat").removeClass("enter").hide();
   element.find(">i").show();
@@ -42,6 +46,7 @@ function closeElement() {
   }, 500);
 }
 
+// tạo ra 1 mã ngẫu nhiên
 function createUUID() {
   // http://www.ietf.org/rfc/rfc4122.txt
   var s = [];
@@ -57,6 +62,7 @@ function createUUID() {
   return uuid;
 }
 
+// hàm gửi tin nhắn đi
 function sendNewMessage() {
   var userInput = $(".text-box");
   var newMessage = userInput
@@ -85,6 +91,7 @@ function sendNewMessage() {
   );
 }
 
+// Ctrl + Enter hoặc Cmd + Enter (trên Mac) thì gửi tin nhắn đi
 function onMetaAndEnter(event) {
   if ((event.metaKey || event.ctrlKey) && event.keyCode == 13) {
     sendNewMessage();

@@ -8,8 +8,9 @@ app.controller("NewsCtrl", function ($scope, $http) {
     url: current_url + "/api-user/news/get-all",
   })
     .then(function (response) {
-      debugger;
+      // debugger;
       $scope.newsList = response.data;
+      // makeScript("js/main.js");
     })
     .catch(function (error) {
       console.log("Request failed: " + error.data);

@@ -6,18 +6,21 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+    <!-- Font -->
     <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
         integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Bootstrap -->
     <link rel="stylesheet" href="css/bootstrap-v4dot3dot1.css">
+
+    <!-- AJAX Jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/admin.css">
-
-    <!-- AJAX -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 
 <body>
@@ -81,48 +84,14 @@
         </div>
     </div>
 
+    <!-- jQuery -->
     <!-- <script src="js/jquery.min.js"></script> -->
+    <!-- Popper -->
     <script src="js/popper.min.js"></script>
+    <!-- Bootstrap -->
     <script src="js/bootstrap.min.js"></script>
+    <!-- Custom JS -->
     <script src="js/admin.js"></script>
-    <script>
-        $(document).ready(function () {
-            var defaultPage = $('a[data-page]').first().data('page');
-
-            if (defaultPage) {
-                $.ajax({
-                    url: defaultPage,
-                    success: function (result) {
-                        $('#content').html(result);
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error loading default page:", error);
-                    }
-                });
-            }
-            $('a[data-page]').on('click', function (e) {
-                e.preventDefault();
-                var page = $(this).data('page');
-
-                $.ajax({
-                    url: page,
-                    success: function (result) {
-                        $('#content').html(result);
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error loading page:", error);
-                    }
-                });
-            });
-
-            // handle click nav change active
-            $('ul.list-item li').on('click', function () {
-                $('ul.list-item li').removeClass('active');
-
-                $(this).addClass('active');
-            });
-        });
-    </script>
 
     <!-- ApexCharts for dashboard -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.35.3/apexcharts.min.js"></script>

@@ -2,6 +2,13 @@ $(document).ready(function () {
   var token = localStorage.getItem("admin");
   var advertisementId = "";
 
+  let currentPage = 1;
+  const pageSize = 5;
+
+  const exampleModal = new bootstrap.Modal(
+    document.getElementById("exampleModal")
+  );
+
   var status = 1;
   $(".btn-add-advertisement").click(function () {
     status = 1;
@@ -33,7 +40,7 @@ $(document).ready(function () {
     // }
   });
 
-  function addAdvertisement() {
+  async function addAdvertisement() {
     var advertisementName = $("input[name='advertisementName']").val();
     var advertisementImage = $("input[name='advertisementImage']")[0].files[0];
     var location = $("input[name='location']").val();
@@ -56,11 +63,14 @@ $(document).ready(function () {
       alert("Please enter an advertiser ID.");
       return;
     }
+
+    let advertisementImg = await uploadImage();
+
     // debugger;
     var raw_data = {
       advertisementId: 0,
       advertisementName: advertisementName,
-      advertisementImage: advertisementImage.name,
+      advertisementImage: advertisementImg,
       location: location,
       advertiserId: advertiserId,
       deleted: false,
@@ -228,10 +238,8 @@ $(document).ready(function () {
     }
 
     $(".advertisement-checkbox:checked").each(function () {
-      // Lấy dòng (tr) chứa checkbox này
       let row = $(this).closest("tr");
 
-      // Lấy thông tin từ các cột trong dòng
       let id = row.find("td").eq(0).text();
 
       advertisementId = id;
@@ -265,6 +273,41 @@ $(document).ready(function () {
       });
   }
 
+  function searchAdvertisement(name, currentPage, pageSize) {
+    $.ajax({
+      type: "GET",
+      url:
+        "http://localhost:4006/api-admin/advertisement/search-and-pagination?pageNumber=" +
+        currentPage +
+        "&pageSize=" +
+        pageSize +
+        "&name=" +
+        name,
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        updateTable(data);
+      })
+      .fail(function () {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  document
+    .getElementById("searchForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const searchValue = document.getElementById("searchInput").value;
+
+      searchAdvertisement(searchValue, currentPage, pageSize);
+    });
+
   function updateTable(data) {
     var tbody = $("tbody");
     tbody.empty();
@@ -275,18 +318,13 @@ $(document).ready(function () {
                      </th>
                      <td scope="row">${advertisement.advertisementId}</td>
                      <td scope="row">${advertisement.advertisementName}</td>
-                     <td><img src="${advertisement.advertisementImage}" alt="Advertisement Image" width="50" height="50"></td>
+                     <td><img src="${advertisement.advertisementImage}" alt="Advertisement Image" width="30" height="30"></td>
                      <td>${advertisement.location}</td>
                       <td>${advertisement.advertiserId}</td>
                    </tr>`;
       tbody.append(row);
     });
   }
-
-  let currentPage = 1;
-  const pageSize = 5;
-
-  fetchAdvertisements(currentPage, pageSize);
 
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
@@ -340,6 +378,8 @@ $(document).ready(function () {
     });
   }
 
+  fetchAdvertisements(currentPage, pageSize);
+
   // Update pagination button states
   function updatePaginationButtons() {
     // if đang ở trang đầu tiên thì ẩn btn previous
@@ -353,5 +393,34 @@ $(document).ready(function () {
     if (currentPage === 3) $(".btn-ThreePage").addClass("active");
   }
 
-  function moveToTrash() {}
+  function uploadImage() {
+    return new Promise((resolve, reject) => {
+      const fileInput = document.getElementById("advertisementImage").files[0];
+      const formData = new FormData();
+      formData.append("file", fileInput);
+
+      $.ajax({
+        type: "POST",
+        url: "http://localhost:4006/api-admin/advertisement/upload-image",
+        data: formData,
+        headers: { Authorization: "Bearer " + token },
+        processData: false,
+        contentType: false,
+      })
+        .done(function (data) {
+          if (data && data.fullPath) {
+            // alert(`File đã upload tại đường dẫn: ${data.fullPath}`);
+            resolve(data.fullPath.toString());
+          } else {
+            alert("Upload thất bại.");
+            reject("Upload failed.");
+          }
+        })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+          console.log("Request failed:", textStatus, errorThrown);
+          alert("Đã có lỗi xảy ra khi tải lên.");
+          reject(errorThrown);
+        });
+    });
+  }
 });

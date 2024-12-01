@@ -17,5 +17,16 @@ app.controller("CartCtrl", function ($scope, $http) {
     $scope.totalAfterDiscount = $scope.totalPrice - $scope.discount;
   };
 
+  $scope.updateCartInStorage = function () {
+    localStorage.setItem("cart", JSON.stringify($scope.cart));
+  };
+
+  $scope.removeFromCart = function (product) {
+    $scope.cart = $scope.cart.filter(
+      (item) => item.productId !== product.productId
+    );
+    $scope.updateCartInStorage();
+  };
+
   $scope.loadCart();
 });

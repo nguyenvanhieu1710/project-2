@@ -2,6 +2,9 @@ $(document).ready(function () {
   var token = localStorage.getItem("admin");
   var newsId = "";
 
+  let currentPage = 1;
+  const pageSize = 5;
+
   var status = 1;
   $(".btn-add-news").click(function () {
     status = 1;
@@ -69,55 +72,51 @@ $(document).ready(function () {
     return true;
   }
 
-  function addNews() {
-    // Lấy giá trị từ các trường trong form
+  async function addNews() {
     var newsName = $("input[name='newsName']").val();
     var content = $("textarea[name='content']").val();
     var newsImage = $("input[name='newsImage']").val();
     var postingDate = $("input[name='postingDate']").val();
     var personPostingId = $("input[name='personPostingId']").val();
 
-    // Kiểm tra tính hợp lệ của các trường dữ liệu trước khi thực hiện thêm tin tức
     if (validate() == false) {
-      return; // Dừng lại nếu validation không thành công
+      return;
     }
 
-    // Dữ liệu sẽ được gửi đến API
+    let newsImg = await uploadImage();
+
     var raw_data = {
-      newsId: 0, // Nếu đang tạo mới tin tức, ID có thể là 0
+      newsId: 0,
       newsName: newsName,
-      content: content, // Thêm content vào raw_data
-      newsImage: newsImage,
+      content: content,
+      newsImage: newsImg,
       postingDate: postingDate,
       personPostingId: personPostingId,
-      deleted: false, // Nếu bạn cần đánh dấu tin tức chưa xóa
+      deleted: false,
     };
 
-    // Gửi dữ liệu qua AJAX
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/News/create",
       headers: {
-        Authorization: "Bearer " + token, // Token để xác thực người dùng
+        Authorization: "Bearer " + token,
         "Content-Type": "application/json",
       },
       processData: false,
       contentType: false,
-      data: JSON.stringify(raw_data), // Chuyển dữ liệu thành JSON trước khi gửi
+      data: JSON.stringify(raw_data),
     })
       .done(function (data) {
-        // Kiểm tra nếu API trả về lỗi
         if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error); // Hiển thị thông báo lỗi
-          console.log(data.error); // In lỗi ra console
+          alert(data.error);
+          console.log(data.error);
         } else {
-          alert("Add News Success"); // Thông báo thành công
+          alert("Add News Success");
           console.log("Add News Success");
-          fetchNewss(1, 5); // Gọi lại hàm fetchNewss để cập nhật danh sách tin tức
+          fetchNews(1, 5);
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
-        // In lỗi nếu có lỗi khi gửi yêu cầu AJAX
         console.log("Request failed: ", textStatus, errorThrown);
       });
   }
@@ -134,11 +133,9 @@ $(document).ready(function () {
     }
 
     $(".news-checkbox:checked").each(function () {
-      // Lấy dòng (tr) chứa checkbox này
       let row = $(this).closest("tr");
 
-      // Lấy thông tin từ các cột trong dòng
-      let id = row.find("td").eq(0).text(); // Cột ID
+      let id = row.find("td").eq(0).text();
 
       newsId = id;
     });
@@ -249,7 +246,7 @@ $(document).ready(function () {
           //     document.getElementById("exampleModal")
           //   );
           //   modal.hide();
-          fetchNewss(1, 5);
+          fetchNews(1, 5);
         }
       })
       .fail(function () {
@@ -297,12 +294,47 @@ $(document).ready(function () {
           alert(data.error);
         }
         alert("Delete News Success");
-        fetchNewss(1, 5);
+        fetchNews(1, 5);
       })
       .fail(function () {
         console.log("Request failed: ", textStatus, errorThrown);
       });
   }
+
+  function searchNews(name, currentPage, pageSize) {
+    $.ajax({
+      type: "GET",
+      url:
+        "http://localhost:4006/api-admin/news/search-and-pagination?pageNumber=" +
+        currentPage +
+        "&pageSize=" +
+        pageSize +
+        "&name=" +
+        name,
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        updateTable(data);
+      })
+      .fail(function () {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  document
+    .getElementById("searchForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const searchValue = document.getElementById("searchInput").value;
+
+      searchNews(searchValue, currentPage, pageSize);
+    });
 
   function updateTable(data) {
     var tbody = $("tbody");
@@ -316,18 +348,13 @@ $(document).ready(function () {
                        <td>${news.newsId}</td>
                        <td>${news.newsName}</td>
                        <td>${news.content}</td>
-                       <td><img src="${news.newsImage}" alt="News Image" width="50"></td> 
+                       <td><img src="${news.newsImage}" alt="News Image" width="30" height="30"></td> 
                        <td>${news.postingDate}</td> 
                        <td>${news.personPostingId}</td>
                    </tr>`;
       tbody.append(row);
     });
   }
-
-  let currentPage = 1;
-  const pageSize = 5;
-
-  fetchNews(currentPage, pageSize);
 
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
@@ -381,6 +408,8 @@ $(document).ready(function () {
     });
   }
 
+  fetchNews(currentPage, pageSize);
+
   // Update pagination button states
   function updatePaginationButtons() {
     // if đang ở trang đầu tiên thì ẩn btn previous
@@ -394,5 +423,34 @@ $(document).ready(function () {
     if (currentPage === 3) $(".btn-ThreePage").addClass("active");
   }
 
-  function moveToTrash() {}
+  function uploadImage() {
+    return new Promise((resolve, reject) => {
+      const fileInput = document.getElementById("newsImage").files[0];
+      const formData = new FormData();
+      formData.append("file", fileInput);
+
+      $.ajax({
+        type: "POST",
+        url: "http://localhost:4006/api-admin/news/upload-image",
+        data: formData,
+        headers: { Authorization: "Bearer " + token },
+        processData: false,
+        contentType: false,
+      })
+        .done(function (data) {
+          if (data && data.fullPath) {
+            // alert(`File đã upload tại đường dẫn: ${data.fullPath}`);
+            resolve(data.fullPath.toString());
+          } else {
+            alert("Upload thất bại.");
+            reject("Upload failed.");
+          }
+        })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+          console.log("Request failed:", textStatus, errorThrown);
+          alert("Đã có lỗi xảy ra khi tải lên.");
+          reject(errorThrown);
+        });
+    });
+  }
 });

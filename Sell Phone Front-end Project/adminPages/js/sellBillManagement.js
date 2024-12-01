@@ -1,6 +1,8 @@
 $(document).ready(function () {
   var token = localStorage.getItem("admin");
   var billId = "";
+  let currentPage = 1;
+  const pageSize = 5;
 
   var status = 1;
   $(".btn-add-bill").click(function () {
@@ -242,8 +244,43 @@ $(document).ready(function () {
       });
   }
 
+  function searchSellBill(name, currentPage, pageSize) {
+    $.ajax({
+      type: "GET",
+      url:
+        "http://localhost:4006/api-admin/bill/search-and-pagination?pageNumber=" +
+        currentPage +
+        "&pageSize=" +
+        pageSize +
+        "&name=" +
+        name,
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        updateTable(data);
+      })
+      .fail(function () {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  document
+    .getElementById("searchForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const searchValue = document.getElementById("searchInput").value;
+
+      searchSellBill(searchValue, currentPage, pageSize);
+    });
+
   function updateTable(data) {
-    var tbody = $("tbody");
+    var tbody = $("#activeTable tbody");
     tbody.empty();
     data.forEach(function (bill, index) {
       var row = `<tr>
@@ -262,10 +299,26 @@ $(document).ready(function () {
     });
   }
 
-  let currentPage = 1;
-  const pageSize = 5;
-
-  fetchBills(currentPage, pageSize);
+  function updateTableDeleted(data) {
+    var tbody = $("#deletedTable tbody");
+    tbody.empty();
+    data.forEach(function (bill, index) {
+      var row = `<tr>
+                         <td scope="row">${bill.orderId}</td>
+                         <td>${bill.userId}</td>
+                         <td>${bill.staffId}</td>
+                         <td>${bill.orderStatus}</td>
+                         <td>${bill.dayBuy}</td>
+                         <td>${bill.deliveryAddress}</td>
+                         <td>${bill.evaluate}</td>
+                         <td>
+                            <button type="button" class="btn btn-primary btn-restore">Restore</button>
+                            <button type="button" class="btn btn-danger btn-delete">Delete</button>
+                         </td>
+                       </tr>`;
+      tbody.append(row);
+    });
+  }
 
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
@@ -318,6 +371,27 @@ $(document).ready(function () {
       },
     });
   }
+
+  fetchBills(currentPage, pageSize);
+
+  function fetchDeletedBills(pageNumber, pageSize) {
+    $.ajax({
+      type: "GET",
+      url: `http://localhost:4006/api-admin/bill/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      headers: { Authorization: "Bearer " + token },
+      success: function (response) {
+        // debugger;
+        updateTableDeleted(response);
+        updatePaginationButtons();
+        // debugger;
+      },
+      error: function (error) {
+        console.error("Request failed: ", error);
+      },
+    });
+  }
+
+  fetchDeletedBills(currentPage, pageSize);
 
   // Update pagination button states
   function updatePaginationButtons() {

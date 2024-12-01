@@ -34,6 +34,7 @@ app.controller("IndexCtrl", function ($scope, $http) {
       });
   };
 
+  // ===============================================================================================
   $scope.DisPlayBestSellingProduct = function () {
     $http({
       method: "GET",
@@ -54,6 +55,14 @@ app.controller("IndexCtrl", function ($scope, $http) {
     window.location.href = "productDetail.html?productId=" + product.productId;
   };
 
+  //================================================> Cart <=================================================
+  // Handle cart
+  $scope.loadCart = function () {
+    // debugger;
+    $scope.cart = JSON.parse(localStorage.getItem("cart")) || [];
+    $scope.updateCartSummary();
+  };
+
   $scope.addToCart = function (product) {
     // debugger;
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -70,38 +79,37 @@ app.controller("IndexCtrl", function ($scope, $http) {
         productName: product.productName,
         price: product.price,
         quantity: 1,
+        image: product.productImage,
       });
     }
 
-    localStorage.setItem("cart", JSON.stringify(cart));
-
+    $scope.cart = cart;
+    $scope.updateCartInStorage();
+    $scope.updateCartSummary();
     alert(`${product.productName} đã được thêm vào giỏ hàng!`);
   };
 
-  $scope.loadCart = function () {
-    // debugger;
-    $scope.cart = JSON.parse(localStorage.getItem("cart")) || [];
-  };
-
-  $scope.getTotalQuantity = function () {
-    return ($scope.cart || []).reduce(
-      (total, item) => total + (item.quantity || 0),
-      0
-    );
-  };
-
-  $scope.getSubtotal = function () {
-    return ($scope.cart || []).reduce(
-      (total, item) => total + (item.price * item.quantity || 0),
-      0
-    );
+  $scope.updateCartInStorage = function () {
+    localStorage.setItem("cart", JSON.stringify($scope.cart));
   };
 
   $scope.removeFromCart = function (product) {
     $scope.cart = $scope.cart.filter(
       (item) => item.productId !== product.productId
     );
-    localStorage.setItem("cart", JSON.stringify($scope.cart));
+    $scope.updateCartInStorage();
+    $scope.updateCartSummary();
+  };
+
+  $scope.updateCartSummary = function () {
+    $scope.totalQuantity = ($scope.cart || []).reduce(
+      (total, item) => total + (item.quantity || 0),
+      0
+    );
+    $scope.subtotal = ($scope.cart || []).reduce(
+      (total, item) => total + (item.price * item.quantity || 0),
+      0
+    );
   };
 
   $scope.DisPlayCategory();

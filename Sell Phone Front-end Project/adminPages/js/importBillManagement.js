@@ -2,6 +2,9 @@ $(document).ready(function () {
   var token = localStorage.getItem("admin");
   var importBillId = "";
 
+  let currentPage = 1;
+  const pageSize = 5;
+
   var status = 1;
   $(".btn-add-importBill").click(function () {
     status = 1;
@@ -244,6 +247,41 @@ $(document).ready(function () {
       });
   }
 
+  function searchImportBill(name, currentPage, pageSize) {
+    $.ajax({
+      type: "GET",
+      url:
+        "http://localhost:4006/api-admin/importBill/search-and-pagination?pageNumber=" +
+        currentPage +
+        "&pageSize=" +
+        pageSize +
+        "&name=" +
+        name,
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        updateTable(data);
+      })
+      .fail(function () {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  document
+    .getElementById("searchForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const searchValue = document.getElementById("searchInput").value;
+
+      searchImportBill(searchValue, currentPage, pageSize);
+    });
+
   function updateTable(data) {
     var tbody = $("tbody");
     tbody.empty();
@@ -260,11 +298,6 @@ $(document).ready(function () {
       tbody.append(row);
     });
   }
-
-  let currentPage = 1;
-  const pageSize = 5;
-
-  fetchImportBills(currentPage, pageSize);
 
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
@@ -317,6 +350,8 @@ $(document).ready(function () {
       },
     });
   }
+
+  fetchImportBills(currentPage, pageSize);
 
   // Update pagination button states
   function updatePaginationButtons() {

@@ -6,12 +6,19 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>News</title>
+
+    <!-- Responsive -->
     <link href="css/media_query.css" rel="stylesheet" type="text/css" />
+    <!-- Bootstrap -->
     <link href="css/bootstrap.css" rel="stylesheet" type="text/css" />
+    <!-- Font Awesome Icon -->
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
         integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <!-- Animate.css -->
     <link href="css/animate.css" rel="stylesheet" type="text/css" />
+    <!-- Google font -->
     <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
+    <!-- Owl Carousel -->
     <link href="css/owl.carousel.css" rel="stylesheet" type="text/css" />
     <link href="css/owl.theme.default.css" rel="stylesheet" type="text/css" />
     <!-- Bootstrap CSS -->
@@ -26,6 +33,33 @@
 </head>
 
 <body ng-app="MyProject" ng-controller="NewsCtrl">
+    <header>
+        <style>
+            .btn-back-to-home {
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                cursor: pointer;
+                z-index: 9999;
+            }
+
+            .btn-open-modal-create {
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                cursor: pointer;
+                z-index: 9999;
+            }
+        </style>
+        <button class="btn btn-secondary btn-back-to-home">
+            <i class="fa fa-arrow-left"></i>
+            Back To Home</button>
+
+        <button class="btn btn-primary btn-open-modal-create" data-toggle="modal" data-target="#createModal">Add new
+            news</button>
+    </header>
+
+    <!-- NEWS -->
     <div class="container-fluid pb-4 pt-4 paddding">
         <div class="container paddding">
             <div class="row mx-0">
@@ -37,20 +71,23 @@
                     <div class="row pb-4" ng-repeat="news in newsList">
                         <div class="col-md-5">
                             <div class="fh5co_hover_news_img">
-                                <div class="fh5co_news_img"><img src="images/nathan-mcbride-229637.jpg" alt="" /></div>
+                                <div class="fh5co_news_img"><img ng-src="{{news.newsImage}}" width="315" height="200"
+                                        alt="News Image" /></div>
                                 <div></div>
                             </div>
                         </div>
                         <div class="col-md-7 animate-box">
-                            <a href="#" class="fh5co_magna py-2"> {{news.newsName}} </a> <a href="#"
-                                class="fh5co_mini_time py-3"> Thomson
+                            <a href="#" class="fh5co_magna py-2"> {{news.newsName}} </a>
+                            <br>
+                            <a href="#" class="fh5co_mini_time py-3"> Thomson
                                 Smith -
-                                {{news.postingDate}} </a>
+                                {{news.postingDate}}
+                            </a>
                             <div class="fh5co_consectetur"> {{news.content}}
                             </div>
                         </div>
                     </div>
-                    <div class="row pb-4">
+                    <!-- <div class="row pb-4">
                         <div class="col-md-5">
                             <div class="fh5co_hover_news_img">
                                 <div class="fh5co_news_img"><img src="images/ryan-moreno-98837.jpg" alt="" /></div>
@@ -112,7 +149,7 @@
                                 ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <!-- end news -->
                 <!-- tags and most popular -->
@@ -192,23 +229,36 @@
             </div>
         </div>
     </div>
+    <!-- End News -->
+
+    <!-- Trending -->
     <div class="container-fluid pb-4 pt-5">
         <div class="container animate-box">
             <div>
                 <div class="fh5co_heading fh5co_heading_border_bottom py-2 mb-4">Trending</div>
             </div>
-            <div class="owl-carousel owl-theme" id="slider2">
-                <div class="item px-2">
+            <style>
+                .block-news-img {
+                    width: 350px !important;
+                }
+
+                .listOfNews {
+                    display: flex !important;
+                }
+            </style>
+            <div class="owl-carousel owl-theme listOfNews" id="slider2">
+                <div class="item px-2" ng-repeat="news in newsList | limitTo:3">
                     <div class="fh5co_hover_news_img">
-                        <div class="fh5co_news_img"><img src="images/39-324x235.jpg" alt="" /></div>
+                        <div class="fh5co_news_img block-news-img"><img ng-src="{{news.newsImage}}" alt="News Image" />
+                        </div>
                         <div>
-                            <a href="#" class="d-block fh5co_small_post_heading"><span class="">The top 10 best computer
-                                    speakers in the market</span></a>
-                            <div class="c_g"><i class="fa fa-clock-o"></i> Oct 16,2017</div>
+                            <a href="#" class="d-block fh5co_small_post_heading"><span
+                                    class="">{{news.newsName}}</span></a>
+                            <div class="c_g"><i class="fa fa-clock-o"></i> {{news.postingDate}}</div>
                         </div>
                     </div>
                 </div>
-                <div class="item px-2">
+                <!-- <div class="item px-2">
                     <div class="fh5co_hover_news_img">
                         <div class="fh5co_news_img"><img src="images/joe-gardner-75333.jpg" alt="" /></div>
                         <div>
@@ -237,16 +287,76 @@
                             <div class="c_g"><i class="fa fa-clock-o"></i> Oct 16,2017</div>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
+    <!-- End Trending -->
 
     <div class="gototop js-top">
         <a href="#" class="js-gotop"><i class="fa fa-arrow-up"></i></a>
     </div>
 
+    <!-- Modal create -->
+    <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Create news</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div class="container">
+                        <form action="#">
+                            <div class="form-group">
+                                <label for="newsName">News Name</label>
+                                <input type="text" name="newsName" class="form-control" placeholder="Enter News Name">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="content">Content</label>
+                                <textarea name="content" class="form-control" rows="4"
+                                    placeholder="Enter content of the news"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="newsImage" class="form-label">News Image</label>
+                                <input class="form-control-file" type="file" name="newsImage" id="newsImage">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="postingDate">Posting Date</label>
+                                <input type="date" name="postingDate" class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="personPostingId">Person Posting ID</label>
+                                <input type="number" name="personPostingId" class="form-control"
+                                    placeholder="Enter Person Posting ID">
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- End Modal create -->
+
+    <!-- JQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Owl Carousel -->
     <script src="js/owl.carousel.min.js"></script>
     <!--<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
@@ -258,8 +368,13 @@
     <!-- Waypoints -->
     <script src="js/jquery.waypoints.min.js"></script>
     <!-- Main -->
-    <script src="js/blog.js"></script>
-
+    <script src="js/news.js"></script>
+    <!-- Custom JS -->
+    <script>
+        $(".btn-back-to-home").click(function () {
+            window.location.href = "index.html";
+        });
+    </script>
 </body>
 
 </html>

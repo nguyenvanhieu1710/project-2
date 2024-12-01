@@ -1,8 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
-  var countdownDate = new Date("Nov 31, 2024 23:59:59").getTime();
+  var countdownDate = new Date("December 31, 2024 23:59:59").getTime();
 
   var countdownFunction = setInterval(function () {
-    // Lấy thời gian hiện tại
     var now = new Date().getTime();
 
     // Tìm khoảng cách giữa bây giờ và ngày kết thúc
@@ -16,7 +15,6 @@ document.addEventListener("DOMContentLoaded", function () {
     var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
     var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-    // Xuất kết quả ra các phần tử tương ứng
     document.getElementById("days").innerHTML = days;
     document.getElementById("hours").innerHTML = hours;
     document.getElementById("minutes").innerHTML = minutes;

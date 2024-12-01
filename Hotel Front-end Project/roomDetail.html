@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Phòng</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,700|Work+Sans:300,400,700"
+        rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
+        integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/roomDetail.css">
+</head>
+
+<body>
+    <header class="room-header">
+        <button class="btn btn-secondary btn-back-to-home"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+        <h1>Phòng Sang Trọng</h1>
+        <p>Trải nghiệm đẳng cấp, tận hưởng sự thoải mái.</p>
+    </header>
+
+    <div class="room-details">
+        <div class="room-image">
+            <img src="images/img_1.jpg" alt="Phòng Sang Trọng">
+        </div>
+        <div class="room-info">
+            <h2>Mô tả chi tiết</h2>
+            <p>
+                Phòng được thiết kế hiện đại với không gian rộng rãi, nội thất cao cấp và các tiện nghi hàng đầu. Phù
+                hợp cho cả
+                du khách và doanh nhân.
+            </p>
+            <p>
+                Diện tích: 50m² <br>
+                Giá: $200.00 / một đêm <br>
+                Phong cách: Hiện đại, sang trọng
+            </p>
+        </div>
+
+        <div class="room-amenities">
+            <h3>Tiện ích bao gồm:</h3>
+            <ul>
+                <li><i class="bi bi-wifi"></i> Wi-Fi miễn phí</li>
+                <li><i class="bi bi-tv"></i> TV màn hình phẳng</li>
+                <li><i class="bi bi-cup"></i> Dịch vụ phòng 24/7</li>
+                <li><i class="bi bi-airplane"></i> Hỗ trợ đưa đón sân bay</li>
+                <li><i class="bi bi-geo-alt"></i> View thành phố tuyệt đẹp</li>
+            </ul>
+        </div>
+
+        <button class="btn-book-now">Đặt Phòng Ngay</button>
+    </div>
+
+    <script>
+        document.querySelector('.btn-back-to-home').addEventListener('click', function () {
+            window.location.href = 'index.html';
+        });
+        document.querySelector('.btn-book-now').addEventListener('click', function () {
+            window.location.href = 'payment.html';
+        });
+    </script>
+</body>
+
+</html>

@@ -7,7 +7,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-	<title>Electro - HTML Ecommerce Template</title>
+	<title>Checkout</title>
 
 	<!-- Google font -->
 	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
@@ -28,16 +28,13 @@
 	<!-- Custom stlylesheet -->
 	<link type="text/css" rel="stylesheet" href="css/style.css" />
 
-	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-	<!--[if lt IE 9]>
-		  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-		  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-		<![endif]-->
-
+	<!-- AngularJS -->
+	<script src="angular/angular.min.js"></script>
+	<script src="angular/global.js"></script>
+	<script src="angular/checkout.js"></script>
 </head>
 
-<body>
+<body ng-app="MyProject" ng-controller="CheckoutCtrl">
 	<!-- HEADER -->
 	<header>
 		<!-- TOP HEADER -->
@@ -65,7 +62,7 @@
 					<!-- LOGO -->
 					<div class="col-md-3">
 						<div class="header-logo">
-							<a href="#" class="logo">
+							<a href="index.html" class="logo">
 								<img src="./img/logo.png" alt="">
 							</a>
 						</div>
@@ -163,30 +160,6 @@
 		<!-- /MAIN HEADER -->
 	</header>
 	<!-- /HEADER -->
-
-	<!-- NAVIGATION -->
-	<nav id="navigation">
-		<!-- container -->
-		<div class="container">
-			<!-- responsive-nav -->
-			<div id="responsive-nav">
-				<!-- NAV -->
-				<ul class="main-nav nav navbar-nav">
-					<li class="active"><a href="#">Home</a></li>
-					<li><a href="#">Hot Deals</a></li>
-					<li><a href="#">Categories</a></li>
-					<li><a href="#">Laptops</a></li>
-					<li><a href="#">Smartphones</a></li>
-					<li><a href="#">Cameras</a></li>
-					<li><a href="#">Accessories</a></li>
-				</ul>
-				<!-- /NAV -->
-			</div>
-			<!-- /responsive-nav -->
-		</div>
-		<!-- /container -->
-	</nav>
-	<!-- /NAVIGATION -->
 
 	<!-- BREADCRUMB -->
 	<div id="breadcrumb" class="section">
@@ -322,14 +295,15 @@
 							<div><strong>TOTAL</strong></div>
 						</div>
 						<div class="order-products">
-							<div class="order-col">
-								<div>1x Product Name Goes Here</div>
-								<div>$980.00</div>
+							<!-- cho track by item.productId để tránh trùng lặp trong angular -->
+							<div class="order-col" ng-repeat="item in cart track by item.productId">
+								<div>{{item.quantity}}x {{item.productName}}</div>
+								<div>${{item.price}}</div>
 							</div>
-							<div class="order-col">
+							<!-- <div class="order-col">
 								<div>2x Product Name Goes Here</div>
 								<div>$980.00</div>
-							</div>
+							</div> -->
 						</div>
 						<div class="order-col">
 							<div>Shiping</div>
@@ -337,7 +311,7 @@
 						</div>
 						<div class="order-col">
 							<div><strong>TOTAL</strong></div>
-							<div><strong class="order-total">$2940.00</strong></div>
+							<div><strong class="order-total">${{totalPrice}}</strong></div>
 						</div>
 					</div>
 					<div class="payment-method">
@@ -348,30 +322,30 @@
 								Direct Bank Transfer
 							</label>
 							<div class="caption">
-								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-									incididunt ut labore et dolore magna aliqua.</p>
+								<p>Direct transfer via bank account. You will receive bank information to make payment
+									after placing your order.</p>
 							</div>
 						</div>
 						<div class="input-radio">
 							<input type="radio" name="payment" id="payment-2">
 							<label for="payment-2">
 								<span></span>
-								Cheque Payment
+								COD
 							</label>
 							<div class="caption">
-								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-									incididunt ut labore et dolore magna aliqua.</p>
+								<p>Payment in cash upon receipt. Suitable if you want to test the product before paying.
+								</p>
 							</div>
 						</div>
 						<div class="input-radio">
 							<input type="radio" name="payment" id="payment-3">
 							<label for="payment-3">
 								<span></span>
-								Paypal System
+								Credit Card
 							</label>
 							<div class="caption">
-								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-									incididunt ut labore et dolore magna aliqua.</p>
+								<p>Pay via credit or debit card. Transactions are performed safely and securely via
+									payment gateway.</p>
 							</div>
 						</div>
 					</div>
@@ -379,10 +353,10 @@
 						<input type="checkbox" id="terms">
 						<label for="terms">
 							<span></span>
-							I've read and accept the <a href="#">terms & conditions</a>
+							I've read and accept the <a href="#">terms &amp; conditions</a>
 						</label>
 					</div>
-					<a href="payment.html" class="primary-btn order-submit">Place order</a>
+					<a href="javascript:void(0);" class="primary-btn order-submit" id="placeOrderBtn">Place order</a>
 				</div>
 				<!-- /Order Details -->
 			</div>
@@ -472,7 +446,7 @@
 								<li><a href="#">Contact Us</a></li>
 								<li><a href="#">Privacy Policy</a></li>
 								<li><a href="#">Orders and Returns</a></li>
-								<li><a href="#">Terms & Conditions</a></li>
+								<li><a href="#">Terms &amp; Conditions</a></li>
 							</ul>
 						</div>
 					</div>
@@ -512,10 +486,10 @@
 						</ul>
 						<span class="copyright">
 							<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-							Copyright &copy;
+							<!-- Copyright &copy;
 							<script>document.write(new Date().getFullYear());</script> All rights reserved | This
 							template is made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a
-								href="https://colorlib.com" target="_blank">Colorlib</a>
+								href="https://colorlib.com" target="_blank">Colorlib</a> -->
 							<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
 						</span>
 					</div>
@@ -535,7 +509,86 @@
 	<script src="js/nouislider.min.js"></script>
 	<script src="js/jquery.zoom.min.js"></script>
 	<script src="js/main.js"></script>
+	<!-- Custom JavaScript -->
+	<script>
+		document.getElementById("placeOrderBtn").addEventListener("click", function () {
+			const paymentMethods = document.getElementsByName("payment");
+			let selectedMethod = null;
 
+			for (const method of paymentMethods) {
+				if (method.checked) {
+					selectedMethod = method.id;
+					break;
+				}
+			}
+
+			if (!selectedMethod) {
+				alert("Vui lòng chọn phương thức thanh toán trước khi tiếp tục!");
+				return;
+			}
+
+			const termsCheckbox = document.getElementById("terms");
+			if (!termsCheckbox.checked) {
+				alert("Vui lòng đồng ý với các điều khoản và điều kiện!");
+				return;
+			}
+			// get user from local storage
+			var user = localStorage.getItem("user");
+			var userId = user.AccountId;
+
+			// get staff from database
+			var staff = null;
+
+			// get product from cart in local storage
+			var cart = localStorage.getItem("cart");
+			var cart = JSON.parse(cart);
+			var productId = cart.ProductId;
+			var quantity = cart.Quantity;
+			var price = cart.Price;
+			var discountAmount = cart.DiscountAmount;
+			var voucherId = cart.VoucherId;
+			var orderDetailStatus = cart.OrderDetailStatus;
+
+			// create order
+			var order = {
+				orderId: 0,
+				userId: userId,
+				staffId: 0,
+				orderStatus: "Pending Confirmation",
+				dayBuy: "2024-12-01T13:01:17.306Z",
+				deliveryAddress: "string",
+				evaluate: 0,
+				deleted: true,
+				listjson_orderDetail: [
+					{
+						orderDetailId: 0,
+						orderId: 0,
+						productId: 0,
+						quantity: 0,
+						price: 0,
+						discountAmount: 0,
+						voucherId: 0,
+						orderDetailStatus: 0
+					}
+				]
+			};
+
+			// debugger;
+			switch (selectedMethod) {
+				case "payment-1":
+					window.location.href = "payment.html";
+					break;
+				case "payment-2":
+					// window.location.href = "cod.html";
+					break;
+				case "payment-3":
+					window.location.href = "payment.html";
+					break;
+				default:
+					alert("Phương thức thanh toán không hợp lệ!");
+			}
+		});
+	</script>
 </body>
 
 </html>
