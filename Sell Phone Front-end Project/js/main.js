@@ -1,19 +1,20 @@
 (function ($) {
   "use strict";
 
+  // ============================> Mobile Nav <=====================================
   // Mobile Nav toggle
   $(".menu-toggle > a").on("click", function (e) {
     e.preventDefault();
     $("#responsive-nav").toggleClass("active");
   });
 
+  // ===============================> Cart Dropdown <=====================================
   // Fix cart dropdown from closing
   $(".cart-dropdown").on("click", function (e) {
     e.stopPropagation();
   });
 
-  /////////////////////////////////////////
-
+  // ===============================> Product Slick <=====================================
   // Cấu hình hiển thị danh sách sản phẩm
   // Products Slick
   $(".products-slick").each(function () {
@@ -48,6 +49,7 @@
     });
   });
 
+  // ===================================> Product Widget Slick <=====================================
   // Products Widget Slick
   $(".products-widget-slick").each(function () {
     var $this = $(this),
@@ -63,8 +65,7 @@
     });
   });
 
-  /////////////////////////////////////////
-
+  // ===================================> Product Main img Slick <=====================================
   // Product Main img Slick
   $("#product-main-img").slick({
     infinite: true,
@@ -75,6 +76,7 @@
     asNavFor: "#product-imgs",
   });
 
+  // ==================================> Product imgs Slick <=====================================
   // Product imgs Slick
   $("#product-imgs").slick({
     slidesToShow: 3,
@@ -97,14 +99,14 @@
     ],
   });
 
+  // ================================> Product img zoom <=====================================
   // Product img zoom
   var zoomMainProduct = document.getElementById("product-main-img");
   if (zoomMainProduct) {
     $("#product-main-img .product-preview").zoom();
   }
 
-  /////////////////////////////////////////
-
+  // ===================================> Input number <=====================================
   // Thay đổi số lượng
   // Input number
   $(".input-number").each(function () {
@@ -129,6 +131,7 @@
     });
   });
 
+  // ===================================> Price Slider <=====================================
   // Thay đổi giá trên trang danh sách sản phẩm
   var priceInputMax = document.getElementById("price-max"),
     priceInputMin = document.getElementById("price-min");
@@ -151,6 +154,7 @@
     }
   }
 
+  // ===================================> Price Slider <=====================================
   // Thanh trượt giá sản phẩm trên trang danh sách sản phẩm
   // Price Slider
   var priceSlider = document.getElementById("price-slider");
@@ -165,6 +169,7 @@
       },
     });
 
+    // ====================================> Price Slider <============================================
     // cập nhật giá khi người dùng kéo thanh trượt
     priceSlider.noUiSlider.on("update", function (values, handle) {
       var value = values[handle];

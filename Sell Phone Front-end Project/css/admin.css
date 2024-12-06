@@ -5,6 +5,7 @@
     height: 100vh;
 } */
 
+/* =================================> thanh trượt <======================================== */
 .list-item {
   height: 80vh;
   overflow-y: auto;
@@ -28,5 +29,107 @@
 }
 
 /* #content {
-    margin-left: 300px;
+  margin-left: 300px;
+  background-color: #fff !important;
 } */
+
+/* ============================> Menu child <======================================== */
+
+.dropdown-menu {
+  display: none;
+  list-style: none;
+  margin: 5px 0 0 20px;
+  padding: 0;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown a {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.dropdown-menu li {
+  margin: 5px 0;
+}
+
+.dropdown-menu li a {
+  display: block;
+  padding: 10px 15px;
+  font-size: 14px;
+  color: #495057 !important;
+  text-decoration: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dropdown-menu li a:hover {
+  background-color: #007bff;
+  color: #fff !important;
+}
+
+/* ============================> Theme <======================================== */
+:root {
+  --light-bg: #ffffff;
+  --light-text: #000000;
+  --light-sidebar-bg: #f8f9fa;
+  --light-sidebar-text: #495057;
+
+  --dark-bg: #3c3f44;
+  --dark-text: #ffffff;
+  --dark-sidebar-bg: #2b2e33;
+  --dark-sidebar-text: #adb5bd;
+}
+
+/* Light Theme */
+.light-theme {
+  background-color: var(--light-bg) !important;
+  color: var(--light-text) !important;
+}
+
+.light-theme #sidebar {
+  background-color: var(--light-sidebar-bg) !important;
+  color: var(--light-sidebar-text) !important;
+}
+
+.light-theme #sidebar a {
+  color: var(--light-sidebar-text) !important;
+}
+
+.light-theme #sidebar a:hover {
+  color: var(--light-text) !important;
+}
+
+/* Dark Theme */
+.dark-theme {
+  background-color: var(--dark-bg) !important;
+  color: var(--dark-text) !important;
+}
+
+.dark-theme #sidebar {
+  background-color: var(--dark-sidebar-bg) !important;
+  color: var(--dark-sidebar-text) !important;
+}
+
+.dark-theme #sidebar a {
+  color: var(--dark-sidebar-text) !important;
+}
+
+.dark-theme #sidebar a:hover {
+  color: var(--dark-text) !important;
+}

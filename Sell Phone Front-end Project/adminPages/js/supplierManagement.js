@@ -5,6 +5,17 @@ $(document).ready(function () {
   let currentPage = 1;
   const pageSize = 5;
 
+  // Modal create bootstrap
+  const exampleModal = new bootstrap.Modal(
+    document.getElementById("exampleModal")
+  );
+
+  // Modal trash can bootstrap
+  const trashCanModal = new bootstrap.Modal(
+    document.getElementById("trashCanModal")
+  );
+
+  // ===================================> handle button <===========================================
   var status = 1;
   $(".btn-add-supplier").click(function () {
     status = 1;
@@ -17,7 +28,8 @@ $(document).ready(function () {
 
   $(".btn-delete-supplier").click(function () {
     status = 3;
-    deleteSupplier();
+    deleteVirtualSupplier();
+    // deleteSupplier();
   });
 
   $(".btn-handle-func").click(function () {
@@ -32,6 +44,7 @@ $(document).ready(function () {
     // }
   });
 
+  // ===================================> add supplier <===========================================
   function addSupplier() {
     var supplierName = $("input[name='supplierName']").val();
     var phoneNumber = $("input[name='phoneNumber']").val();
@@ -88,6 +101,7 @@ $(document).ready(function () {
       });
   }
 
+  // ===================================> update supplier <===========================================
   function TurnOnModalToUpdate() {
     if ($("input.supplier-checkbox:checked").length === 0) {
       alert("Please select at least one supplier to update.");
@@ -153,6 +167,8 @@ $(document).ready(function () {
         console.log("Request failed: ", textStatus, errorThrown);
       });
   }
+
+  // ===================================> update supplier <===========================================
   function updateSupplier() {
     // alert("Update Supplier Success");
     // debugger;
@@ -199,6 +215,7 @@ $(document).ready(function () {
       });
   }
 
+  // ===================================> delete supplier <===========================================
   function deleteSupplier() {
     if ($("input.supplier-checkbox:checked").length === 0) {
       alert("Please select at least one supplier to update.");
@@ -246,6 +263,70 @@ $(document).ready(function () {
       });
   }
 
+  // ===================================> delete virtual supplier <===========================================
+  function deleteVirtualSupplier() {
+    if ($("input.supplier-checkbox:checked").length === 0) {
+      alert("Please select at least one supplier to update.");
+      return;
+    }
+
+    if ($("input.supplier-checkbox:checked").length > 1) {
+      alert("Choose only a supplier to update.");
+      return;
+    }
+
+    var supplierName;
+    var phoneNumber;
+    var address;
+
+    $(".supplier-checkbox:checked").each(function () {
+      let row = $(this).closest("tr");
+
+      let id = row.find("td").eq(0).text();
+      supplierName = row.find("td").eq(1).text();
+      phoneNumber = row.find("td").eq(2).text();
+      address = row.find("td").eq(3).text();
+
+      supplierId = id;
+      // debugger;
+    });
+
+    var raw_data = {
+      supplierId: supplierId,
+      supplierName: supplierName,
+      phoneNumber: phoneNumber,
+      address: address,
+      deleted: true,
+    };
+
+    // debugger;
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:4006/api-admin/Supplier/update",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(raw_data),
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        // console.log(data);
+        // alert(data);
+        if (data.error != null && data.error != "undefined") {
+          alert(data.error);
+        }
+        alert("Delete Virtual Supplier Success");
+        fetchDeletedSuppliers(currentPage, pageSize);
+        fetchSuppliers(currentPage, pageSize);
+      })
+      .fail(function () {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  // ====================================> search supplier <=============================================================
   function searchSupplier(name, currentPage, pageSize) {
     $.ajax({
       type: "GET",
@@ -271,6 +352,7 @@ $(document).ready(function () {
       });
   }
 
+  // =====================================> search supplier <=============================================================
   document
     .getElementById("searchForm")
     .addEventListener("submit", function (e) {
@@ -281,6 +363,7 @@ $(document).ready(function () {
       searchSupplier(searchValue, currentPage, pageSize);
     });
 
+  // =======================================> update table <=============================================================
   function updateTable(data) {
     var tbody = $("#activeTable tbody");
     tbody.empty();
@@ -298,6 +381,7 @@ $(document).ready(function () {
     });
   }
 
+  // ======================================> update table deleted <=============================================================
   function updateTableDeleted(data) {
     var tbody = $("#deletedTable tbody");
     tbody.empty();
@@ -308,14 +392,73 @@ $(document).ready(function () {
                      <td>${supplier.phoneNumber}</td>
                      <td>${supplier.address}</td>
                      <td>
-                      <button type="button" class="btn btn-primary">Restore</button>
-                      <button type="button" class="btn btn-danger">Delete</button>
+                      <button type="button" class="btn btn-primary btn-restore">Restore</button>
+                      <button type="button" class="btn btn-danger btn-deleteActual">Delete</button>
                      </td>
                    </tr>`;
       tbody.append(row);
     });
   }
 
+  // ======================================> restore supplier <=============================================================
+  $("#deletedTable tbody").on("click", ".btn-restore", function () {
+    const currentRow = $(this).closest("tr");
+    // debugger;
+
+    const supplier = {
+      supplierId: currentRow.find("td").eq(0).text(),
+      supplierName: currentRow.find("td").eq(1).text(),
+      phoneNumber: currentRow.find("td").eq(2).text(),
+      address: currentRow.find("td").eq(3).text(),
+      deleted: false,
+    };
+
+    restoreSupplier(supplier);
+  });
+
+  // =====================================> delete supplier <=============================================================
+  $("#deletedTable tbody").on("click", ".btn-deleteActual", function () {
+    const currentRow = $(this).closest("tr");
+    // debugger;
+
+    const supplier = {
+      supplierId: currentRow.find("td").eq(0).text(),
+    };
+
+    deleteSupplier(supplier.supplierId);
+  });
+
+  // ======================================> restore supplier <=============================================================
+  function restoreSupplier(supplier) {
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:4006/api-admin/supplier/update",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(supplier),
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        if (data && !data.error) {
+          // debugger;
+          // success
+          alert("Restore supplier success!");
+          trashCanModal.hide();
+          fetchSuppliers(currentPage, pageSize);
+          fetchDeletedSuppliers(currentPage, pageSize);
+        } else {
+          alert("Error updating supplier: " + data.error);
+        }
+      })
+      .fail(function (jqXHR, textStatus, errorThrown) {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  // ======================================> pagination <=============================================================
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
@@ -351,6 +494,20 @@ $(document).ready(function () {
     fetchSuppliers(currentPage, pageSize);
   });
 
+  // Update pagination button states
+  function updatePaginationButtons() {
+    // if đang ở trang đầu tiên thì ẩn btn previous
+    $(".btn-previous").toggleClass("disabled", currentPage === 1);
+    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
+
+    // Adjust active class for current page button
+    $(".pagination .page-item").removeClass("active");
+    if (currentPage === 1) $(".btn-onePage").addClass("active");
+    if (currentPage === 2) $(".btn-twoPage").addClass("active");
+    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
+  }
+
+  // ======================================> fetch supplier <=============================================================
   function fetchSuppliers(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -370,6 +527,7 @@ $(document).ready(function () {
 
   fetchSuppliers(currentPage, pageSize);
 
+  // =======================================> fetch deleted supplier <=============================================================
   function fetchDeletedSuppliers(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -377,6 +535,7 @@ $(document).ready(function () {
       headers: { Authorization: "Bearer " + token },
       success: function (response) {
         // debugger;
+        $(".badge").text(response.length || 0);
         updateTableDeleted(response);
         updatePaginationButtons();
         // debugger;
@@ -388,19 +547,4 @@ $(document).ready(function () {
   }
 
   fetchDeletedSuppliers(currentPage, pageSize);
-
-  // Update pagination button states
-  function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
-    $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
-
-    // Adjust active class for current page button
-    $(".pagination .page-item").removeClass("active");
-    if (currentPage === 1) $(".btn-onePage").addClass("active");
-    if (currentPage === 2) $(".btn-twoPage").addClass("active");
-    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
-  }
-
-  function moveToTrash() {}
 });

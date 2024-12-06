@@ -1,4 +1,39 @@
 $(document).ready(function () {
+  var token = localStorage.getItem("admin");
+  // ==================================> fetch products <================================================
+  function fetchProducts() {
+    $.ajax({
+      type: "GET",
+      url: `http://localhost:4006/api-admin/product/get-all`,
+      headers: { Authorization: "Bearer " + token },
+      success: function (response) {
+        // debugger;
+        $(".total-quantity-product").text(response.length);
+        // debugger;
+      },
+      error: function (error) {
+        console.error("Request failed: ", error);
+      },
+    });
+  }
+
+  //
+  function fetchOrder() {
+    $.ajax({
+      type: "GET",
+      url: `http://localhost:4006/api-admin/Bill/get-all`,
+      headers: { Authorization: "Bearer " + token },
+      success: function (response) {
+        // debugger;
+        $(".total-quantity-purchase-orders").text(response.length);
+        // debugger;
+      },
+      error: function (error) {
+        console.error("Request failed: ", error);
+      },
+    });
+  }
+
   // ---------- CHARTS ----------
 
   // Tạo tùy chọn cấu hình cho biểu đồ thanh.
@@ -104,4 +139,8 @@ $(document).ready(function () {
     areaChartOptions
   );
   areaChart.render();
+
+  // =======================================> call functions <=========================================================
+  fetchProducts();
+  fetchOrder();
 });

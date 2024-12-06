@@ -1,4 +1,4 @@
-/* search */
+/* =========================> Search <======================== */
 .search-container {
   position: relative;
   width: 100%;
@@ -39,7 +39,7 @@
   display: none;
 }
 
-/* Order */
+/* ============================> Order <========================== */
 #order-list {
   margin-top: 10px;
 }

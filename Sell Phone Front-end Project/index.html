@@ -45,11 +45,11 @@
 				<ul class="header-links pull-left">
 					<li><a href="#"><i class="fa fa-phone"></i> +0984605263</a></li>
 					<li><a href="#"><i class="fa fa-envelope-o"></i> nguyenvanhieu@gmail.com</a></li>
-					<li><a href="#"><i class="fa fa-map-marker"></i> Ha Noi</a></li>
+					<li><a href="#"><i class="fa fa-map-marker"></i> Hung Yen</a></li>
 				</ul>
 				<ul class="header-links pull-right">
 					<!-- <li><a href="#"><i class="fa fa-dollar"></i> USD</a></li> -->
-					<li><a href="login.html"><i class="fa fa-user-o"></i> My Account</a></li>
+					<li><a href="#" id="my-account"><i class="fa fa-user-o"></i> My Account</a></li>
 				</ul>
 			</div>
 		</div>
@@ -80,8 +80,8 @@
 									<option ng-repeat="x in categoryList" value="{{x.categoryId}}">{{x.categoryName}}
 									</option>
 								</select>
-								<input class="input" placeholder="Search here">
-								<button class="search-btn">Search</button>
+								<input class="input" ng-model="productName" placeholder="Search here">
+								<button class="search-btn" ng-click="SearchProduct(productName)">Search</button>
 							</form>
 						</div>
 					</div>
@@ -109,7 +109,8 @@
 								</a>
 								<div class="cart-dropdown">
 									<div class="cart-list">
-										<div class="product-widget" ng-repeat="item in cart">
+										<!-- thêm track by $index để tránh bị trùng lặp -->
+										<div class="product-widget" ng-repeat="item in cart track by $index">
 											<div class="product-img">
 												<img ng-src="{{ item.image }}" alt="Product Image">
 											</div>
@@ -179,6 +180,83 @@
 		<!-- /container -->
 	</nav>
 	<!-- /NAVIGATION -->
+
+	<!-- Product has been searched -->
+	<div class="section" id="product-has-been-searched" ng-show="productHasBeenSearched.length > 0">
+		<!-- container -->
+		<div class="container">
+			<!-- row -->
+			<div class="row">
+				<!-- section title -->
+				<div class="col-md-12">
+					<div class="section-title">
+						<h3 class="title">Product has been searched</h3>
+					</div>
+				</div>
+				<!-- /section title -->
+
+				<!-- Products tab & slick -->
+				<div class="col-md-12">
+					<div class="row">
+						<div class="products-tabs">
+							<!-- tab -->
+							<div id="tab10" class="tab-pane active">
+								<div class="products-slick" data-nav="#slick-nav-10">
+									<!-- product -->
+									<div class="product" ng-repeat="product in productHasBeenSearched track by $index">
+										<a href="#" ng-click="openProductDetail(product)">
+											<div class="product-img">
+												<img ng-src="{{product.productImage}}" width="250" height="250"
+													alt="Product Image">
+												<div class="product-label">
+													<span class="sale">-30%</span>
+													<span class="new">NEW</span>
+												</div>
+											</div>
+											<div class="product-body">
+												<p class="product-category">Category</p>
+												<h3 class="product-name"><a href="#">{{product.productName}}</a></h3>
+												<h4 class="product-price">${{product.price}} <del
+														class="product-old-price">${{product.price * 3}}</del></h4>
+												<div class="product-rating">
+													<i class="fa fa-star"></i>
+													<i class="fa fa-star"></i>
+													<i class="fa fa-star"></i>
+													<i class="fa fa-star"></i>
+													<i class="fa fa-star"></i>
+												</div>
+												<div class="product-btns">
+													<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span
+															class="tooltipp">add to wishlist</span></button>
+													<button class="add-to-compare"><i class="fa fa-exchange"></i><span
+															class="tooltipp">add to compare</span></button>
+													<button ng-click="openProductDetail(product)" class="quick-view"><i
+															class="fa fa-eye"></i><span class="tooltipp">quick
+															view</span></button>
+												</div>
+											</div>
+											<div class="add-to-cart" ng-click="addToCart(product)">
+												<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add
+													to
+													cart</button>
+											</div>
+										</a>
+									</div>
+									<!-- /product -->
+								</div>
+								<div id="slick-nav-10" class="products-slick-nav"></div>
+							</div>
+							<!-- /tab -->
+						</div>
+					</div>
+				</div>
+				<!-- Products tab & slick -->
+			</div>
+			<!-- /row -->
+		</div>
+		<!-- /container -->
+	</div>
+	<!-- End product has been searched -->
 
 	<!-- SECTION -->
 	<div class="section">
@@ -1146,12 +1224,12 @@
 					<div class="col-md-3 col-xs-6">
 						<div class="footer">
 							<h3 class="footer-title">About Us</h3>
-							<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-								incididunt ut.</p>
+							<p>Welcome to sell phone shop. Let us accompany you on your journey of
+								technological discovery!</p>
 							<ul class="footer-links">
-								<li><a href="#"><i class="fa fa-map-marker"></i>1734 Stonecoal Road</a></li>
-								<li><a href="#"><i class="fa fa-phone"></i>+021-95-51-84</a></li>
-								<li><a href="#"><i class="fa fa-envelope-o"></i>email@email.com</a></li>
+								<li><a href="#"><i class="fa fa-map-marker"></i>Hung Yen</a></li>
+								<li><a href="#"><i class="fa fa-phone"></i>+0984605263</a></li>
+								<li><a href="#"><i class="fa fa-envelope-o"></i>nguyenvanhieu@gmail.com</a></li>
 							</ul>
 						</div>
 					</div>
@@ -1283,6 +1361,16 @@
 		if (!user) {
 			// window.location.href = 'login.html';
 		}
+
+		var myAccount = document.getElementById('my-account');
+		myAccount.addEventListener('click', function () {
+			if (user) {
+				window.location.href = 'profile.html';
+			}
+			else {
+				window.location.href = 'login.html';
+			}
+		});
 	</script>
 </body>
 

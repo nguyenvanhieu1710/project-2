@@ -5,11 +5,17 @@ $(document).ready(function () {
   let currentPage = 1;
   const pageSize = 5;
 
-  // Modal bootstrap
+  // Modal create bootstrap
   const exampleModal = new bootstrap.Modal(
     document.getElementById("exampleModal")
   );
 
+  // Modal trash can bootstrap
+  const trashCanModal = new bootstrap.Modal(
+    document.getElementById("trashCanModal")
+  );
+
+  // ===============================> handle button <===================================
   var status = 1;
   $(".btn-add-category").click(function () {
     status = 1;
@@ -39,6 +45,7 @@ $(document).ready(function () {
     // }
   });
 
+  // ==============================> add category <===================================
   async function addCategory() {
     var categoryName = $("input[name='categoryName']").val();
     var categoryImage = $("#categoryImage")[0].files[0];
@@ -95,6 +102,7 @@ $(document).ready(function () {
       });
   }
 
+  // ==============================> turn on modal to update <===================================
   function TurnOnModalToUpdate() {
     if ($("input.category-checkbox:checked").length === 0) {
       alert("Please select at least one category to update.");
@@ -145,6 +153,7 @@ $(document).ready(function () {
       });
   }
 
+  // ==============================> update category <===================================
   function updateCategory() {
     var categoryName = $("input[name='categoryName']").val();
     var categoryImage = $("#categoryImage")[0].files[0];
@@ -200,26 +209,8 @@ $(document).ready(function () {
       });
   }
 
-  function deleteCategory() {
-    if ($("input.category-checkbox:checked").length === 0) {
-      alert("Please select at least one category to update.");
-      return;
-    }
-
-    if ($("input.category-checkbox:checked").length > 1) {
-      alert("Choose only a category to update.");
-      return;
-    }
-
-    $(".category-checkbox:checked").each(function () {
-      let row = $(this).closest("tr");
-
-      let id = row.find("td").eq(0).text();
-
-      categoryId = id;
-      // debugger;
-    });
-
+  // ===============================> delete category <===================================
+  function deleteCategory(categoryId) {
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/category/delete/" + categoryId,
@@ -237,7 +228,8 @@ $(document).ready(function () {
           alert(data.error);
         }
         alert("Delete category Success");
-        exampleModal.hide();
+        trashCanModal.hide();
+        fetchDeletedCategory(currentPage, pageSize);
         fetchCategory(currentPage, pageSize);
       })
       .fail(function () {
@@ -245,6 +237,7 @@ $(document).ready(function () {
       });
   }
 
+  // ==============================> delete virtual category <===================================
   function deleteVirtualCategory() {
     if ($("input.category-checkbox:checked").length === 0) {
       alert("Please select at least one category to update.");
@@ -319,6 +312,7 @@ $(document).ready(function () {
       });
   }
 
+  // ==============================> update table <===================================
   function updateTable(categories) {
     const tbody = $("#activeTable tbody");
     tbody.empty();
@@ -334,6 +328,7 @@ $(document).ready(function () {
     });
   }
 
+  // ===============================> update table deleted <==================================
   function updateTableDeleted(categories) {
     const tbody = $("#deletedTable tbody");
     tbody.empty();
@@ -352,6 +347,7 @@ $(document).ready(function () {
     });
   }
 
+  // ==============================> restore category <==================================
   $("#deletedTable tbody").on("click", ".btn-restore", function () {
     const currentRow = $(this).closest("tr");
     // debugger;
@@ -366,6 +362,7 @@ $(document).ready(function () {
     restoreCategory(category);
   });
 
+  // =============================> delete actual category <==================================
   $("#deletedTable tbody").on("click", ".btn-deleteActual", function () {
     const currentRow = $(this).closest("tr");
     // debugger;
@@ -380,6 +377,7 @@ $(document).ready(function () {
     deleteCategory(category.categoryId);
   });
 
+  // ==============================> restore category <==================================
   function restoreCategory(category) {
     $.ajax({
       type: "POST",
@@ -397,6 +395,7 @@ $(document).ready(function () {
           // debugger;
           // success
           alert("Restore category success!");
+          trashCanModal.hide();
           fetchCategory(currentPage, pageSize);
           fetchDeletedCategory(currentPage, pageSize);
         } else {
@@ -408,6 +407,7 @@ $(document).ready(function () {
       });
   }
 
+  // ===============================> pagination <===================================
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
@@ -443,6 +443,20 @@ $(document).ready(function () {
     fetchCategory(currentPage, pageSize);
   });
 
+  // Update pagination button states
+  function updatePaginationButtons() {
+    // if đang ở trang đầu tiên thì ẩn btn previous
+    $(".btn-previous").toggleClass("disabled", currentPage === 1);
+    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
+
+    // Adjust active class for current page button
+    $(".pagination .page-item").removeClass("active");
+    if (currentPage === 1) $(".btn-onePage").addClass("active");
+    if (currentPage === 2) $(".btn-twoPage").addClass("active");
+    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
+  }
+
+  // ===============================> fetch category <================================
   function fetchCategory(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -462,6 +476,7 @@ $(document).ready(function () {
 
   fetchCategory(currentPage, pageSize);
 
+  // ==============================> fetch category deleted <================================
   function fetchDeletedCategory(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -482,19 +497,7 @@ $(document).ready(function () {
 
   fetchDeletedCategory(currentPage, pageSize);
 
-  // Update pagination button states
-  function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
-    $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
-
-    // Adjust active class for current page button
-    $(".pagination .page-item").removeClass("active");
-    if (currentPage === 1) $(".btn-onePage").addClass("active");
-    if (currentPage === 2) $(".btn-twoPage").addClass("active");
-    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
-  }
-
+  // ===============================> upload image <===================================
   function uploadImage() {
     return new Promise((resolve, reject) => {
       const fileInput = document.getElementById("categoryImage").files[0];

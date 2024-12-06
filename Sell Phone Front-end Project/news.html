@@ -21,41 +21,45 @@
     <!-- Owl Carousel -->
     <link href="css/owl.carousel.css" rel="stylesheet" type="text/css" />
     <link href="css/owl.theme.default.css" rel="stylesheet" type="text/css" />
-    <!-- Bootstrap CSS -->
+    <!-- Custom CSS -->
     <link href="css/news.css" rel="stylesheet" type="text/css" />
     <!-- Modernizr JS -->
     <script src="js/modernizr-3.5.0.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- AngularJS -->
     <script src="angular/angular.min.js"></script>
     <script src="angular/global.js"></script>
     <script src="angular/news.js"></script>
+
+    <style>
+        .btn-back-to-home {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+            z-index: 9999;
+        }
+
+        .btn-open-modal-create {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            z-index: 9999;
+        }
+    </style>
 </head>
 
 <body ng-app="MyProject" ng-controller="NewsCtrl">
     <header>
-        <style>
-            .btn-back-to-home {
-                position: fixed;
-                top: 10px;
-                left: 10px;
-                cursor: pointer;
-                z-index: 9999;
-            }
-
-            .btn-open-modal-create {
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                cursor: pointer;
-                z-index: 9999;
-            }
-        </style>
         <button class="btn btn-secondary btn-back-to-home">
             <i class="fa fa-arrow-left"></i>
             Back To Home</button>
 
-        <button class="btn btn-primary btn-open-modal-create" data-toggle="modal" data-target="#createModal">Add new
+        <button class="btn btn-primary btn-open-modal-create" data-toggle="modal" data-target="#createModal"
+            ng-click="handleStatus(0)">Add new
             news</button>
     </header>
 
@@ -77,11 +81,12 @@
                             </div>
                         </div>
                         <div class="col-md-7 animate-box">
-                            <a href="#" class="fh5co_magna py-2"> {{news.newsName}} </a>
+                            <a href="#" data-toggle="modal" data-target="#questionModal" class="fh5co_magna py-2"
+                                ng-click="selectNews(news)">
+                                {{news.newsName}} </a>
                             <br>
-                            <a href="#" class="fh5co_mini_time py-3"> Thomson
-                                Smith -
-                                {{news.postingDate}}
+                            <a href="#" class="fh5co_mini_time py-3"> Person Posting: {{news.personPostingId}} -
+                                Posting Date: {{news.postingDate}}
                             </a>
                             <div class="fh5co_consectetur"> {{news.content}}
                             </div>
@@ -175,17 +180,18 @@
                     <div>
                         <div class="fh5co_heading fh5co_heading_border_bottom pt-3 py-2 mb-4">Most Popular</div>
                     </div>
-                    <div class="row pb-3">
+                    <div class="row pb-3" ng-repeat="news in newsList | limitTo: 4">
                         <div class="col-5 align-self-center">
-                            <img src="images/download (1).jpg" alt="img" class="fh5co_most_trading" />
+                            <img ng-src="{{news.newsImage}}" width="88" height="60" alt="img"
+                                class="fh5co_most_trading" />
                         </div>
                         <div class="col-7 paddding">
-                            <div class="most_fh5co_treding_font"> Magna aliqua ut enim ad minim veniam quis nostrud.
+                            <div class="most_fh5co_treding_font"> {{news.newsName}}.
                             </div>
-                            <div class="most_fh5co_treding_font_123"> April 18, 2016</div>
+                            <div class="most_fh5co_treding_font_123"> {{news.postingDate}}</div>
                         </div>
                     </div>
-                    <div class="row pb-3">
+                    <!-- <div class="row pb-3">
                         <div class="col-5 align-self-center">
                             <img src="images/allef-vinicius-108153.jpg" alt="img" class="fh5co_most_trading" />
                         </div>
@@ -213,7 +219,7 @@
                             </div>
                             <div class="most_fh5co_treding_font_123"> April 18, 2016</div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <!-- end tags and most popular -->
             </div>
@@ -297,62 +303,92 @@
         <a href="#" class="js-gotop"><i class="fa fa-arrow-up"></i></a>
     </div>
 
-    <!-- Modal create -->
-    <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    <!-- Modal create news -->
+    <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel"
         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
 
                 <!-- Modal Header -->
                 <div class="modal-header">
-                    <h4 class="modal-title">Create news</h4>
+                    <h4 class="modal-title">{{modalTitle}}</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
 
                 <!-- Modal body -->
                 <div class="modal-body">
                     <div class="container">
-                        <form action="#">
+                        <form name="newsForm">
                             <div class="form-group">
                                 <label for="newsName">News Name</label>
-                                <input type="text" name="newsName" class="form-control" placeholder="Enter News Name">
+                                <input type="text" name="newsName" class="form-control" placeholder="Enter News Name"
+                                    ng-model="news.newsName">
                             </div>
 
                             <div class="form-group">
                                 <label for="content">Content</label>
                                 <textarea name="content" class="form-control" rows="4"
-                                    placeholder="Enter content of the news"></textarea>
+                                    placeholder="Enter content of the news" ng-model="news.content"></textarea>
                             </div>
 
                             <div class="form-group">
                                 <label for="newsImage" class="form-label">News Image</label>
-                                <input class="form-control-file" type="file" name="newsImage" id="newsImage">
+                                <input class="form-control-file" type="file" name="newsImage" id="newsImage"
+                                    ng-model="news.newsImage" ngf-select>
                             </div>
 
                             <div class="form-group">
                                 <label for="postingDate">Posting Date</label>
-                                <input type="date" name="postingDate" class="form-control">
+                                <input type="date" name="postingDate" class="form-control" ng-model="news.postingDate">
                             </div>
 
                             <div class="form-group">
                                 <label for="personPostingId">Person Posting ID</label>
                                 <input type="number" name="personPostingId" class="form-control"
-                                    placeholder="Enter Person Posting ID">
+                                    placeholder="Enter Person Posting ID" ng-model="news.personPostingId">
                             </div>
                         </form>
                     </div>
-
                 </div>
 
                 <!-- Modal footer -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" ng-click="executeFunction()">Save</button>
                 </div>
 
             </div>
         </div>
     </div>
-    <!-- End Modal create -->
+    <!-- End Modal create news -->
+
+    <!-- Modal question -->
+    <div class="modal fade" id="questionModal" tabindex="-1" role="dialog" aria-labelledby="questionModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Question?</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div class="container">
+                        <button type="button" class="btn btn-warning m-lg-4" data-dismiss="modal" data-toggle="modal"
+                            data-target="#createModal" ng-click="fillDataToModalUpdate()">Update This
+                            News</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal" ng-click="deleteNews()">Delete
+                            This News</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- End Modal question -->
 
     <!-- JQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>

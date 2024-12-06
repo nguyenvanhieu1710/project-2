@@ -41,12 +41,12 @@
 		<div id="top-header">
 			<div class="container">
 				<ul class="header-links pull-left">
-					<li><a href="#"><i class="fa fa-phone"></i> +021-95-51-84</a></li>
-					<li><a href="#"><i class="fa fa-envelope-o"></i> email@email.com</a></li>
-					<li><a href="#"><i class="fa fa-map-marker"></i> 1734 Stonecoal Road</a></li>
+					<li><a href="#"><i class="fa fa-phone"></i> +0984605263</a></li>
+					<li><a href="#"><i class="fa fa-envelope-o"></i> nguyenvanhieu@gmail.com</a></li>
+					<li><a href="#"><i class="fa fa-map-marker"></i> Hung Yen</a></li>
 				</ul>
 				<ul class="header-links pull-right">
-					<li><a href="#"><i class="fa fa-dollar"></i> USD</a></li>
+					<!-- <li><a href="#"><i class="fa fa-dollar"></i> USD</a></li> -->
 					<li><a href="#"><i class="fa fa-user-o"></i> My Account</a></li>
 				</ul>
 			</div>
@@ -356,7 +356,7 @@
 							I've read and accept the <a href="#">terms &amp; conditions</a>
 						</label>
 					</div>
-					<a href="javascript:void(0);" class="primary-btn order-submit" id="placeOrderBtn">Place order</a>
+					<a href="#" class="primary-btn order-submit" id="placeOrderBtn">Place order</a>
 				</div>
 				<!-- /Order Details -->
 			</div>
@@ -413,12 +413,12 @@
 					<div class="col-md-3 col-xs-6">
 						<div class="footer">
 							<h3 class="footer-title">About Us</h3>
-							<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-								incididunt ut.</p>
+							<p>Welcome to sell phone shop. Let us accompany you on your journey of
+								technological discovery!</p>
 							<ul class="footer-links">
-								<li><a href="#"><i class="fa fa-map-marker"></i>1734 Stonecoal Road</a></li>
-								<li><a href="#"><i class="fa fa-phone"></i>+021-95-51-84</a></li>
-								<li><a href="#"><i class="fa fa-envelope-o"></i>email@email.com</a></li>
+								<li><a href="#"><i class="fa fa-map-marker"></i>Hung Yen</a></li>
+								<li><a href="#"><i class="fa fa-phone"></i>+0984605263</a></li>
+								<li><a href="#"><i class="fa fa-envelope-o"></i>nguyenvanhieu@gmail.com</a></li>
 							</ul>
 						</div>
 					</div>
@@ -511,7 +511,9 @@
 	<script src="js/main.js"></script>
 	<!-- Custom JavaScript -->
 	<script>
-		document.getElementById("placeOrderBtn").addEventListener("click", function () {
+		document.getElementById("placeOrderBtn").addEventListener("click", function (e) {
+			e.preventDefault();
+			// các input radio có name là payment
 			const paymentMethods = document.getElementsByName("payment");
 			let selectedMethod = null;
 
@@ -532,47 +534,111 @@
 				alert("Vui lòng đồng ý với các điều khoản và điều kiện!");
 				return;
 			}
+
+			// ================> start add order <================================================================
+
 			// get user from local storage
 			var user = localStorage.getItem("user");
 			var userId = user.AccountId;
 
-			// get staff from database
-			var staff = null;
+			// get staffId from database
+			var staffId = null;
+			var token = localStorage.getItem("admin");
+			$.ajax({
+				type: "GET",
+				url: "http://localhost:4006/api-admin/Staff/get-all",
+				headers: {
+					Authorization: "Bearer " + token,
+					"Content-Type": "application/json",
+				},
+				processData: false,
+				success: function (data) {
+					if (data && data.length > 0) {
+						staffId = data[0].StaffId;
+						console.log("StaffId:", staffId);
+					} else {
+						console.error("Không tìm thấy nhân viên nào!");
+					}
+				},
+				error: function (xhr, status, error) {
+					console.error(error);
+				},
+			});
+
+			// get voucherId from database
+			var voucherId = null;
+			$.ajax({
+				type: "GET",
+				url: "http://localhost:4006/api-admin/Voucher/get-all",
+				headers: {
+					Authorization: "Bearer " + token,
+					"Content-Type": "application/json",
+				},
+				processData: false,
+				success: function (data) {
+					if (data && data.length > 0) {
+						voucherId = data[0].VoucherId;
+						console.log("VoucherId:", voucherId);
+					} else {
+						console.error("Không tìm thấy voucher nào!");
+					}
+				},
+				error: function (xhr, status, error) {
+					console.error(error);
+				},
+			});
 
 			// get product from cart in local storage
-			var cart = localStorage.getItem("cart");
-			var cart = JSON.parse(cart);
-			var productId = cart.ProductId;
-			var quantity = cart.Quantity;
-			var price = cart.Price;
-			var discountAmount = cart.DiscountAmount;
-			var voucherId = cart.VoucherId;
-			var orderDetailStatus = cart.OrderDetailStatus;
+			var cart = JSON.parse(localStorage.getItem("cart"));
+			if (!cart || cart.length <= 0) {
+				console.error("Giỏ hàng rỗng hoặc không hợp lệ!");
+				return;
+			}
+			var orderDetail = cart.map(item => {
+				return {
+					orderDetailId: 0,
+					orderId: 0,
+					productId: item.ProductId,
+					quantity: item.Quantity,
+					price: item.Price,
+					discountAmount: 0,
+					voucherId: voucherId,
+					orderDetailStatus: 0
+				};
+			});
 
 			// create order
 			var order = {
 				orderId: 0,
 				userId: userId,
-				staffId: 0,
+				staffId: staffId,
 				orderStatus: "Pending Confirmation",
 				dayBuy: "2024-12-01T13:01:17.306Z",
 				deliveryAddress: "string",
-				evaluate: 0,
-				deleted: true,
-				listjson_orderDetail: [
-					{
-						orderDetailId: 0,
-						orderId: 0,
-						productId: 0,
-						quantity: 0,
-						price: 0,
-						discountAmount: 0,
-						voucherId: 0,
-						orderDetailStatus: 0
-					}
-				]
+				evaluate: 5,
+				deleted: false,
+				listjson_orderDetail: orderDetail
 			};
 
+			// add order to database
+			$.ajax({
+				type: "POST",
+				url: "http://localhost:4006/api-user/Orders/create",
+				headers: {
+					Authorization: "Bearer " + token,
+					"Content-Type": "application/json",
+				},
+				data: JSON.stringify(order),
+				processData: false,
+				success: function (data) {
+					console.log("Order created successfully:", data);
+				},
+				error: function (xhr, status, error) {
+					console.error(error);
+				},
+			});
+
+			// ============================> chuyển hướng <=====================================
 			// debugger;
 			switch (selectedMethod) {
 				case "payment-1":
@@ -580,6 +646,7 @@
 					break;
 				case "payment-2":
 					// window.location.href = "cod.html";
+					alert("Vui lòng chờ đơn hàng được xác nhận.");
 					break;
 				case "payment-3":
 					window.location.href = "payment.html";

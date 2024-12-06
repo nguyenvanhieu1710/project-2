@@ -5,16 +5,17 @@ $(document).ready(function () {
   let currentPage = 1;
   const pageSize = 5;
 
-  // Modal bootstrap
+  // Modal create bootstrap
   const exampleModal = new bootstrap.Modal(
     document.getElementById("exampleModal")
   );
 
-  // Modal bootstrap
+  // Modal trash can bootstrap
   const trashCanModal = new bootstrap.Modal(
     document.getElementById("trashCanModal")
   );
 
+  // ===================================> handle button <===========================================
   var status = 1;
   $(".btn-add-voucher").click(function () {
     status = 1;
@@ -44,6 +45,7 @@ $(document).ready(function () {
     // }
   });
 
+  // ==============================================> add voucher <===========================================
   function addVoucher() {
     var voucherName = $("input[name='voucherName']").val();
     var price = $("input[name='price']").val();
@@ -53,27 +55,27 @@ $(document).ready(function () {
     var endDate = $("input[name='endDate']").val();
 
     if (!voucherName) {
-      alert("Please enter a voucher name.");
+      Swal.fire("Warning", "Please enter a voucher name.", "warning");
       return;
     }
     if (!price) {
-      alert("Please enter a price.");
+      Swal.fire("Warning", "Please enter a price.", "warning");
       return;
     }
     if (!minimumPrice) {
-      alert("Please enter a minimum price.");
+      Swal.fire("Warning", "Please enter a minimum price.", "warning");
       return;
     }
     if (!quantity) {
-      alert("Please enter a quantity.");
+      Swal.fire("Warning", "Please enter a quantity.", "warning");
       return;
     }
     if (!startDay) {
-      alert("Please enter a start day.");
+      Swal.fire("Warning", "Please enter a start day.", "warning");
       return;
     }
     if (!endDate) {
-      alert("Please enter an end date.");
+      Swal.fire("Warning", "Please enter an end date.", "warning");
       return;
     }
     // debugger;
@@ -102,11 +104,10 @@ $(document).ready(function () {
     })
       .done(function (data) {
         if (data && data.error) {
-          alert(data.error);
+          Swal.fire("Error", data.error, "error");
           console.log(data.error);
         } else {
-          alert("Voucher added successfully.");
-          console.log("Voucher added successfully.");
+          Swal.fire("Success", "Voucher added successfully.", "success");
           fetchVouchers(currentPage, pageSize);
         }
       })
@@ -115,14 +116,19 @@ $(document).ready(function () {
       });
   }
 
+  // ===============================================> turn on modal to update <===========================================
   function TurnOnModalToUpdate() {
     if ($("input.voucher-checkbox:checked").length === 0) {
-      alert("Please select at least one voucher to update.");
+      Swal.fire(
+        "Warning",
+        "Please select at least one voucher to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.voucher-checkbox:checked").length > 1) {
-      alert("Choose only one voucher to update.");
+      Swal.fire("Warning", "Choose only one voucher to update.", "warning");
       return;
     }
 
@@ -160,7 +166,11 @@ $(document).ready(function () {
           modal.show();
           $("#exampleModalLabel").text("Update Voucher");
         } else {
-          alert("Error retrieving voucher data: " + data.error);
+          Swal.fire(
+            "Error!",
+            "Error retrieving voucher data: " + data.error,
+            "error"
+          );
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -168,6 +178,7 @@ $(document).ready(function () {
       });
   }
 
+  // ==============================================> update voucher <===========================================
   function updateVoucher() {
     var voucherName = $("input[name='voucherName']").val();
     var price = $("input[name='price']").val();
@@ -177,27 +188,27 @@ $(document).ready(function () {
     var endDate = $("input[name='endDate']").val();
 
     if (!voucherName) {
-      alert("Please enter a voucher name.");
+      Swal.fire("Warning!", "Please enter a voucher name.", "warning");
       return;
     }
     if (!price) {
-      alert("Please enter a price.");
+      Swal.fire("Warning!", "Please enter a price.", "warning");
       return;
     }
     if (!minimumPrice) {
-      alert("Please enter a minimum price.");
+      Swal.fire("Warning!", "Please enter a minimum price.", "warning");
       return;
     }
     if (!quantity) {
-      alert("Please enter a quantity.");
+      Swal.fire("Warning!", "Please enter a quantity.", "warning");
       return;
     }
     if (!startDay) {
-      alert("Please enter a start day.");
+      Swal.fire("Warning!", "Please enter a start day.", "warning");
       return;
     }
     if (!endDate) {
-      alert("Please enter an end date.");
+      Swal.fire("Warning!", "Please enter an end date.", "warning");
       return;
     }
 
@@ -230,10 +241,10 @@ $(document).ready(function () {
             document.getElementById("exampleModal")
           );
           modal.hide();
-          alert("Update voucher success!");
+          Swal.fire("Success", "Voucher updated successfully.", "success");
           fetchVouchers(currentPage, pageSize);
         } else {
-          alert("Error updating voucher: " + data.error);
+          Swal.fire("Error", "Error updating voucher: " + data.error, "error");
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -241,6 +252,7 @@ $(document).ready(function () {
       });
   }
 
+  // ===============================================> delete voucher <===========================================
   function deleteVoucher(voucherId) {
     $.ajax({
       type: "POST",
@@ -253,12 +265,10 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", "Error: " + data.error, "error");
         }
-        alert("Delete voucher Success");
+        Swal.fire("Success!", "Delete voucher success!", "success");
         fetchVouchers(currentPage, pageSize);
         fetchDeletedVouchers(currentPage, pageSize);
       })
@@ -267,15 +277,24 @@ $(document).ready(function () {
       });
   }
 
+  // ==============================================> delete virtual voucher <===========================================
   function deleteVirtualVoucher() {
     // get voucherId
     if ($("input.voucher-checkbox:checked").length === 0) {
-      alert("Please select at least one voucher to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one voucher to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.voucher-checkbox:checked").length > 1) {
-      alert("Choose only a voucher to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select only one voucher to update.",
+        "warning"
+      );
       return;
     }
 
@@ -329,8 +348,6 @@ $(document).ready(function () {
             deleted: true,
           };
 
-          // alert(JSON.stringify(raw_data));
-
           $.ajax({
             type: "POST",
             url: "http://localhost:4006/api-admin/voucher/update",
@@ -345,12 +362,19 @@ $(document).ready(function () {
             .done(function (data) {
               if (data && !data.error) {
                 // debugger;
-                // success
-                alert("Delete virtual voucher success!");
+                Swal.fire(
+                  "Success!",
+                  "Delete virtual voucher success!",
+                  "success"
+                );
                 fetchVouchers(currentPage, pageSize);
                 fetchDeletedVouchers(currentPage, pageSize);
               } else {
-                alert("Error updating voucher: " + data.error);
+                Swal.fire(
+                  "Error!",
+                  "Error updating voucher: " + data.error,
+                  "error"
+                );
               }
             })
             .fail(function (jqXHR, textStatus, errorThrown) {
@@ -358,7 +382,11 @@ $(document).ready(function () {
             });
         } else {
           // debugger;
-          alert("Error retrieving voucher data: " + data.error);
+          Swal.fire(
+            "Error!",
+            "Error retrieving voucher data: " + data.error,
+            "error"
+          );
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -366,6 +394,7 @@ $(document).ready(function () {
       });
   }
 
+  // ==============================================> search voucher <===========================================
   function searchVoucher(name, currentPage, pageSize) {
     $.ajax({
       type: "GET",
@@ -391,6 +420,7 @@ $(document).ready(function () {
       });
   }
 
+  // ==============================================> search voucher <===========================================
   document
     .getElementById("searchForm")
     .addEventListener("submit", function (e) {
@@ -401,6 +431,7 @@ $(document).ready(function () {
       searchVoucher(searchValue, currentPage, pageSize);
     });
 
+  // ==============================================> update table <===========================================
   function updateTable(vouchers) {
     const tbody = $("#activeTable tbody");
     tbody.empty();
@@ -419,6 +450,7 @@ $(document).ready(function () {
     });
   }
 
+  // ==============================================> update table deleted <===========================================
   function updateTableDeleted(vouchers) {
     const tbody = $("#deletedTable tbody");
     tbody.empty();
@@ -440,6 +472,7 @@ $(document).ready(function () {
     });
   }
 
+  // ===============================================> restore voucher <=============================================
   $("#deletedTable tbody").on("click", ".btn-restore", function () {
     const currentRow = $(this).closest("tr");
     // debugger;
@@ -456,21 +489,17 @@ $(document).ready(function () {
     restoreVoucher(voucher);
   });
 
+  // ==============================================> delete voucher <=============================================
   $("#deletedTable tbody").on("click", ".btn-deleteActual", function () {
     const currentRow = $(this).closest("tr");
     // debugger;
     const voucher = {
       voucherId: currentRow.find("td:eq(0)").text(),
-      voucherName: currentRow.find("td:eq(1)").text(),
-      price: currentRow.find("td:eq(2)").text(),
-      minimumPrice: currentRow.find("td:eq(3)").text(),
-      quantity: currentRow.find("td:eq(4)").text(),
-      startDay: currentRow.find("td:eq(5)").text(),
-      endDate: currentRow.find("td:eq(6)").text(),
     };
     deleteVoucher(voucher.voucherId);
   });
 
+  // ==============================================> restore voucher <=============================================
   function restoreVoucher(voucher) {
     $.ajax({
       type: "POST",
@@ -487,11 +516,12 @@ $(document).ready(function () {
         if (data && !data.error) {
           // debugger;
           // success
-          alert("Restore voucher success!");
+          Swal.fire("Success!", "Restore voucher success!", "success");
+          trashCanModal.hide();
           fetchVouchers(currentPage, pageSize);
           fetchDeletedVouchers(currentPage, pageSize);
         } else {
-          alert("Error updating voucher: " + data.error);
+          Swal.fire("Error!", "Error updating voucher: " + data.error, "error");
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -499,6 +529,7 @@ $(document).ready(function () {
       });
   }
 
+  // ===============================================> pagination <=============================================
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
@@ -534,6 +565,20 @@ $(document).ready(function () {
     fetchVouchers(currentPage, pageSize);
   });
 
+  // Update pagination button states
+  function updatePaginationButtons() {
+    // if đang ở trang đầu tiên thì ẩn btn previous
+    $(".btn-previous").toggleClass("disabled", currentPage === 1);
+    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
+
+    // Adjust active class for current page button
+    $(".pagination .page-item").removeClass("active");
+    if (currentPage === 1) $(".btn-onePage").addClass("active");
+    if (currentPage === 2) $(".btn-twoPage").addClass("active");
+    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
+  }
+
+  // ==============================================> fetch vouchers <=============================================
   function fetchVouchers(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -553,6 +598,7 @@ $(document).ready(function () {
 
   fetchVouchers(currentPage, pageSize);
 
+  // ===============================================> fetch deleted vouchers <=============================================
   function fetchDeletedVouchers(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -572,17 +618,4 @@ $(document).ready(function () {
   }
 
   fetchDeletedVouchers(currentPage, pageSize);
-
-  // Update pagination button states
-  function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
-    $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
-
-    // Adjust active class for current page button
-    $(".pagination .page-item").removeClass("active");
-    if (currentPage === 1) $(".btn-onePage").addClass("active");
-    if (currentPage === 2) $(".btn-twoPage").addClass("active");
-    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
-  }
 });

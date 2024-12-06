@@ -11,6 +11,7 @@ setTimeout(function () {
 
 element.click(openElement);
 
+// ===================================> Functions <==========================================
 // hàm mở cửa sổ chat
 // Functions open chat dialog
 function openElement() {
@@ -27,6 +28,7 @@ function openElement() {
   messages.scrollTop(messages.prop("scrollHeight"));
 }
 
+// ===================================> Functions <==========================================
 // hàm đóng cửa sổ chat
 // Functions close chat dialog
 function closeElement() {
@@ -46,6 +48,7 @@ function closeElement() {
   }, 500);
 }
 
+// ===================================> Functions <==========================================
 // tạo ra 1 mã ngẫu nhiên
 function createUUID() {
   // http://www.ietf.org/rfc/rfc4122.txt
@@ -62,6 +65,7 @@ function createUUID() {
   return uuid;
 }
 
+// ===================================> Functions <==========================================
 // hàm gửi tin nhắn đi
 function sendNewMessage() {
   var userInput = $(".text-box");
@@ -91,6 +95,7 @@ function sendNewMessage() {
   );
 }
 
+// ==================================> Functions <==========================================
 // Ctrl + Enter hoặc Cmd + Enter (trên Mac) thì gửi tin nhắn đi
 function onMetaAndEnter(event) {
   if ((event.metaKey || event.ctrlKey) && event.keyCode == 13) {

@@ -8,6 +8,7 @@ app.controller("ProductDetailCtrl", function ($scope, $http) {
   var params = new URLSearchParams(window.location.search); // Lấy phần query string sau dấu ?
   var productId = params.get("productId"); // Lấy giá trị của tham số productId
   // debugger;
+  // ==============================================> Product <===============================================
   $scope.loadProduct = function () {
     // debugger;
     $http({
@@ -24,6 +25,7 @@ app.controller("ProductDetailCtrl", function ($scope, $http) {
       });
   };
 
+  // ==============================================> Product <===============================================
   $scope.DisPlayProduct = function () {
     $http({
       method: "GET",
@@ -39,6 +41,7 @@ app.controller("ProductDetailCtrl", function ($scope, $http) {
       });
   };
 
+  // ===============================================> call function <===============================================
   $scope.loadProduct();
   $scope.DisPlayProduct();
 });

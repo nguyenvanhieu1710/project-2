@@ -53,7 +53,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="table-wrap">
-                        <table class="table table-hover">
+                        <table class="table table-hover" id="activeTable">
                             <thead>
                                 <tr>
                                     <th scope="col">#</th>
@@ -149,7 +149,7 @@
         <!-- Modal trash can-->
         <div class="modal fade" id="trashCanModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
             aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="trashCanModalLabel">Advertisement list has been deleted</h5>
@@ -160,25 +160,49 @@
                     <div class="modal-body">
                         <div class="container">
                             <div class="table-wrap">
-                                <table class="table table-hover">
+                                <table class="table table-hover" id="deletedTable">
                                     <thead>
                                         <tr>
-
+                                            <th scope="col">Advertisement ID</th>
+                                            <th scope="col">Advertisement Name</th>
+                                            <th scope="col">Advertisement Image</th>
+                                            <th scope="col">Location</th>
+                                            <th scope="col">Advertiser ID</th>
+                                            <th scope="col">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-
+                                            <td>1</td>
+                                            <td>Holiday Sale</td>
+                                            <td><img src="../img/anh-trang.jpg" alt="Advertisement Image" width="50"
+                                                    height="50">
+                                            </td>
+                                            <td>Homepage Banner</td>
+                                            <td>101</td>
+                                            <td>
+                                                <button type="button" class="btn btn-primary">Restore</button>
+                                                <button type="button" class="btn btn-danger">Delete</button>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
+
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination justify-content-end">
+                                        <li class="page-item disabled btn-previous">
+                                            <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                        </li>
+                                        <li class="page-item btn-onePage"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item btn-twoPage"><a class="page-link" href="#">2</a></li>
+                                        <li class="page-item btn-ThreePage"><a class="page-link" href="#">3</a></li>
+                                        <li class="page-item btn-next">
+                                            <a class="page-link" href="#">Next</a>
+                                        </li>
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
                     </div>
                 </div>
             </div>

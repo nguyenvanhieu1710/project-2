@@ -4,6 +4,22 @@ $(document).ready(function () {
   let currentPage = 1;
   const pageSize = 5;
 
+  // Modal create bootstrap
+  const exampleModal = new bootstrap.Modal(
+    document.getElementById("exampleModal")
+  );
+
+  // Modal trash can bootstrap
+  const trashCanModal = new bootstrap.Modal(
+    document.getElementById("trashCanModal")
+  );
+
+  // Modal order details bootstrap
+  const orderDetailsModal = new bootstrap.Modal(
+    document.getElementById("orderDetailsModal")
+  );
+
+  // ====================================> handle button <===========================================
   var status = 1;
   $(".btn-add-bill").click(function () {
     status = 1;
@@ -31,6 +47,7 @@ $(document).ready(function () {
     // }
   });
 
+  // ====================================> add bill <==========================================
   function addBill() {
     var billName = $("input[name='billName']").val();
     var phoneNumber = $("input[name='phoneNumber']").val();
@@ -87,6 +104,7 @@ $(document).ready(function () {
       });
   }
 
+  // =====================================> turn on modal to update <==========================================
   function TurnOnModalToUpdate() {
     if ($("input.bill-checkbox:checked").length === 0) {
       alert("Please select at least one bill to update.");
@@ -151,6 +169,8 @@ $(document).ready(function () {
         console.log("Request failed: ", textStatus, errorThrown);
       });
   }
+
+  // ======================================> update bill <==========================================
   function updateBill() {
     // alert("Update Bill Success");
     // debugger;
@@ -197,6 +217,7 @@ $(document).ready(function () {
       });
   }
 
+  // ======================================> delete bill <==========================================
   function deleteBill() {
     if ($("input.bill-checkbox:checked").length === 0) {
       alert("Please select at least one bill to update.");
@@ -244,6 +265,7 @@ $(document).ready(function () {
       });
   }
 
+  // =====================================> search bill <==========================================
   function searchSellBill(name, currentPage, pageSize) {
     $.ajax({
       type: "GET",
@@ -269,6 +291,7 @@ $(document).ready(function () {
       });
   }
 
+  // =====================================> search bill <==========================================================
   document
     .getElementById("searchForm")
     .addEventListener("submit", function (e) {
@@ -279,6 +302,7 @@ $(document).ready(function () {
       searchSellBill(searchValue, currentPage, pageSize);
     });
 
+  // ====================================> update table <==========================================================
   function updateTable(data) {
     var tbody = $("#activeTable tbody");
     tbody.empty();
@@ -294,11 +318,15 @@ $(document).ready(function () {
                          <td>${bill.dayBuy}</td>
                          <td>${bill.deliveryAddress}</td>
                          <td>${bill.evaluate}</td>
+                         <td>
+                            <button type="button" class="btn btn-primary btn-sm btn-order-detail">Oredr Detail</button>
+                         </td>
                        </tr>`;
       tbody.append(row);
     });
   }
 
+  // ====================================> update table deleted <==========================================================
   function updateTableDeleted(data) {
     var tbody = $("#deletedTable tbody");
     tbody.empty();
@@ -320,6 +348,38 @@ $(document).ready(function () {
     });
   }
 
+  $("#activeTable tbody").on("click", ".btn-order-detail", function () {
+    const currentRow = $(this).closest("tr");
+    // debugger;
+
+    const importBill = {
+      importBillId: currentRow.find("td").eq(0).text(),
+    };
+
+    openOrderDetail(importBill.importBillId);
+  });
+
+  function openOrderDetail(importBillId) {
+    orderDetailsModal.show();
+
+    $.ajax({
+      type: "GET",
+      url:
+        "http://localhost:4006/api-admin/bill/get-data-by-id/" + importBillId,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+      .done(function (data) {
+        // console.log(data);
+        // updateOrderDetailTable(data);
+      })
+      .fail(function () {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  // ====================================> pagination <==========================================================
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
@@ -355,6 +415,20 @@ $(document).ready(function () {
     fetchBills(currentPage, pageSize);
   });
 
+  // Update pagination button states
+  function updatePaginationButtons() {
+    // if đang ở trang đầu tiên thì ẩn btn previous
+    $(".btn-previous").toggleClass("disabled", currentPage === 1);
+    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
+
+    // Adjust active class for current page button
+    $(".pagination .page-item").removeClass("active");
+    if (currentPage === 1) $(".btn-onePage").addClass("active");
+    if (currentPage === 2) $(".btn-twoPage").addClass("active");
+    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
+  }
+
+  // ===================================> fetch data <==========================================================
   function fetchBills(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -374,6 +448,7 @@ $(document).ready(function () {
 
   fetchBills(currentPage, pageSize);
 
+  // ====================================> fetch data deleted <==========================================================
   function fetchDeletedBills(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -381,6 +456,7 @@ $(document).ready(function () {
       headers: { Authorization: "Bearer " + token },
       success: function (response) {
         // debugger;
+        $(".badge").text(response.length || 0);
         updateTableDeleted(response);
         updatePaginationButtons();
         // debugger;
@@ -392,19 +468,4 @@ $(document).ready(function () {
   }
 
   fetchDeletedBills(currentPage, pageSize);
-
-  // Update pagination button states
-  function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
-    $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
-
-    // Adjust active class for current page button
-    $(".pagination .page-item").removeClass("active");
-    if (currentPage === 1) $(".btn-onePage").addClass("active");
-    if (currentPage === 2) $(".btn-twoPage").addClass("active");
-    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
-  }
-
-  function moveToTrash() {}
 });

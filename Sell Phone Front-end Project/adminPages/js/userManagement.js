@@ -5,16 +5,17 @@ $(document).ready(function () {
   let currentPage = 1;
   const pageSize = 5;
 
-  // Modal bootstrap
+  // Modal create bootstrap
   const exampleModal = new bootstrap.Modal(
     document.getElementById("exampleModal")
   );
 
-  // Modal bootstrap
+  // Modal trash can bootstrap
   const trashCanModal = new bootstrap.Modal(
     document.getElementById("trashCanModal")
   );
 
+  // ===================================> handle button <===========================================
   var status = 1;
   $(".btn-add-user").click(function () {
     status = 1;
@@ -27,7 +28,8 @@ $(document).ready(function () {
 
   $(".btn-delete-user").click(function () {
     status = 3;
-    deleteUser();
+    deleteVirtualUser();
+    // deleteUser();
   });
 
   $(".btn-handle-func").click(function () {
@@ -42,8 +44,8 @@ $(document).ready(function () {
     // }
   });
 
+  // ====================================> add user <===========================================
   async function addUser() {
-    //   alert("Add User");
     // Retrieve and validate form data
     var userName = $(".username").val();
     var birthday = $("input[name='date']").val();
@@ -54,27 +56,27 @@ $(document).ready(function () {
 
     // Basic validation
     if (!userName) {
-      alert("Please enter a username.");
+      Swal.fire("Warning!", "Please enter a username!", "warning");
       return;
     }
     if (!birthday) {
-      alert("Please enter a birthday.");
+      Swal.fire("Warning!", "Please enter a birthday!", "warning");
       return;
     }
     if (!phoneNumber) {
-      alert("Please enter a phone number.");
+      Swal.fire("Warning!", "Please enter a phone number!", "warning");
       return;
     }
     if (!image) {
-      alert("Please choose an image.");
+      Swal.fire("Warning!", "Please select an image!", "warning");
       return;
     }
     if (!gender || gender === "Gender") {
-      alert("Please select a gender.");
+      Swal.fire("Warning!", "Please select a gender!", "warning");
       return;
     }
     if (!address) {
-      alert("Please enter an address.");
+      Swal.fire("Warning!", "Please enter an address!", "warning");
       return;
     }
 
@@ -104,14 +106,13 @@ $(document).ready(function () {
       data: JSON.stringify(raw_data),
     })
       .done(function (data) {
-        // console.log(data);
         // debugger;
         if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error);
-          console.log(data.error);
+          Swal.fire("Error!", "Error adding user: " + data.error, "error");
+          // console.log(data.error);
         } else {
-          alert("Add User Success");
-          console.log("Add User Success");
+          Swal.fire("Success!", "Add user success!", "success");
+          // console.log("Add User Success");
           fetchUsers(currentPage, pageSize);
         }
       })
@@ -121,14 +122,19 @@ $(document).ready(function () {
       });
   }
 
+  // ===================================> turn on modal to update <===========================================
   function TurnOnModalToUpdate() {
     if ($("input.user-checkbox:checked").length === 0) {
-      alert("Please select at least one user to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one user to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.user-checkbox:checked").length > 1) {
-      alert("Choose only a user to update.");
+      Swal.fire("Warning!", "Choose only one user to update.", "warning");
       return;
     }
 
@@ -136,61 +142,49 @@ $(document).ready(function () {
       let row = $(this).closest("tr");
 
       let id = row.find("td").eq(0).text();
+      let username = row.find("td").eq(1).text();
+      let birthday = row.find("td").eq(2).text();
+      let phonenumber = row.find("td").eq(3).text();
+      // let imageSrc = row.find("td").eq(4).find("img").attr("src");
+      let gender = row.find("td").eq(5).text();
+      let address = row.find("td").eq(6).text();
+      let ranking = row.find("td").eq(7).text();
+
+      $(".username").val(username);
+
+      // Chuyển đổi ngày tháng về định dạng yyyy-MM-dd
+      if (birthday) {
+        let formattedDate = new Date(birthday).toISOString().split("T")[0];
+        $("input[name='date']").val(formattedDate);
+      } else {
+        $("input[name='date']").val("");
+      }
+
+      $("input[name='phonenumber']").val(phonenumber);
+      $(".form-select").val(gender);
+      $("input[name='address']").val(address);
+      $("input[name='ranking']").val(ranking);
+
+      // if (imageSrc) {
+      //   $("#formFile").next().attr("src", imageSrc);
+      // } else {
+      //   $("#formFile").next().attr("src", "images/anh-trang.png");
+      // }
 
       userId = id;
       // debugger;
     });
     // debugger;
 
-    var userFound = {};
-    $.ajax({
-      type: "GET",
-      url: "http://localhost:4006/api-admin/Users/get-data-by-id/" + userId,
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json",
-      },
-      processData: false,
-      contentType: false,
-    })
-      .done(function (data) {
-        // console.log(data);
-        // alert(data);
-        // debugger;
-        if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error);
-          console.log(data.error);
-        } else {
-          // alert("Find User Success");
-          // console.log("Find User Success");
+    exampleModal.show();
 
-          $(".username").val(data.userName);
-          let date = new Date(data.birthday); // Tạo đối tượng Date từ chuỗi ngày
-          let formattedDate = date.toISOString().split("T")[0]; // Chuyển sang yyyy-MM-dd
-          $("input[name='date']").val(formattedDate);
-          $("input[name='phonenumber']").val(data.phoneNumber);
-          // $("#formFile")[0].files[0];
-          $(".form-select").val(data.gender);
-          $("input[name='address']").val(data.address);
-          $("input[name='ranking']").val(data.ranking);
-
-          // Mở modal sau khi dữ liệu đã được cập nhật
-          // $("#exampleModal").modal("show");
-          var modal = new bootstrap.Modal(
-            document.getElementById("exampleModal")
-          );
-          modal.show();
-
-          $("#exampleModalLabel").text("Update User"); // Thay đổi tiêu đề modal
-          $(".modal-title").text("Update User"); // Nếu bạn muốn đặt tiêu đề từ class modal-title
-        }
-      })
-      .fail(function () {
-        console.log("Request failed: ", textStatus, errorThrown);
-      });
+    // Cập nhật tiêu đề modal
+    $("#exampleModalLabel").text("Update User");
+    $(".modal-title").text("Update User");
   }
-  function updateUser() {
-    // alert("Update User Success");
+
+  // =====================================> update user <==========================================================
+  async function updateUser() {
     // debugger;
     var userName = $(".username").val();
     var birthday = $("input[name='date']").val();
@@ -198,15 +192,19 @@ $(document).ready(function () {
     var image = $("#formFile")[0].files[0];
     var gender = $(".form-select").val();
     var address = $("input[name='address']").val();
+    var ranking = $("input[name='ranking']").val();
+
+    let imageUser = await uploadImage();
+
     var raw_data = {
       userId: userId,
       userName: userName,
       birthday: birthday + "T00:00:00.000Z",
       phoneNumber: phoneNumber,
-      image: image ? image.name : "",
+      image: imageUser,
       gender: gender,
       address: address,
-      ranking: "string",
+      ranking: ranking,
       deleted: false,
     };
 
@@ -222,18 +220,11 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", "Error: " + data.error, "success");
         }
-        // Đóng modal sau khi cập nhật thành công
-        // $("#exampleModal").modal("hide");
-        var modal = new bootstrap.Modal(
-          document.getElementById("exampleModal")
-        );
-        modal.hide();
-        alert("Update User Success");
+        exampleModal.hide();
+        Swal.fire("Success!", "Update User Success!", "success");
         fetchUsers(currentPage, pageSize);
       })
       .fail(function () {
@@ -241,26 +232,8 @@ $(document).ready(function () {
       });
   }
 
-  function deleteUser() {
-    if ($("input.user-checkbox:checked").length === 0) {
-      alert("Please select at least one user to update.");
-      return;
-    }
-
-    if ($("input.user-checkbox:checked").length > 1) {
-      alert("Choose only a user to update.");
-      return;
-    }
-
-    $(".user-checkbox:checked").each(function () {
-      let row = $(this).closest("tr");
-
-      let id = row.find("td").eq(0).text();
-
-      userId = id;
-      // debugger;
-    });
-
+  // ====================================> delete user <==========================================================
+  function deleteUser(userId) {
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/Users/delete/" + userId,
@@ -272,12 +245,10 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", "Error updating user: " + data.error, "error");
         }
-        alert("Delete User Success");
+        Swal.fire("Success!", "Delete Actual User Success!", "success");
         fetchUsers(currentPage, pageSize);
       })
       .fail(function () {
@@ -285,6 +256,84 @@ $(document).ready(function () {
       });
   }
 
+  // ====================================> delete virtual user <==========================================================
+  function deleteVirtualUser() {
+    if ($("input.user-checkbox:checked").length === 0) {
+      Swal.fire(
+        "Warning!",
+        "Please select at least one user to update.",
+        "warning"
+      );
+      return;
+    }
+
+    if ($("input.user-checkbox:checked").length > 1) {
+      Swal.fire("Warning!", "Choose only one user to update.", "warning");
+      return;
+    }
+
+    var userName;
+    var birthday;
+    var phoneNumber;
+    var image;
+    var gender;
+    var address;
+    var ranking;
+
+    $(".user-checkbox:checked").each(function () {
+      let row = $(this).closest("tr");
+
+      let id = row.find("td").eq(0).text();
+      userName = row.find("td").eq(1).text();
+      birthday = row.find("td").eq(2).text();
+      phoneNumber = row.find("td").eq(3).text();
+      image = row.find("td").eq(4).text();
+      gender = row.find("td").eq(5).text();
+      address = row.find("td").eq(6).text();
+      ranking = row.find("td").eq(7).text();
+
+      userId = id;
+      // debugger;
+    });
+
+    var raw_data = {
+      userId: userId,
+      userName: userName,
+      birthday: birthday,
+      phoneNumber: phoneNumber,
+      image: image,
+      gender: gender,
+      address: address,
+      ranking: ranking,
+      deleted: true,
+    };
+
+    // debugger;
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:4006/api-admin/Users/update",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(raw_data),
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        if (data.error != null && data.error != "undefined") {
+          Swal.fire("Error!", "Error updating user: " + data.error, "error");
+        }
+        Swal.fire("Success!", "Delete Virtual User Success!", "success");
+        fetchDeletedUsers(currentPage, pageSize);
+        fetchUsers(currentPage, pageSize);
+      })
+      .fail(function () {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  // =====================================> search user <=============================================================
   function searchUsers(name, currentPage, pageSize) {
     $.ajax({
       type: "GET",
@@ -310,7 +359,7 @@ $(document).ready(function () {
       });
   }
 
-  // Search
+  // =======================================> search user <========================================================================
   document
     .getElementById("searchForm")
     .addEventListener("submit", function (e) {
@@ -321,6 +370,7 @@ $(document).ready(function () {
       searchUsers(searchValue, currentPage, pageSize);
     });
 
+  // ======================================> update table <========================================================================
   function updateTable(data) {
     var tbody = $("#activeTable tbody");
     tbody.empty();
@@ -342,6 +392,7 @@ $(document).ready(function () {
     });
   }
 
+  // ======================================> update table deleted <=============================================================
   function updateTableDeleted(data) {
     var tbody = $("#deletedTable tbody");
     tbody.empty();
@@ -356,14 +407,76 @@ $(document).ready(function () {
                      <td>${user.address}</td>
                      <td>${user.ranking}</td>
                      <td>
-                      <button type="button" class="btn btn-primary">Restore</button>
-                      <button type="button" class="btn btn-danger">Delete</button>
+                      <button type="button" class="btn btn-primary btn-restore">Restore</button>
+                      <button type="button" class="btn btn-danger btn-deleteActual">Delete</button>
                      </td>
                    </tr>`;
       tbody.append(row);
     });
   }
 
+  // ======================================> restore user <=============================================================
+  $("#deletedTable tbody").on("click", ".btn-restore", function () {
+    const currentRow = $(this).closest("tr");
+    // debugger;
+
+    const user = {
+      userId: currentRow.find("td").eq(0).text(),
+      userName: currentRow.find("td").eq(1).text(),
+      birthday: currentRow.find("td").eq(2).text(),
+      phoneNumber: currentRow.find("td").eq(3).text(),
+      image: currentRow.find("td").eq(4).find("img").attr("src"),
+      gender: currentRow.find("td").eq(5).text(),
+      address: currentRow.find("td").eq(6).text(),
+      ranking: currentRow.find("td").eq(7).text(),
+      deleted: false,
+    };
+
+    restoreUser(user);
+  });
+
+  // ======================================> delete user <=============================================================
+  $("#deletedTable tbody").on("click", ".btn-deleteActual", function () {
+    const currentRow = $(this).closest("tr");
+    // debugger;
+
+    const user = {
+      userId: currentRow.find("td").eq(0).text(),
+    };
+
+    deleteUser(user.userId);
+  });
+
+  // ======================================> restore user <=============================================================
+  function restoreUser(user) {
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:4006/api-admin/users/update",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(user),
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        if (data && !data.error) {
+          // debugger;
+          Swal.fire("Success!", "Restore user success!", "success");
+          trashCanModal.hide();
+          fetchUsers(currentPage, pageSize);
+          fetchDeletedUsers(currentPage, pageSize);
+        } else {
+          Swal.fire("Error!", "Error updating user: " + data.error, "error");
+        }
+      })
+      .fail(function (jqXHR, textStatus, errorThrown) {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  // ======================================> pagination <========================================================================
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
@@ -399,6 +512,20 @@ $(document).ready(function () {
     fetchUsers(currentPage, pageSize);
   });
 
+  // Update pagination button states
+  function updatePaginationButtons() {
+    // if đang ở trang đầu tiên thì ẩn btn previous
+    $(".btn-previous").toggleClass("disabled", currentPage === 1);
+    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
+
+    // Adjust active class for current page button
+    $(".pagination .page-item").removeClass("active");
+    if (currentPage === 1) $(".btn-onePage").addClass("active");
+    if (currentPage === 2) $(".btn-twoPage").addClass("active");
+    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
+  }
+
+  // ========================================> fetch users <=======================================================
   function fetchUsers(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -416,9 +543,9 @@ $(document).ready(function () {
     });
   }
 
-  // Fetch initial page
   fetchUsers(currentPage, pageSize);
 
+  // =======================================> fetch deleted users <================================================
   function fetchDeletedUsers(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -439,19 +566,7 @@ $(document).ready(function () {
 
   fetchDeletedUsers(currentPage, pageSize);
 
-  // Update pagination button states
-  function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
-    $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
-
-    // Adjust active class for current page button
-    $(".pagination .page-item").removeClass("active");
-    if (currentPage === 1) $(".btn-onePage").addClass("active");
-    if (currentPage === 2) $(".btn-twoPage").addClass("active");
-    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
-  }
-
+  // =======================================> upload image <=============================================================
   function uploadImage() {
     return new Promise((resolve, reject) => {
       const fileInput = document.getElementById("formFile").files[0];
@@ -468,16 +583,20 @@ $(document).ready(function () {
       })
         .done(function (data) {
           if (data && data.fullPath) {
-            // alert(`File đã upload tại đường dẫn: ${data.fullPath}`);
+            // Swal.fire(
+            //   "Success!",
+            //   `File đã upload tại đường dẫn: ${data.fullPath}`,
+            //   "success"
+            // );
             resolve(data.fullPath.toString());
           } else {
-            alert("Upload thất bại.");
+            Swal.fire("Error!", "Upload thất bại!", "error");
             reject("Upload failed.");
           }
         })
         .fail(function (jqXHR, textStatus, errorThrown) {
           console.log("Request failed:", textStatus, errorThrown);
-          alert("Đã có lỗi xảy ra khi tải lên.");
+          Swal.fire("Error!", "Đã có lỗi xảy ra khi tải lên.", "error");
           reject(errorThrown);
         });
     });

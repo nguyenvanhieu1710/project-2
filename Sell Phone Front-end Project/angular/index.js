@@ -4,7 +4,9 @@ app.controller("IndexCtrl", function ($scope, $http) {
   $scope.productList;
   $scope.bestSellingProductList;
   $scope.cart;
+  $scope.productHasBeenSearched;
 
+  // ==========================================> Category <=====================================================
   $scope.DisPlayCategory = function () {
     $http({
       method: "GET",
@@ -19,6 +21,7 @@ app.controller("IndexCtrl", function ($scope, $http) {
       });
   };
 
+  // ===========================================> Product <=====================================================
   $scope.DisPlayProduct = function () {
     $http({
       method: "GET",
@@ -34,7 +37,7 @@ app.controller("IndexCtrl", function ($scope, $http) {
       });
   };
 
-  // ===============================================================================================
+  // ==========================================> Best Selling Product <=====================================================
   $scope.DisPlayBestSellingProduct = function () {
     $http({
       method: "GET",
@@ -50,19 +53,20 @@ app.controller("IndexCtrl", function ($scope, $http) {
       });
   };
 
+  // ==========================================> Product Detail <=====================================================
   $scope.openProductDetail = function (product) {
     // debugger;
     window.location.href = "productDetail.html?productId=" + product.productId;
   };
 
   //================================================> Cart <=================================================
-  // Handle cart
   $scope.loadCart = function () {
     // debugger;
     $scope.cart = JSON.parse(localStorage.getItem("cart")) || [];
     $scope.updateCartSummary();
   };
 
+  // ========================================> Add to cart <================================================
   $scope.addToCart = function (product) {
     // debugger;
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -89,10 +93,12 @@ app.controller("IndexCtrl", function ($scope, $http) {
     alert(`${product.productName} đã được thêm vào giỏ hàng!`);
   };
 
+  // =======================================> Update cart in storage <================================================
   $scope.updateCartInStorage = function () {
     localStorage.setItem("cart", JSON.stringify($scope.cart));
   };
 
+  // ======================================> Remove from cart <================================================
   $scope.removeFromCart = function (product) {
     $scope.cart = $scope.cart.filter(
       (item) => item.productId !== product.productId
@@ -101,6 +107,7 @@ app.controller("IndexCtrl", function ($scope, $http) {
     $scope.updateCartSummary();
   };
 
+  // ======================================> Update cart summary <================================================
   $scope.updateCartSummary = function () {
     $scope.totalQuantity = ($scope.cart || []).reduce(
       (total, item) => total + (item.quantity || 0),
@@ -112,8 +119,53 @@ app.controller("IndexCtrl", function ($scope, $http) {
     );
   };
 
+  // ======================================> Search product <================================================
+  $scope.SearchProduct = function (productName) {
+    // debugger;
+    document.getElementById("product-has-been-searched").style.display =
+      "block";
+
+    $scope.productHasBeenSearched = [];
+
+    $http({
+      method: "GET",
+      url: current_url + "/api-user/product/search/" + productName,
+    })
+      .then(function (response) {
+        // debugger;
+        $scope.productHasBeenSearched = response.data;
+
+        setTimeout(() => {
+          const slider = $(".products-slick");
+          if (slider.hasClass("slick-initialized")) {
+            slider.slick("unslick");
+          }
+
+          slider.slick({
+            slidesToShow: 4,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 2000,
+            arrows: true,
+            dots: false,
+            appendArrows: "#slick-nav-10",
+          });
+        }, 0);
+      })
+      .catch(function (error) {
+        console.error("Request failed: ", error.data);
+      });
+  };
+
+  // =====================================> Default Layout <================================================
+  $scope.defaultLayout = function () {
+    document.getElementById("product-has-been-searched").style.display = "none";
+  };
+
+  // =====================================> call function <================================================
   $scope.DisPlayCategory();
   $scope.DisPlayProduct();
   $scope.DisPlayBestSellingProduct();
   $scope.loadCart();
+  $scope.defaultLayout();
 });

@@ -5,6 +5,17 @@ $(document).ready(function () {
   let currentPage = 1;
   const pageSize = 5;
 
+  // Modal create bootstrap
+  const exampleModal = new bootstrap.Modal(
+    document.getElementById("exampleModal")
+  );
+
+  // Modal trash can bootstrap
+  const trashCanModal = new bootstrap.Modal(
+    document.getElementById("trashCanModal")
+  );
+
+  // ================================> handle button <===================================
   var status = 1;
   $(".btn-add-product").click(function () {
     status = 1;
@@ -17,7 +28,8 @@ $(document).ready(function () {
 
   $(".btn-delete-product").click(function () {
     status = 3;
-    deleteProduct();
+    deleteVirtualProduct();
+    // deleteProduct();
   });
 
   $(".btn-handle-func").click(function () {
@@ -32,6 +44,7 @@ $(document).ready(function () {
     // }
   });
 
+  // ===================================> validate <===================================
   function validate() {
     var productName = $("input[name='productName']").val();
     var quantity = $("input[name='quantity']").val();
@@ -107,6 +120,7 @@ $(document).ready(function () {
     }
   }
 
+  // ===================================> add product <===================================
   async function addProduct() {
     var productName = $("input[name='productName']").val();
     var quantity = $("input[name='quantity']").val();
@@ -157,7 +171,7 @@ $(document).ready(function () {
           console.log(data.error);
         } else {
           alert("Add Product Success");
-          console.log("Add Product Success");
+          exampleModal.hide();
           fetchProducts(1, 5);
         }
       })
@@ -167,6 +181,7 @@ $(document).ready(function () {
       });
   }
 
+  // ===================================> turn on modal to update <===================================
   function TurnOnModalToUpdate() {
     if ($("input.product-checkbox:checked").length === 0) {
       alert("Please select at least one product to update.");
@@ -238,6 +253,8 @@ $(document).ready(function () {
         console.log("Request failed: ", textStatus, errorThrown);
       });
   }
+
+  // ===================================> update product <===================================
   function updateProduct() {
     // alert("Update Product Success");
     // debugger;
@@ -303,29 +320,8 @@ $(document).ready(function () {
       });
   }
 
-  function deleteProduct() {
-    if ($("input.product-checkbox:checked").length === 0) {
-      alert("Please select at least one product to update.");
-      return;
-    }
-
-    if ($("input.product-checkbox:checked").length > 1) {
-      alert("Choose only a product to update.");
-      return;
-    }
-
-    $(".product-checkbox:checked").each(function () {
-      // Lấy dòng (tr) chứa checkbox này
-      let row = $(this).closest("tr");
-
-      // Lấy thông tin từ các cột trong dòng
-      let id = row.find("td").eq(0).text(); // Cột ID
-
-      productId = id;
-    });
-
-    // debugger;
-
+  // ===================================> delete product <===================================
+  function deleteProduct(productId) {
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/Product/delete/" + productId,
@@ -343,6 +339,8 @@ $(document).ready(function () {
           alert(data.error);
         }
         alert("Delete Product Success");
+        trashCanModal.hide();
+        fetchDeletedProducts(currentPage, pageSize);
         fetchProducts(1, 5);
       })
       .fail(function () {
@@ -350,6 +348,88 @@ $(document).ready(function () {
       });
   }
 
+  // =========================================> delete virtual product <==================================================================
+  function deleteVirtualProduct() {
+    if ($("input.product-checkbox:checked").length === 0) {
+      alert("Please select at least one product to update.");
+      return;
+    }
+
+    if ($("input.product-checkbox:checked").length > 1) {
+      alert("Choose only a product to update.");
+      return;
+    }
+
+    var productName;
+    var quantity;
+    var price;
+    var description;
+    var brand;
+    var star;
+    var categoryId;
+    var productImage;
+    var productDetail;
+
+    $(".product-checkbox:checked").each(function () {
+      let row = $(this).closest("tr");
+
+      let id = row.find("td").eq(0).text();
+      productName = row.find("td").eq(1).text();
+      quantity = row.find("td").eq(2).text();
+      price = row.find("td").eq(3).text();
+      description = row.find("td").eq(4).text();
+      brand = row.find("td").eq(5).text();
+      star = row.find("td").eq(6).text();
+      categoryId = row.find("td").eq(7).text();
+      productImage = row.find("td").eq(8).text();
+      productDetail = "string";
+
+      productId = id;
+    });
+
+    var raw_data = {
+      productId: productId,
+      productName: productName,
+      quantity: quantity,
+      price: price,
+      description: description,
+      brand: brand,
+      star: star,
+      categoryId: categoryId,
+      productImage: productImage,
+      productDetail: productDetail,
+
+      deleted: true,
+    };
+    // debugger;
+
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:4006/api-admin/Product/update",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(raw_data),
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        // console.log(data);
+        // alert(data);
+        if (data.error != null && data.error != "undefined") {
+          alert(data.error);
+        }
+        alert("Delete Virtual Product Success");
+        fetchDeletedProducts(currentPage, pageSize);
+        fetchProducts(currentPage, pageSize);
+      })
+      .fail(function () {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  // ====================================> search product <===================================
   function searchProduct(name, currentPage, pageSize) {
     $.ajax({
       type: "GET",
@@ -375,6 +455,7 @@ $(document).ready(function () {
       });
   }
 
+  // ====================================> search product <===================================
   document
     .getElementById("searchForm")
     .addEventListener("submit", function (e) {
@@ -385,8 +466,9 @@ $(document).ready(function () {
       searchProduct(searchValue, currentPage, pageSize);
     });
 
+  // ====================================> update product <===================================
   function updateTable(data) {
-    var tbody = $("tbody");
+    var tbody = $("#activeTable tbody");
     tbody.empty();
     data.forEach(function (product, index) {
       var row = `<tr>
@@ -407,6 +489,94 @@ $(document).ready(function () {
     });
   }
 
+  // ====================================> update table deleted <===================================
+  function updateTableDeleted(data) {
+    var tbody = $("#deletedTable tbody");
+    tbody.empty();
+    data.forEach(function (product, index) {
+      var row = `<tr>                     
+                     <td scope="row">${product.productId}</td>
+                     <td>${product.productName}</td>
+                     <td>${product.quantity}</td>
+                     <td>${product.price}</td>
+                     <td>${product.description}</td>
+                     <td>${product.brand}</td>
+                     <td>${product.star}</td>
+                     <td>${product.categoryId}</td>
+                     <td><img src="${product.productImage}" alt="Product Image" width="30" height="30"></td>
+                     <td>
+                       <button type="button" class="btn btn-primary btn-restore">Restore</button>
+                       <button type="button" class="btn btn-danger btn-deleteActual">Delete</button>
+                     </td>
+                   </tr>`;
+      tbody.append(row);
+    });
+  }
+
+  // ====================================> restore product <=============================================================
+  $("#deletedTable tbody").on("click", ".btn-restore", function () {
+    const currentRow = $(this).closest("tr");
+    // debugger;
+
+    const product = {
+      productId: currentRow.find("td").eq(0).text(),
+      productName: currentRow.find("td").eq(1).text(),
+      quantity: currentRow.find("td").eq(2).text(),
+      price: currentRow.find("td").eq(3).text(),
+      description: currentRow.find("td").eq(4).text(),
+      brand: currentRow.find("td").eq(5).text(),
+      star: currentRow.find("td").eq(6).text(),
+      categoryId: currentRow.find("td").eq(7).text(),
+      productImage: currentRow.find("td").eq(8).text(),
+      deleted: false,
+    };
+
+    restoreProduct(product);
+  });
+
+  // ====================================> delete product <=============================================================
+  $("#deletedTable tbody").on("click", ".btn-deleteActual", function () {
+    const currentRow = $(this).closest("tr");
+    // debugger;
+
+    const product = {
+      productId: currentRow.find("td").eq(0).text(),
+    };
+
+    deleteProduct(product.productId);
+  });
+
+  // ====================================> restore product <=============================================================
+  function restoreProduct(product) {
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:4006/api-admin/product/update",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(product),
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        if (data && !data.error) {
+          // debugger;
+          // success
+          alert("Restore product success!");
+          trashCanModal.hide();
+          fetchDeletedProducts(currentPage, pageSize);
+          fetchProducts(currentPage, pageSize);
+        } else {
+          alert("Error updating product: " + data.error);
+        }
+      })
+      .fail(function (jqXHR, textStatus, errorThrown) {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  // ====================================> pagination <===================================
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
@@ -442,6 +612,20 @@ $(document).ready(function () {
     fetchProducts(currentPage, pageSize);
   });
 
+  // Update pagination button states
+  function updatePaginationButtons() {
+    // if đang ở trang đầu tiên thì ẩn btn previous
+    $(".btn-previous").toggleClass("disabled", currentPage === 1);
+    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
+
+    // Adjust active class for current page button
+    $(".pagination .page-item").removeClass("active");
+    if (currentPage === 1) $(".btn-onePage").addClass("active");
+    if (currentPage === 2) $(".btn-twoPage").addClass("active");
+    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
+  }
+
+  // ==================================> fetch products <================================================
   function fetchProducts(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -461,19 +645,28 @@ $(document).ready(function () {
 
   fetchProducts(currentPage, pageSize);
 
-  // Update pagination button states
-  function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
-    $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
-
-    // Adjust active class for current page button
-    $(".pagination .page-item").removeClass("active");
-    if (currentPage === 1) $(".btn-onePage").addClass("active");
-    if (currentPage === 2) $(".btn-twoPage").addClass("active");
-    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
+  // ===================================> fetch products deleted <================================================
+  function fetchDeletedProducts(pageNumber, pageSize) {
+    $.ajax({
+      type: "GET",
+      url: `http://localhost:4006/api-admin/product/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      headers: { Authorization: "Bearer " + token },
+      success: function (response) {
+        // debugger;
+        $(".badge").text(response.length || 0);
+        updateTableDeleted(response);
+        updatePaginationButtons();
+        // debugger;
+      },
+      error: function (error) {
+        console.error("Request failed: ", error);
+      },
+    });
   }
 
+  fetchDeletedProducts(currentPage, pageSize);
+
+  // ===================================> upload image <===================================
   function uploadImage() {
     return new Promise((resolve, reject) => {
       const fileInput = document.getElementById("productImage").files[0];

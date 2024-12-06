@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // ==============================> Owl Carousel <=====================================
   // cho phần trending
   var owlCarousel = function () {
     $("#slider1").owlCarousel({
@@ -112,6 +113,7 @@
   };
   **/
 
+  // ===============================> Content WayPoint <=====================================
   var contentWayPoint = function () {
     var i = 0;
 
@@ -154,6 +156,7 @@
     // }, { offset: '90%'} );
   };
 
+  // ==============================> Go To Top <=====================================
   var goToTop = function () {
     $(".js-gotop").on("click", function (event) {
       event.preventDefault();
@@ -179,6 +182,7 @@
     });
   };
 
+  // ==============================> call function <=====================================
   $(function () {
     owlCarousel();
     // videos();

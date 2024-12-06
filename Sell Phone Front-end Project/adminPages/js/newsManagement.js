@@ -5,6 +5,17 @@ $(document).ready(function () {
   let currentPage = 1;
   const pageSize = 5;
 
+  // Modal create bootstrap
+  const exampleModal = new bootstrap.Modal(
+    document.getElementById("exampleModal")
+  );
+
+  // Modal trash can bootstrap
+  const trashCanModal = new bootstrap.Modal(
+    document.getElementById("trashCanModal")
+  );
+
+  // ================================> handle button <===================================
   var status = 1;
   $(".btn-add-news").click(function () {
     status = 1;
@@ -17,7 +28,8 @@ $(document).ready(function () {
 
   $(".btn-delete-news").click(function () {
     status = 3;
-    deleteNews();
+    deleteVirtualNews();
+    // deleteNews();
   });
 
   $(".btn-handle-func").click(function () {
@@ -32,6 +44,7 @@ $(document).ready(function () {
     // }
   });
 
+  // ===============================> validate <===================================
   function validate() {
     var newsName = $("input[name='newsName']").val();
     var content = $("textarea[name='content']").val();
@@ -72,6 +85,7 @@ $(document).ready(function () {
     return true;
   }
 
+  // ==================================> add news <===============================================================
   async function addNews() {
     var newsName = $("input[name='newsName']").val();
     var content = $("textarea[name='content']").val();
@@ -121,6 +135,7 @@ $(document).ready(function () {
       });
   }
 
+  // ====================================> turn on modal to update <=========================================================
   function TurnOnModalToUpdate() {
     if ($("input.news-checkbox:checked").length === 0) {
       alert("Please select at least one news to update.");
@@ -189,6 +204,8 @@ $(document).ready(function () {
         console.log("Request failed: ", textStatus, errorThrown);
       });
   }
+
+  // ======================================> update news <===========================================================
   function updateNews() {
     // alert("Update News Success");
     // debugger;
@@ -240,12 +257,7 @@ $(document).ready(function () {
           alert(data.error);
         } else {
           alert("Update News Success");
-          // Đóng modal sau khi cập nhật thành công
-          //     $("#exampleModal").modal("hide");
-          //   var modal = new bootstrap.Modal(
-          //     document.getElementById("exampleModal")
-          //   );
-          //   modal.hide();
+          exampleModal.hide();
           fetchNews(1, 5);
         }
       })
@@ -254,29 +266,8 @@ $(document).ready(function () {
       });
   }
 
-  function deleteNews() {
-    if ($("input.news-checkbox:checked").length === 0) {
-      alert("Please select at least one news to update.");
-      return;
-    }
-
-    if ($("input.news-checkbox:checked").length > 1) {
-      alert("Choose only a news to update.");
-      return;
-    }
-
-    $(".news-checkbox:checked").each(function () {
-      // Lấy dòng (tr) chứa checkbox này
-      let row = $(this).closest("tr");
-
-      // Lấy thông tin từ các cột trong dòng
-      let id = row.find("td").eq(0).text(); // Cột ID
-
-      newsId = id;
-    });
-
-    // debugger;
-
+  // =======================================> delete news <===========================================================
+  function deleteNews(newsId) {
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/News/delete/" + newsId,
@@ -301,6 +292,75 @@ $(document).ready(function () {
       });
   }
 
+  // =========================================> delete virtual news <==================================================================
+  function deleteVirtualNews() {
+    if ($("input.news-checkbox:checked").length === 0) {
+      alert("Please select at least one news to update.");
+      return;
+    }
+
+    if ($("input.news-checkbox:checked").length > 1) {
+      alert("Choose only a news to update.");
+      return;
+    }
+
+    var newsName;
+    var content;
+    var newsImage;
+    var postingDate;
+    var personPostingId;
+
+    $(".news-checkbox:checked").each(function () {
+      let row = $(this).closest("tr");
+
+      let id = row.find("td").eq(0).text();
+      newsName = row.find("td").eq(1).text();
+      content = row.find("td").eq(2).text();
+      newsImage = row.find("td").eq(3).text();
+      postingDate = row.find("td").eq(4).text();
+      personPostingId = row.find("td").eq(5).text();
+
+      newsId = id;
+    });
+
+    var raw_data = {
+      newsId: newsId,
+      newsName: newsName,
+      content: content,
+      newsImage: newsImage,
+      postingDate: postingDate,
+      personPostingId: personPostingId,
+      deleted: true,
+    };
+    // debugger;
+
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:4006/api-admin/News/update",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(raw_data),
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        // console.log(data);
+        // alert(data);
+        if (data.error != null && data.error != "undefined") {
+          alert(data.error);
+        }
+        alert("Delete Virtual News Success");
+        fetchDeletedNews(currentPage, pageSize);
+        fetchNews(currentPage, pageSize);
+      })
+      .fail(function () {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  // ======================================> search news <===========================================================
   function searchNews(name, currentPage, pageSize) {
     $.ajax({
       type: "GET",
@@ -326,6 +386,7 @@ $(document).ready(function () {
       });
   }
 
+  // ======================================> search news <===========================================================
   document
     .getElementById("searchForm")
     .addEventListener("submit", function (e) {
@@ -336,8 +397,9 @@ $(document).ready(function () {
       searchNews(searchValue, currentPage, pageSize);
     });
 
+  // =====================================> update table <===========================================================
   function updateTable(data) {
-    var tbody = $("tbody");
+    var tbody = $("#activeTable tbody");
     tbody.empty();
 
     data.forEach(function (news, index) {
@@ -356,6 +418,89 @@ $(document).ready(function () {
     });
   }
 
+  // ====================================> update table deleted <===========================================================
+  function updateTableDeleted(data) {
+    var tbody = $("#deletedTable tbody");
+    tbody.empty();
+
+    data.forEach(function (news, index) {
+      var row = `<tr>
+                       <td>${news.newsId}</td>
+                       <td>${news.newsName}</td>
+                       <td>${news.content}</td>
+                       <td><img src="${news.newsImage}" alt="News Image" width="30" height="30"></td> 
+                       <td>${news.postingDate}</td> 
+                       <td>${news.personPostingId}</td>
+                       <td>
+                           <button type="button" class="btn btn-primary btn-restore">Restore</button>
+                           <button type="button" class="btn btn-danger btn-deleteActual">Delete</button>
+                       </td>
+                   </tr>`;
+      tbody.append(row);
+    });
+  }
+
+  // ====================================> restore news <=============================================================
+  $("#deletedTable tbody").on("click", ".btn-restore", function () {
+    const currentRow = $(this).closest("tr");
+    // debugger;
+
+    const news = {
+      newsId: currentRow.find("td").eq(0).text(),
+      newsName: currentRow.find("td").eq(1).text(),
+      content: currentRow.find("td").eq(2).text(),
+      newsImage: currentRow.find("td").eq(3).text(),
+      postingDate: currentRow.find("td").eq(4).text(),
+      personPostingId: currentRow.find("td").eq(5).text(),
+      deleted: false,
+    };
+
+    restoreNews(news);
+  });
+
+  // ====================================> delete news <=============================================================
+  $("#deletedTable tbody").on("click", ".btn-deleteActual", function () {
+    const currentRow = $(this).closest("tr");
+    // debugger;
+
+    const news = {
+      newsId: currentRow.find("td").eq(0).text(),
+    };
+
+    deleteNews(news.newsId);
+  });
+
+  // ====================================> restore news <=============================================================
+  function restoreNews(news) {
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:4006/api-admin/news/update",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(news),
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        if (data && !data.error) {
+          // debugger;
+          // success
+          alert("Restore news success!");
+          trashCanModal.hide();
+          fetchNews(currentPage, pageSize);
+          fetchDeletedNews(currentPage, pageSize);
+        } else {
+          alert("Error updating news: " + data.error);
+        }
+      })
+      .fail(function (jqXHR, textStatus, errorThrown) {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  // ====================================> pagination <===========================================================
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
@@ -391,6 +536,20 @@ $(document).ready(function () {
     fetchNews(currentPage, pageSize);
   });
 
+  // Update pagination button states
+  function updatePaginationButtons() {
+    // if đang ở trang đầu tiên thì ẩn btn previous
+    $(".btn-previous").toggleClass("disabled", currentPage === 1);
+    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
+
+    // Adjust active class for current page button
+    $(".pagination .page-item").removeClass("active");
+    if (currentPage === 1) $(".btn-onePage").addClass("active");
+    if (currentPage === 2) $(".btn-twoPage").addClass("active");
+    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
+  }
+
+  // ====================================> fetch news <===========================================================
   function fetchNews(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -410,19 +569,28 @@ $(document).ready(function () {
 
   fetchNews(currentPage, pageSize);
 
-  // Update pagination button states
-  function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
-    $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
-
-    // Adjust active class for current page button
-    $(".pagination .page-item").removeClass("active");
-    if (currentPage === 1) $(".btn-onePage").addClass("active");
-    if (currentPage === 2) $(".btn-twoPage").addClass("active");
-    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
+  // ===================================> fetch deleted news <===========================================================
+  function fetchDeletedNews(pageNumber, pageSize) {
+    $.ajax({
+      type: "GET",
+      url: `http://localhost:4006/api-admin/news/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      headers: { Authorization: "Bearer " + token },
+      success: function (response) {
+        // debugger;
+        $(".badge").text(response.length || 0);
+        updateTableDeleted(response);
+        updatePaginationButtons();
+        // debugger;
+      },
+      error: function (error) {
+        console.error("Request failed: ", error);
+      },
+    });
   }
 
+  fetchDeletedNews(currentPage, pageSize);
+
+  // ===================================> upload image <===========================================================
   function uploadImage() {
     return new Promise((resolve, reject) => {
       const fileInput = document.getElementById("newsImage").files[0];

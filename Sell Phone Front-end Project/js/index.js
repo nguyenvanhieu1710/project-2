@@ -1,3 +1,5 @@
+// ==================================> Countdown <=========================================
+
 document.addEventListener("DOMContentLoaded", function () {
   var countdownDate = new Date("December 31, 2024 23:59:59").getTime();
 

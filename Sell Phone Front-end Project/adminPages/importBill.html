@@ -53,7 +53,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="table-wrap">
-                        <table class="table table-hover">
+                        <table class="table table-hover" id="activeTable">
                             <thead>
                                 <tr>
                                     <th scope="col">#</th>
@@ -61,6 +61,7 @@
                                     <th scope="col">Supplier ID</th>
                                     <th scope="col">Staff ID</th>
                                     <th scope="col">Input Day</th>
+                                    <th scope="col">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -72,6 +73,10 @@
                                     <td>101</td>
                                     <td>2001</td>
                                     <td>11/11/2024</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm btn-import-bill-detail">Import Bill
+                                            Detail</button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -107,30 +112,55 @@
                     <div class="modal-body">
                         <div class="container">
                             <form action="#">
-                                <!-- <div class="mb-3">
-                                    <label for="importBillId">Import Bill ID</label>
-                                    <input type="number" name="importBillId" class="form-control border"
-                                        placeholder="Enter import bill ID">
-                                </div> -->
-
-                                <div class="mb-3">
-                                    <label for="supplierId">Supplier ID</label>
-                                    <input type="number" name="supplierId" class="form-control border"
-                                        placeholder="Enter supplier ID">
+                                <div class="row">
+                                    <!-- Supplier ID -->
+                                    <div class="col-md-6 mb-3">
+                                        <label for="supplierId" class="form-label">Supplier ID</label>
+                                        <input type="number" name="supplierId" class="form-control border"
+                                            placeholder="Enter Supplier ID">
+                                    </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="staffId">Staff ID</label>
-                                    <input type="number" name="staffId" class="form-control border"
-                                        placeholder="Enter staff ID">
+                                <div class="row">
+                                    <!-- Staff ID -->
+                                    <div class="col-md-6 mb-3">
+                                        <label for="staffId" class="form-label">Staff ID</label>
+                                        <input type="number" name="staffId" class="form-control border"
+                                            placeholder="Enter Staff ID">
+                                    </div>
+
+                                    <!-- Input Day -->
+                                    <div class="col-md-6 mb-3">
+                                        <label for="inputDay" class="form-label">Input Day</label>
+                                        <input type="datetime-local" name="inputDay" class="form-control border">
+                                    </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="inputDay">Input Day</label>
-                                    <input type="date" name="inputDay" class="form-control border">
+                                <hr>
+                                <h5 class="mb-3">Import Bill Details</h5>
+                                <div id="importBillDetailsContainer">
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label for="productId" class="form-label">Product ID</label>
+                                            <input type="number" name="productId[]" class="form-control border"
+                                                placeholder="Enter Product ID">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="importPrice" class="form-label">Import Price</label>
+                                            <input type="number" name="importPrice[]" class="form-control border"
+                                                placeholder="Enter Import Price">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="importQuantity" class="form-label">Import Quantity</label>
+                                            <input type="number" name="importQuantity[]" class="form-control border"
+                                                placeholder="Enter Quantity">
+                                        </div>
+                                    </div>
                                 </div>
+
+                                <button type="button" class="btn btn-primary mb-3" id="addDetailButton">Add Another
+                                    Detail</button>
                             </form>
-
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -140,7 +170,7 @@
                 </div>
             </div>
         </div>
-        <!-- End Modal -->
+        <!-- End Modal create -->
         <!-- Modal trash can-->
         <div class="modal fade" id="trashCanModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
             aria-hidden="true">
@@ -155,34 +185,81 @@
                     <div class="modal-body">
                         <div class="container">
                             <div class="table-wrap">
-                                <table class="table table-hover">
+                                <table class="table table-hover" id="deletedTable">
                                     <thead>
                                         <tr>
-
+                                            <th scope="col">Import Bill ID</th>
+                                            <th scope="col">Supplier ID</th>
+                                            <th scope="col">Staff ID</th>
+                                            <th scope="col">Input Day</th>
+                                            <th scope="col">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-
+                                            <td>1</td>
+                                            <td>101</td>
+                                            <td>2001</td>
+                                            <td>11/11/2024</td>
+                                            <td>
+                                                <button type="button" class="btn btn-primary">Restore</button>
+                                                <button type="button" class="btn btn-danger">Delete</button>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
+
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination justify-content-end">
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                        </li>
+                                        <li class="page-item"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="#">Next</a>
+                                        </li>
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- End Modal -->
+        <!-- End Modal trash can -->
+
+        <!-- Modal for import bill Details -->
+        <div class="modal fade" id="importBillDetailsModal" tabindex="-1" aria-labelledby="importBillDetailsLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="orderDetailsLabel">Import Bill Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Product ID</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Modal for import bill Details -->
     </section>
 
     <script src="../adminPages/js/importBillManagement.js"></script>
-
 </body>
 
 </html>

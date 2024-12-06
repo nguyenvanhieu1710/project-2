@@ -3,6 +3,7 @@ var app = angular.module("MyProject", []);
 app.controller("OrderCtrl", function ($scope, $http) {
   $scope.orderList;
 
+  // ===============================================> Order <===============================================
   $http({
     method: "GET",
     url: current_url + "/api-user/orders/get-all",

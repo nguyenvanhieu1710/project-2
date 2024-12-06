@@ -2,8 +2,11 @@ var app = angular.module("MyProject", []);
 app.controller("StoreCtrl", function ($scope, $http) {
   $scope.categoryList;
   $scope.productList;
+  $scope.bestSellingProductList;
   $scope.currentPage = 1;
   $scope.pageSize = 5;
+
+  // ================================================> Category <===============================================
   $scope.DisPlayCategory = function () {
     $http({
       method: "GET",
@@ -18,6 +21,7 @@ app.controller("StoreCtrl", function ($scope, $http) {
       });
   };
 
+  // ===============================================> Product <===============================================
   $scope.loadProducts = function () {
     $http({
       method: "GET",
@@ -32,6 +36,7 @@ app.controller("StoreCtrl", function ($scope, $http) {
       });
   };
 
+  // ==============================================> Pagination <===============================================
   $scope.changePage = function (page) {
     $scope.currentPage = page;
     $scope.loadProducts();
@@ -54,6 +59,23 @@ app.controller("StoreCtrl", function ($scope, $http) {
     $scope.loadProducts();
   };
 
+  // =========================================> Best Selling Product <========================================================
+  $scope.DisPlayBestSellingProduct = function () {
+    $http({
+      method: "GET",
+      url: current_url + "/api-user/product/get-best-selling-product",
+    })
+      .then(function (response) {
+        $scope.bestSellingProductList = response.data;
+        makeScript("js/main.js");
+        // debugger;
+      })
+      .catch(function (error) {
+        console.log("Request failed: " + error.data);
+      });
+  };
+
+  // ==============================================> Add to cart <=================================================
   $scope.addToCart = function (product) {
     debugger;
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -78,6 +100,7 @@ app.controller("StoreCtrl", function ($scope, $http) {
     alert(`${product.productName} đã được thêm vào giỏ hàng!`);
   };
 
+  // ==============================================> call function <===============================================
   $scope.DisPlayCategory();
   $scope.loadProducts();
 });

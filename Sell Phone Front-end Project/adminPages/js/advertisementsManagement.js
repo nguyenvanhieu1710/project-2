@@ -5,10 +5,17 @@ $(document).ready(function () {
   let currentPage = 1;
   const pageSize = 5;
 
+  // Modal create bootstrap
   const exampleModal = new bootstrap.Modal(
     document.getElementById("exampleModal")
   );
 
+  // Modal trash can bootstrap
+  const trashCanModal = new bootstrap.Modal(
+    document.getElementById("trashCanModal")
+  );
+
+  // ================================> handle button <===================================
   var status = 1;
   $(".btn-add-advertisement").click(function () {
     status = 1;
@@ -21,7 +28,8 @@ $(document).ready(function () {
 
   $(".btn-delete-advertisement").click(function () {
     status = 3;
-    deleteAdvertisement();
+    deleteVirtualAdvertisement();
+    // deleteAdvertisement();
   });
 
   $(".btn-handle-func").click(function () {
@@ -40,6 +48,7 @@ $(document).ready(function () {
     // }
   });
 
+  // ===============================> add advertisement <===================================
   async function addAdvertisement() {
     var advertisementName = $("input[name='advertisementName']").val();
     var advertisementImage = $("input[name='advertisementImage']")[0].files[0];
@@ -112,6 +121,7 @@ $(document).ready(function () {
       });
   }
 
+  // ==============================> tourn on modal to update <===================================
   function TurnOnModalToUpdate() {
     if ($("input.advertisement-checkbox:checked").length === 0) {
       alert("Please select at least one advertisement to update.");
@@ -177,6 +187,8 @@ $(document).ready(function () {
         console.log("Request failed: ", textStatus, errorThrown);
       });
   }
+
+  // ==============================> update advertisement <===================================
   function updateAdvertisement() {
     // alert("Update Advertisement Success");
     // debugger;
@@ -226,27 +238,8 @@ $(document).ready(function () {
       });
   }
 
-  function deleteAdvertisement() {
-    if ($("input.advertisement-checkbox:checked").length === 0) {
-      alert("Please select at least one advertisement to update.");
-      return;
-    }
-
-    if ($("input.advertisement-checkbox:checked").length > 1) {
-      alert("Choose only a advertisement to update.");
-      return;
-    }
-
-    $(".advertisement-checkbox:checked").each(function () {
-      let row = $(this).closest("tr");
-
-      let id = row.find("td").eq(0).text();
-
-      advertisementId = id;
-    });
-
-    // debugger;
-
+  // ==============================> delete advertisement <===================================
+  function deleteAdvertisement(advertisementId) {
     $.ajax({
       type: "POST",
       url:
@@ -273,6 +266,72 @@ $(document).ready(function () {
       });
   }
 
+  // ===============================> delete virtual advertisement <===================================
+  function deleteVirtualAdvertisement() {
+    if ($("input.advertisement-checkbox:checked").length === 0) {
+      alert("Please select at least one advertisement to update.");
+      return;
+    }
+
+    if ($("input.advertisement-checkbox:checked").length > 1) {
+      alert("Choose only a advertisement to update.");
+      return;
+    }
+
+    var advertisementName;
+    var advertisementImage;
+    var location;
+    var advertiserId;
+
+    $(".advertisement-checkbox:checked").each(function () {
+      let row = $(this).closest("tr");
+
+      let id = row.find("td").eq(0).text();
+      advertisementName = row.find("td").eq(1).text();
+      advertisementImage = row.find("td").eq(2).text();
+      location = row.find("td").eq(3).text();
+      advertiserId = row.find("td").eq(4).text();
+
+      advertisementId = id;
+    });
+
+    var raw_data = {
+      advertisementId: advertisementId,
+      advertisementName: advertisementName,
+      advertisementImage: advertisementImage,
+      location: location,
+      advertiserId: advertiserId,
+      deleted: true,
+    };
+    // debugger;
+
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:4006/api-admin/Advertisement/update",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(raw_data),
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        // console.log(data);
+        // alert(data);
+        if (data.error != null && data.error != "undefined") {
+          alert(data.error);
+        }
+        alert("Delete Virtual Advertisement Success");
+        fetchDeletedAdvertisements(currentPage, pageSize);
+        fetchAdvertisements(currentPage, pageSize);
+      })
+      .fail(function () {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  // ==============================> search advertisement <===================================
   function searchAdvertisement(name, currentPage, pageSize) {
     $.ajax({
       type: "GET",
@@ -298,6 +357,7 @@ $(document).ready(function () {
       });
   }
 
+  // ==============================> search advertisement <===================================
   document
     .getElementById("searchForm")
     .addEventListener("submit", function (e) {
@@ -308,8 +368,9 @@ $(document).ready(function () {
       searchAdvertisement(searchValue, currentPage, pageSize);
     });
 
+  // =============================> update table <===================================
   function updateTable(data) {
-    var tbody = $("tbody");
+    var tbody = $("#activeTable tbody");
     tbody.empty();
     data.forEach(function (advertisement, index) {
       var row = `<tr>
@@ -326,6 +387,86 @@ $(document).ready(function () {
     });
   }
 
+  // ==============================> update table deleted <===================================
+  function updateTableDeleted(data) {
+    var tbody = $("#deletedTable tbody");
+    tbody.empty();
+    data.forEach(function (advertisement, index) {
+      var row = `<tr>
+                     <td scope="row">${advertisement.advertisementId}</td>
+                     <td scope="row">${advertisement.advertisementName}</td>
+                     <td><img src="${advertisement.advertisementImage}" alt="Advertisement Image" width="30" height="30"></td>
+                     <td>${advertisement.location}</td>
+                      <td>${advertisement.advertiserId}</td>
+                      <td>
+                       <button type="button" class="btn btn-primary btn-restore">Restore</button>
+                       <button type="button" class="btn btn-danger btn-deleteActual">Delete</button>
+                      </td>
+                   </tr>`;
+      tbody.append(row);
+    });
+  }
+
+  // ====================================> restore advertisement <=============================================================
+  $("#deletedTable tbody").on("click", ".btn-restore", function () {
+    const currentRow = $(this).closest("tr");
+    // debugger;
+
+    const advertisement = {
+      advertisementId: currentRow.find("td").eq(0).text(),
+      advertisementName: currentRow.find("td").eq(1).text(),
+      advertisementImage: currentRow.find("td").eq(2).text(),
+      location: currentRow.find("td").eq(3).text(),
+      advertiserId: currentRow.find("td").eq(4).text(),
+      deleted: false,
+    };
+
+    restoreAdvertisement(advertisement);
+  });
+
+  // ====================================> delete advertisement <=============================================================
+  $("#deletedTable tbody").on("click", ".btn-deleteActual", function () {
+    const currentRow = $(this).closest("tr");
+    // debugger;
+
+    const advertisement = {
+      advertisementId: currentRow.find("td").eq(0).text(),
+    };
+
+    deleteAdvertisement(advertisement.advertisementId);
+  });
+
+  // ====================================> restore advertisement <=============================================================
+  function restoreAdvertisement(advertisement) {
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:4006/api-admin/advertisement/update",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(advertisement),
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        if (data && !data.error) {
+          // debugger;
+          // success
+          alert("Restore advertisement success!");
+          trashCanModal.hide();
+          fetchAdvertisements(currentPage, pageSize);
+          fetchDeletedAdvertisements(currentPage, pageSize);
+        } else {
+          alert("Error updating advertisement: " + data.error);
+        }
+      })
+      .fail(function (jqXHR, textStatus, errorThrown) {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  // ==============================> pagination <===================================
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
@@ -361,6 +502,21 @@ $(document).ready(function () {
     fetchAdvertisements(currentPage, pageSize);
   });
 
+  // ==============================> update pagination button <===================================
+  // Update pagination button states
+  function updatePaginationButtons() {
+    // if đang ở trang đầu tiên thì ẩn btn previous
+    $(".btn-previous").toggleClass("disabled", currentPage === 1);
+    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
+
+    // Adjust active class for current page button
+    $(".pagination .page-item").removeClass("active");
+    if (currentPage === 1) $(".btn-onePage").addClass("active");
+    if (currentPage === 2) $(".btn-twoPage").addClass("active");
+    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
+  }
+
+  // ==============================> fetch data <===================================
   function fetchAdvertisements(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -380,19 +536,28 @@ $(document).ready(function () {
 
   fetchAdvertisements(currentPage, pageSize);
 
-  // Update pagination button states
-  function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
-    $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
-
-    // Adjust active class for current page button
-    $(".pagination .page-item").removeClass("active");
-    if (currentPage === 1) $(".btn-onePage").addClass("active");
-    if (currentPage === 2) $(".btn-twoPage").addClass("active");
-    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
+  // =============================> fetch data deleted <===================================
+  function fetchDeletedAdvertisements(pageNumber, pageSize) {
+    $.ajax({
+      type: "GET",
+      url: `http://localhost:4006/api-admin/advertisement/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      headers: { Authorization: "Bearer " + token },
+      success: function (response) {
+        // debugger;
+        $(".badge").text(response.length || 0);
+        updateTableDeleted(response);
+        updatePaginationButtons();
+        // debugger;
+      },
+      error: function (error) {
+        console.error("Request failed: ", error);
+      },
+    });
   }
 
+  fetchDeletedAdvertisements(currentPage, pageSize);
+
+  // ==============================> upload image <===================================
   function uploadImage() {
     return new Promise((resolve, reject) => {
       const fileInput = document.getElementById("advertisementImage").files[0];

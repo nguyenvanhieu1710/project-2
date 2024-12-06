@@ -14,6 +14,7 @@ $(document).ready(function () {
     document.getElementById("trashCanModal")
   );
 
+  // ===================================> handle button <===========================================
   var status = 1;
   $(".btn-add-staff").click(function () {
     status = 1;
@@ -26,7 +27,8 @@ $(document).ready(function () {
 
   $(".btn-delete-staff").click(function () {
     status = 3;
-    deleteStaff();
+    deleteVirtualStaff();
+    // deleteStaff();
   });
 
   $(".btn-handle-func").click(function () {
@@ -41,6 +43,7 @@ $(document).ready(function () {
     // }
   });
 
+  // ===================================> add staff <===========================================
   function addStaff() {
     //   alert("Add Staff");
     // Retrieve and validate form data
@@ -119,6 +122,7 @@ $(document).ready(function () {
       });
   }
 
+  // ===================================> turn on modal to update <===========================================
   function TurnOnModalToUpdate() {
     if ($("input.staff-checkbox:checked").length === 0) {
       alert("Please select at least one staff to update.");
@@ -188,7 +192,9 @@ $(document).ready(function () {
         console.log("Request failed: ", textStatus, errorThrown);
       });
   }
-  function updateStaff() {
+
+  // ====================================> update staff <================================================
+  async function updateStaff() {
     // alert("Update Staff Success");
     // debugger;
     var staffName = $(".staffname").val();
@@ -199,12 +205,14 @@ $(document).ready(function () {
     var address = $("input[name='address']").val();
     var position = $("input[name='position']").val();
 
+    let imageUser = await uploadImage();
+
     var raw_data = {
       staffId: staffId,
       staffName: staffName,
       birthday: birthday + "T00:00:00.000Z",
       phoneNumber: phoneNumber,
-      image: image ? image.name : "",
+      image: imageUser,
       gender: gender,
       address: address,
       position: position,
@@ -228,12 +236,7 @@ $(document).ready(function () {
         if (data.error != null && data.error != "undefined") {
           alert(data.error);
         }
-        // Đóng modal sau khi cập nhật thành công
-        // $("#exampleModal").modal("hide");
-        var modal = new bootstrap.Modal(
-          document.getElementById("exampleModal")
-        );
-        modal.hide();
+        exampleModal.hide();
         alert("Update Staff Success");
         fetchStaffs(1, 5);
       })
@@ -242,29 +245,8 @@ $(document).ready(function () {
       });
   }
 
-  function deleteStaff() {
-    if ($("input.staff-checkbox:checked").length === 0) {
-      alert("Please select at least one staff to update.");
-      return;
-    }
-
-    if ($("input.staff-checkbox:checked").length > 1) {
-      alert("Choose only a staff to update.");
-      return;
-    }
-
-    $(".staff-checkbox:checked").each(function () {
-      // Lấy dòng (tr) chứa checkbox này
-      let row = $(this).closest("tr");
-
-      // Lấy thông tin từ các cột trong dòng
-      let id = row.find("td").eq(0).text(); // Cột ID
-
-      staffId = id;
-    });
-
-    // debugger;
-
+  // =====================================> delete staff <================================================
+  function deleteStaff(staffId) {
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/Staff/delete/" + staffId,
@@ -289,6 +271,99 @@ $(document).ready(function () {
       });
   }
 
+  // ======================================> delete virtual staff <===========================================================
+  function deleteVirtualStaff() {
+    if ($("input.staff-checkbox:checked").length === 0) {
+      alert("Please select at least one staff to update.");
+      return;
+    }
+
+    if ($("input.staff-checkbox:checked").length > 1) {
+      alert("Choose only a staff to update.");
+      return;
+    }
+
+    var staffName;
+    var birthday;
+    var phoneNumber;
+    var image;
+    var gender;
+    var address;
+    var position;
+
+    $(".staff-checkbox:checked").each(function () {
+      let row = $(this).closest("tr");
+
+      let id = row.find("td").eq(0).text();
+      staffName = row.find("td").eq(1).text();
+      birthday = row.find("td").eq(2).text();
+      phoneNumber = row.find("td").eq(3).text();
+      image = row.find("td").eq(4).text();
+      gender = row.find("td").eq(5).text();
+      address = row.find("td").eq(6).text();
+      position = row.find("td").eq(7).text();
+
+      staffId = id;
+      // debugger;
+    });
+
+    // Chuyển đổi birthday từ dd/MM/yyyy sang yyyy-MM-dd
+    let formattedBirthday = null;
+    if (birthday) {
+      let parts = birthday.split("/"); // Tách chuỗi
+      if (parts.length === 3) {
+        let day = parseInt(parts[0], 10);
+        let month = parseInt(parts[1], 10) - 1; // Tháng bắt đầu từ 0 trong Date
+        let year = parseInt(parts[2], 10);
+        let parsedDate = new Date(year, month, day);
+        if (!isNaN(parsedDate)) {
+          // Định dạng yyyy-MM-dd
+          formattedBirthday = `${year}-${String(month + 1).padStart(
+            2,
+            "0"
+          )}-${String(day).padStart(2, "0")}`;
+        }
+      }
+    }
+
+    var raw_data = {
+      staffId: staffId,
+      staffName: staffName,
+      birthday: formattedBirthday,
+      phoneNumber: phoneNumber,
+      image: image || "",
+      gender: gender,
+      address: address,
+      position: position,
+      deleted: true,
+    };
+
+    // debugger;
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:4006/api-admin/Staff/update",
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+      data: JSON.stringify(raw_data),
+      processData: false,
+      contentType: "application/json",
+    })
+      .done(function (data) {
+        if (data.error != null && data.error != "undefined") {
+          alert(data.error);
+        }
+        // debugger;
+        alert("Delete Virtual Staff Success");
+        fetchDeletedStaffs(currentPage, pageSize);
+        fetchStaffs(currentPage, pageSize);
+      })
+      .fail(function () {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  // ====================================> search staff <=============================================================
   function searchStaff(name, currentPage, pageSize) {
     $.ajax({
       type: "GET",
@@ -314,6 +389,7 @@ $(document).ready(function () {
       });
   }
 
+  // ===================================> search staff <=============================================================
   document
     .getElementById("searchForm")
     .addEventListener("submit", function (e) {
@@ -324,6 +400,7 @@ $(document).ready(function () {
       searchStaff(searchValue, currentPage, pageSize);
     });
 
+  // ===================================> update table <=============================================================
   function updateTable(data) {
     var tbody = $("#activeTable tbody");
     tbody.empty();
@@ -347,6 +424,7 @@ $(document).ready(function () {
     });
   }
 
+  // ====================================> update table deleted <=============================================================
   function updateTableDeleted(data) {
     var tbody = $("#deletedTable tbody");
     tbody.empty();
@@ -354,20 +432,84 @@ $(document).ready(function () {
       var row = `<tr>
                      <td scope="row">${staff.staffId}</td>
                      <td>${staff.staffName}</td>
+                     <td>${staff.birthday}</td>
                      <td>${staff.phoneNumber}</td>
                      <td><img src="${staff.image}" alt="Image" width="30" height="30"></td>
                      <td>${staff.gender}</td>
                      <td>${staff.address}</td>
                      <td>${staff.position}</td>
                      <td>
-                      <button type="button" class="btn btn-primary">Restore</button>
-                      <button type="button" class="btn btn-danger">Delete</button>
+                      <button type="button" class="btn btn-primary btn-restore">Restore</button>
+                      <button type="button" class="btn btn-danger btn-deleteActual">Delete</button>
                      </td>
                    </tr>`;
       tbody.append(row);
     });
   }
 
+  // ====================================> restore staff <=============================================================
+  $("#deletedTable tbody").on("click", ".btn-restore", function () {
+    const currentRow = $(this).closest("tr");
+    // debugger;
+
+    const staff = {
+      staffId: currentRow.find("td").eq(0).text(),
+      staffName: currentRow.find("td").eq(1).text(),
+      birthday: currentRow.find("td").eq(2).text(),
+      phoneNumber: currentRow.find("td").eq(3).text(),
+      image: currentRow.find("td").eq(4).find("img").attr("src"),
+      gender: currentRow.find("td").eq(5).text(),
+      address: currentRow.find("td").eq(6).text(),
+      position: currentRow.find("td").eq(7).text(),
+      deleted: false,
+    };
+
+    restoreStaff(staff);
+  });
+
+  // ====================================> delete staff <=============================================================
+  $("#deletedTable tbody").on("click", ".btn-deleteActual", function () {
+    const currentRow = $(this).closest("tr");
+    // debugger;
+
+    const staff = {
+      staffId: currentRow.find("td").eq(0).text(),
+    };
+
+    deleteStaff(staff.staffId);
+  });
+
+  // ====================================> restore staff <=============================================================
+  function restoreStaff(staff) {
+    $.ajax({
+      type: "POST",
+      url: "http://localhost:4006/api-admin/staff/update",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(staff),
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        if (data && !data.error) {
+          // debugger;
+          // success
+          alert("Restore staff success!");
+          trashCanModal.hide();
+          fetchStaffs(currentPage, pageSize);
+          fetchDeletedStaffs(currentPage, pageSize);
+        } else {
+          alert("Error updating staff: " + data.error);
+        }
+      })
+      .fail(function (jqXHR, textStatus, errorThrown) {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
+  }
+
+  // ====================================> pagination <=============================================================
   // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
@@ -403,6 +545,20 @@ $(document).ready(function () {
     fetchStaffs(currentPage, pageSize);
   });
 
+  // Update pagination button states
+  function updatePaginationButtons() {
+    // if đang ở trang đầu tiên thì ẩn btn previous
+    $(".btn-previous").toggleClass("disabled", currentPage === 1);
+    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
+
+    // Adjust active class for current page button
+    $(".pagination .page-item").removeClass("active");
+    if (currentPage === 1) $(".btn-onePage").addClass("active");
+    if (currentPage === 2) $(".btn-twoPage").addClass("active");
+    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
+  }
+
+  // ===================================> fetch staffs <=============================================================
   function fetchStaffs(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -422,6 +578,7 @@ $(document).ready(function () {
 
   fetchStaffs(currentPage, pageSize);
 
+  // ====================================> fetch deleted staffs <=============================================================
   function fetchDeletedStaffs(pageNumber, pageSize) {
     $.ajax({
       type: "GET",
@@ -429,6 +586,7 @@ $(document).ready(function () {
       headers: { Authorization: "Bearer " + token },
       success: function (response) {
         // debugger;
+        $(".badge").text(response.length || 0);
         updateTableDeleted(response);
         updatePaginationButtons();
         // debugger;
@@ -441,19 +599,7 @@ $(document).ready(function () {
 
   fetchDeletedStaffs(currentPage, pageSize);
 
-  // Update pagination button states
-  function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
-    $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
-
-    // Adjust active class for current page button
-    $(".pagination .page-item").removeClass("active");
-    if (currentPage === 1) $(".btn-onePage").addClass("active");
-    if (currentPage === 2) $(".btn-twoPage").addClass("active");
-    if (currentPage === 3) $(".btn-ThreePage").addClass("active");
-  }
-
+  // =====================================> upload image <=============================================================
   function uploadImage() {
     return new Promise((resolve, reject) => {
       const fileInput = document.getElementById("formFile").files[0];
@@ -462,7 +608,7 @@ $(document).ready(function () {
 
       $.ajax({
         type: "POST",
-        url: "http://localhost:4006/api-admin/users/upload-image",
+        url: "http://localhost:4006/api-admin/staff/upload-image",
         data: formData,
         headers: { Authorization: "Bearer " + token },
         processData: false,
