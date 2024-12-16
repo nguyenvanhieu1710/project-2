@@ -25,10 +25,12 @@
   position: absolute;
   top: 50%;
   right: 20px;
+  padding: 10px;
   transform: translateY(-50%);
   color: #aaa;
   transition: all 0.3s ease;
   font-size: 18px;
+  cursor: pointer;
 }
 
 .search-input:focus + .search-icon {
@@ -97,4 +99,17 @@
 .tab-link.active {
   color: #ff5722;
   font-weight: bold;
+}
+
+/* ========================> Pagination <======================== */
+.disabled {
+  pointer-events: none;
+}
+
+.disabled:hover {
+  cursor: not-allowed;
+}
+
+.store-pagination li.active a {
+  color: #fff;
 }

@@ -5,8 +5,6 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-
 	<title>Checkout</title>
 
 	<!-- Google font -->
@@ -32,6 +30,10 @@
 	<script src="angular/angular.min.js"></script>
 	<script src="angular/global.js"></script>
 	<script src="angular/checkout.js"></script>
+
+	<!-- SweetAlert2 -->
+	<link rel="stylesheet" href="css/sweetalert2.min.css" />
+	<script src="js/sweetalert2.min.js"></script>
 </head>
 
 <body ng-app="MyProject" ng-controller="CheckoutCtrl">
@@ -194,11 +196,14 @@
 						<div class="section-title">
 							<h3 class="title">Billing address</h3>
 						</div>
-						<div class="form-group">
+						<!-- <div class="form-group">
 							<input class="input" type="text" name="first-name" placeholder="First Name">
 						</div>
 						<div class="form-group">
 							<input class="input" type="text" name="last-name" placeholder="Last Name">
+						</div> -->
+						<div class="form-group">
+							<input class="input" type="text" name="name" placeholder="Name">
 						</div>
 						<div class="form-group">
 							<input class="input" type="email" name="email" placeholder="Email">
@@ -212,13 +217,13 @@
 						<div class="form-group">
 							<input class="input" type="text" name="country" placeholder="Country">
 						</div>
-						<div class="form-group">
+						<!-- <div class="form-group">
 							<input class="input" type="text" name="zip-code" placeholder="ZIP Code">
-						</div>
-						<div class="form-group">
+						</div> -->
+						<!-- <div class="form-group">
 							<input class="input" type="tel" name="tel" placeholder="Telephone">
-						</div>
-						<div class="form-group">
+						</div> -->
+						<!-- <div class="form-group">
 							<div class="input-checkbox">
 								<input type="checkbox" id="create-account">
 								<label for="create-account">
@@ -232,7 +237,7 @@
 										placeholder="Enter Your Password">
 								</div>
 							</div>
-						</div>
+						</div> -->
 					</div>
 					<!-- /Billing Details -->
 
@@ -296,7 +301,8 @@
 						</div>
 						<div class="order-products">
 							<!-- cho track by item.productId để tránh trùng lặp trong angular -->
-							<div class="order-col" ng-repeat="item in cart track by item.productId">
+							<div class="order-col"
+								ng-repeat="item in cart | filter:{selected: true} track by item.productId">
 								<div>{{item.quantity}}x {{item.productName}}</div>
 								<div>${{item.price}}</div>
 							</div>
@@ -306,7 +312,7 @@
 							</div> -->
 						</div>
 						<div class="order-col">
-							<div>Shiping</div>
+							<div><strong>SHIPPING</strong></div>
 							<div><strong>FREE</strong></div>
 						</div>
 						<div class="order-col">
@@ -510,152 +516,7 @@
 	<script src="js/jquery.zoom.min.js"></script>
 	<script src="js/main.js"></script>
 	<!-- Custom JavaScript -->
-	<script>
-		document.getElementById("placeOrderBtn").addEventListener("click", function (e) {
-			e.preventDefault();
-			// các input radio có name là payment
-			const paymentMethods = document.getElementsByName("payment");
-			let selectedMethod = null;
-
-			for (const method of paymentMethods) {
-				if (method.checked) {
-					selectedMethod = method.id;
-					break;
-				}
-			}
-
-			if (!selectedMethod) {
-				alert("Vui lòng chọn phương thức thanh toán trước khi tiếp tục!");
-				return;
-			}
-
-			const termsCheckbox = document.getElementById("terms");
-			if (!termsCheckbox.checked) {
-				alert("Vui lòng đồng ý với các điều khoản và điều kiện!");
-				return;
-			}
-
-			// ================> start add order <================================================================
-
-			// get user from local storage
-			var user = localStorage.getItem("user");
-			var userId = user.AccountId;
-
-			// get staffId from database
-			var staffId = null;
-			var token = localStorage.getItem("admin");
-			$.ajax({
-				type: "GET",
-				url: "http://localhost:4006/api-admin/Staff/get-all",
-				headers: {
-					Authorization: "Bearer " + token,
-					"Content-Type": "application/json",
-				},
-				processData: false,
-				success: function (data) {
-					if (data && data.length > 0) {
-						staffId = data[0].StaffId;
-						console.log("StaffId:", staffId);
-					} else {
-						console.error("Không tìm thấy nhân viên nào!");
-					}
-				},
-				error: function (xhr, status, error) {
-					console.error(error);
-				},
-			});
-
-			// get voucherId from database
-			var voucherId = null;
-			$.ajax({
-				type: "GET",
-				url: "http://localhost:4006/api-admin/Voucher/get-all",
-				headers: {
-					Authorization: "Bearer " + token,
-					"Content-Type": "application/json",
-				},
-				processData: false,
-				success: function (data) {
-					if (data && data.length > 0) {
-						voucherId = data[0].VoucherId;
-						console.log("VoucherId:", voucherId);
-					} else {
-						console.error("Không tìm thấy voucher nào!");
-					}
-				},
-				error: function (xhr, status, error) {
-					console.error(error);
-				},
-			});
-
-			// get product from cart in local storage
-			var cart = JSON.parse(localStorage.getItem("cart"));
-			if (!cart || cart.length <= 0) {
-				console.error("Giỏ hàng rỗng hoặc không hợp lệ!");
-				return;
-			}
-			var orderDetail = cart.map(item => {
-				return {
-					orderDetailId: 0,
-					orderId: 0,
-					productId: item.ProductId,
-					quantity: item.Quantity,
-					price: item.Price,
-					discountAmount: 0,
-					voucherId: voucherId,
-					orderDetailStatus: 0
-				};
-			});
-
-			// create order
-			var order = {
-				orderId: 0,
-				userId: userId,
-				staffId: staffId,
-				orderStatus: "Pending Confirmation",
-				dayBuy: "2024-12-01T13:01:17.306Z",
-				deliveryAddress: "string",
-				evaluate: 5,
-				deleted: false,
-				listjson_orderDetail: orderDetail
-			};
-
-			// add order to database
-			$.ajax({
-				type: "POST",
-				url: "http://localhost:4006/api-user/Orders/create",
-				headers: {
-					Authorization: "Bearer " + token,
-					"Content-Type": "application/json",
-				},
-				data: JSON.stringify(order),
-				processData: false,
-				success: function (data) {
-					console.log("Order created successfully:", data);
-				},
-				error: function (xhr, status, error) {
-					console.error(error);
-				},
-			});
-
-			// ============================> chuyển hướng <=====================================
-			// debugger;
-			switch (selectedMethod) {
-				case "payment-1":
-					window.location.href = "payment.html";
-					break;
-				case "payment-2":
-					// window.location.href = "cod.html";
-					alert("Vui lòng chờ đơn hàng được xác nhận.");
-					break;
-				case "payment-3":
-					window.location.href = "payment.html";
-					break;
-				default:
-					alert("Phương thức thanh toán không hợp lệ!");
-			}
-		});
-	</script>
+	<script src="js/checkout.js"></script>
 </body>
 
 </html>

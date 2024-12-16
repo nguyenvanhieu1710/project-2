@@ -32,6 +32,10 @@
 	<script src="angular/global.js"></script>
 	<script src="angular/store.js"></script>
 
+	<!-- SweetAlert2 -->
+	<link rel="stylesheet" href="css/sweetalert2.min.css" />
+	<script src="js/sweetalert2.min.js"></script>
+
 </head>
 
 <body ng-app="MyProject" ng-controller="StoreCtrl">
@@ -47,7 +51,7 @@
 				</ul>
 				<ul class="header-links pull-right">
 					<!-- <li><a href="#"><i class="fa fa-dollar"></i> USD</a></li> -->
-					<li><a href="login.html"><i class="fa fa-user-o"></i> My Account</a></li>
+					<li><a href="#" id="my-account"><i class="fa fa-user-o"></i> My Account</a></li>
 				</ul>
 			</div>
 		</div>
@@ -103,35 +107,27 @@
 								<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
 									<i class="fa fa-shopping-cart"></i>
 									<span>Your Cart</span>
-									<div class="qty">3</div>
+									<div class="qty">{{ totalQuantity }}</div>
 								</a>
 								<div class="cart-dropdown">
 									<div class="cart-list">
-										<div class="product-widget">
+										<!-- thêm track by $index để tránh bị trùng lặp -->
+										<div class="product-widget" ng-repeat="item in cart track by $index">
 											<div class="product-img">
-												<img src="./img/product01.png" alt="">
+												<img ng-src="{{ item.image }}" alt="Product Image">
 											</div>
 											<div class="product-body">
-												<h3 class="product-name"><a href="#">product name goes here</a></h3>
-												<h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
+												<h3 class="product-name"><a href="#">{{ item.productName }}</a></h3>
+												<h4 class="product-price"><span class="qty">x{{ item.quantity }}</span>
+													${{ item.price }}</h4>
 											</div>
-											<button class="delete"><i class="fa fa-close"></i></button>
-										</div>
-
-										<div class="product-widget">
-											<div class="product-img">
-												<img src="./img/product02.png" alt="">
-											</div>
-											<div class="product-body">
-												<h3 class="product-name"><a href="#">product name goes here</a></h3>
-												<h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
-											</div>
-											<button class="delete"><i class="fa fa-close"></i></button>
+											<button class="delete" ng-click="removeFromCart(item)"><i
+													class="fa fa-close"></i></button>
 										</div>
 									</div>
 									<div class="cart-summary">
-										<small>3 Item(s) selected</small>
-										<h5>SUBTOTAL: $2940.00</h5>
+										<small>{{ totalQuantity }} Item(s) selected</small>
+										<h5>SUBTOTAL: ${{ subtotal }}</h5>
 									</div>
 									<div class="cart-btns">
 										<a href="shoppingCart.html">View Cart</a>
@@ -195,10 +191,8 @@
 			<div class="row">
 				<div class="col-md-12">
 					<ul class="breadcrumb-tree">
-						<li><a href="#">Home</a></li>
+						<li><a href="index.html">Home</a></li>
 						<li><a href="#">All Categories</a></li>
-						<!-- <li><a href="#">Accessories</a></li>
-						<li class="active">Headphones (227,490 Results)</li> -->
 						<li class="active">Phones ({{ productList.length }} Results)</li>
 					</ul>
 				</div>
@@ -221,13 +215,13 @@
 					<div class="aside">
 						<h3 class="aside-title">Categories</h3>
 						<div class="checkbox-filter">
-
 							<div class="input-checkbox" ng-repeat="category in categoryList">
-								<input type="checkbox" id="category-1">
-								<label for="category-1">
+								<input type="checkbox" id="category-{{category.categoryId}}"
+									ng-model="category.selected" ng-change="filterProductsByCategory()">
+								<label for="category-{{category.categoryId}}">
 									<span></span>
 									{{category.categoryName}}
-									<small>(120)</small>
+									<small>({{category.productCount}})</small>
 								</label>
 							</div>
 
@@ -285,15 +279,17 @@
 						<div class="price-filter">
 							<div id="price-slider"></div>
 							<div class="input-number price-min">
-								<input id="price-min" type="number">
-								<span class="qty-up">+</span>
-								<span class="qty-down">-</span>
+								<input id="price-min" type="number" ng-model="priceMin"
+									ng-change="filterProductsByPrice()">
+								<span class="qty-up" ng-click="priceMin = priceMin + 1">+</span>
+								<span class="qty-down" ng-click="priceMin = priceMin - 1">-</span>
 							</div>
 							<span>-</span>
 							<div class="input-number price-max">
-								<input id="price-max" type="number">
-								<span class="qty-up">+</span>
-								<span class="qty-down">-</span>
+								<input id="price-max" type="number" ng-model="priceMax"
+									ng-change="filterProductsByPrice()">
+								<span class="qty-up" ng-click="priceMax = priceMax + 1">+</span>
+								<span class="qty-down" ng-click="priceMax = priceMax - 1">-</span>
 							</div>
 						</div>
 					</div>
@@ -303,15 +299,15 @@
 					<div class="aside">
 						<h3 class="aside-title">Brand</h3>
 						<div class="checkbox-filter">
-							<div class="input-checkbox">
+							<div class="input-checkbox" ng-repeat="brand in brandList">
 								<input type="checkbox" id="brand-1">
 								<label for="brand-1">
 									<span></span>
-									Iphone
-									<small>(578)</small>
+									{{ brand.brand }}
+									<small>({{brand.count}})</small>
 								</label>
 							</div>
-							<div class="input-checkbox">
+							<!-- <div class="input-checkbox">
 								<input type="checkbox" id="brand-2">
 								<label for="brand-2">
 									<span></span>
@@ -350,7 +346,7 @@
 									Huawei
 									<small>(755)</small>
 								</label>
-							</div>
+							</div> -->
 						</div>
 					</div>
 					<!-- /aside Widget -->
@@ -364,7 +360,8 @@
 							</div>
 							<div class="product-body">
 								<p class="product-category">Category</p>
-								<h3 class="product-name"><a href="#">{{product.productName}}</a></h3>
+								<h3 class="product-name" ng-click="openProductDetail(product)"><a
+										href="#">{{product.productName}}</a></h3>
 								<h4 class="product-price">${{product.price}} <del
 										class="product-old-price">${{product.price * 3}}</del></h4>
 							</div>
@@ -453,7 +450,8 @@
 												class="tooltipp">add to wishlist</span></button>
 										<button class="add-to-compare"><i class="fa fa-exchange"></i><span
 												class="tooltipp">add to compare</span></button>
-										<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick
+										<button ng-click="openProductDetail(x)" class="quick-view"><i
+												class="fa fa-eye"></i><span class="tooltipp">quick
 												view</span></button>
 									</div>
 								</div>
@@ -907,6 +905,8 @@
 	<script src="js/jquery.zoom.min.js"></script>
 	<script src="js/main.js"></script>
 
+	<!-- Custom JS -->
+	<script src="js/global.js"></script>
 </body>
 
 </html>

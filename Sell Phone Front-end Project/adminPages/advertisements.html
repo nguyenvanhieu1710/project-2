@@ -113,8 +113,7 @@
                             <form action="#">
                                 <div class="mb-3">
                                     <label for="advertisementName">Advertisement Name</label>
-                                    <input type="text" name="advertisementName" class="form-control"
-                                        placeholder="Enter advertisement name">
+                                    <input type="text" name="advertisementName" placeholder="Enter advertisement name">
                                 </div>
 
                                 <div class="mb-3">
@@ -125,14 +124,18 @@
 
                                 <div class="mb-3">
                                     <label for="location">Location</label>
-                                    <input type="text" name="location" class="form-control"
-                                        placeholder="Enter location">
+                                    <input type="text" name="location" placeholder="Enter location">
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="advertiserId">Advertiser ID</label>
                                     <input type="number" name="advertiserId" class="form-control border"
                                         placeholder="Enter advertiser ID">
+
+                                    <div id="advertiserIdList" class="mt-3" style="display: none;"></div>
+                                    <button type="button" id="btnViewAdvertiserIdList" class="btn btn-primary mt-2">
+                                        View Advertiser Id List
+                                    </button>
                                 </div>
                             </form>
                         </div>

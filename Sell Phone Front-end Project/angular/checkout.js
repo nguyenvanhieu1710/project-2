@@ -11,7 +11,9 @@ app.controller("CheckoutCtrl", function ($scope, $http) {
 
   // =====================================> Calculate total <===========================================
   $scope.calculateTotal = function () {
-    $scope.totalPrice = $scope.cart.reduce((total, item) => {
+    const selectedItems = $scope.cart.filter((item) => item.selected);
+
+    $scope.totalPrice = selectedItems.reduce((total, item) => {
       return total + item.price * item.quantity;
     }, 0);
 

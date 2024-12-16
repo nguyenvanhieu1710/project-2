@@ -89,15 +89,15 @@ themeToggle.addEventListener("click", function () {
 
   if (bodyElement.classList.contains("light-theme")) {
     bodyElement.classList.replace("light-theme", "dark-theme");
-    // alert("Theme changed to dark");
+    // Swal.fire("Success", "Theme changed to dark", "success");
   } else {
     bodyElement.classList.replace("dark-theme", "light-theme");
-    // alert("Theme changed to light");
+    // Swal.fire("Success", "Theme changed to light", "success");
   }
 });
 
 window.onload = function () {
-  bodyElement.classList.add("light-theme");
+  // bodyElement.classList.add("light-theme");
 };
 
 // ===============================> Change language <========================================

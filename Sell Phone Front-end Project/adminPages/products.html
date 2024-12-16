@@ -117,55 +117,59 @@
                     <div class="modal-body">
                         <div class="container">
                             <form action="#">
-                                <div class="mb-3">
+                                <div class="mb-2">
                                     <label for="productName">Product Name</label>
-                                    <input type="text" name="productName" class="form-control"
-                                        placeholder="Enter Product Name">
+                                    <input type="text" name="productName" placeholder="Enter Product Name">
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-2">
                                     <label for="quantity">Quantity</label>
                                     <input type="number" name="quantity" class="form-control border"
                                         placeholder="Enter Quantity">
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-2">
                                     <label for="price">Price</label>
                                     <input type="number" name="price" class="form-control border"
                                         placeholder="Enter Price">
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-2">
                                     <label for="description">Description</label>
-                                    <textarea name="description" class="form-control border" rows="4"
+                                    <textarea name="description" class=" border" rows="2"
                                         placeholder="Enter Product Description"></textarea>
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-2">
                                     <label for="brand">Brand</label>
-                                    <input type="text" name="brand" class="form-control" placeholder="Enter Brand">
+                                    <input type="text" name="brand" placeholder="Enter Brand">
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-2">
                                     <label for="productImage" class="form-label">Product Image</label>
                                     <input class="form-control" type="file" name="productImage" id="productImage">
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-2">
                                     <label for="star">Star</label>
                                     <input type="number" name="star" class="form-control border" min="1" max="5"
                                         placeholder="Rate the product (1 to 5)">
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-2">
                                     <label for="categoryId">Category ID</label>
                                     <input type="number" name="categoryId" class="form-control border"
                                         placeholder="Enter Category ID">
+
+                                    <div id="categoryIdList" class="mt-2" style="display: none;"></div>
+                                    <button type="button" id="btnViewCategoryIdList" class="btn btn-primary mt-2">
+                                        View Category Id List
+                                    </button>
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-2">
                                     <label for="productDetail">Product Details</label>
-                                    <textarea name="productDetail" class="form-control border" rows="4"
+                                    <textarea name="productDetail" rows="3"
                                         placeholder="Enter Product Details"></textarea>
                                 </div>
                             </form>

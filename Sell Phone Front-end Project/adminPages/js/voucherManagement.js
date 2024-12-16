@@ -19,6 +19,7 @@ $(document).ready(function () {
   var status = 1;
   $(".btn-add-voucher").click(function () {
     status = 1;
+    $("#exampleModalLabel").text("Create Voucher");
   });
 
   $(".btn-update-voucher").click(function () {
@@ -28,22 +29,53 @@ $(document).ready(function () {
 
   $(".btn-delete-voucher").click(function () {
     status = 3;
-    // deleteVoucher();
     deleteVirtualVoucher();
   });
 
   $(".btn-handle-func").click(function () {
     if (status == 1) {
-      // debugger;
       addVoucher();
     }
     if (status == 2) {
       updateVoucher();
     }
-    // if (status == 3) {
-    //   deleteVoucher();
-    // }
   });
+
+  // ====================================> validate voucher data <===========================================
+  function validateVoucherData(
+    voucherName,
+    price,
+    minimumPrice,
+    quantity,
+    startDay,
+    endDate
+  ) {
+    if (!voucherName) {
+      Swal.fire("Warning", "Please enter a voucher name.", "warning");
+      return false;
+    }
+    if (!price) {
+      Swal.fire("Warning", "Please enter a price.", "warning");
+      return false;
+    }
+    if (!minimumPrice) {
+      Swal.fire("Warning", "Please enter a minimum price.", "warning");
+      return false;
+    }
+    if (!quantity) {
+      Swal.fire("Warning", "Please enter a quantity.", "warning");
+      return false;
+    }
+    if (!startDay) {
+      Swal.fire("Warning", "Please enter a start day.", "warning");
+      return false;
+    }
+    if (!endDate) {
+      Swal.fire("Warning", "Please enter an end date.", "warning");
+      return false;
+    }
+    return true;
+  }
 
   // ==============================================> add voucher <===========================================
   function addVoucher() {
@@ -54,31 +86,18 @@ $(document).ready(function () {
     var startDay = $("input[name='startDay']").val();
     var endDate = $("input[name='endDate']").val();
 
-    if (!voucherName) {
-      Swal.fire("Warning", "Please enter a voucher name.", "warning");
+    if (
+      !validateVoucherData(
+        voucherName,
+        price,
+        minimumPrice,
+        quantity,
+        startDay,
+        endDate
+      )
+    ) {
       return;
     }
-    if (!price) {
-      Swal.fire("Warning", "Please enter a price.", "warning");
-      return;
-    }
-    if (!minimumPrice) {
-      Swal.fire("Warning", "Please enter a minimum price.", "warning");
-      return;
-    }
-    if (!quantity) {
-      Swal.fire("Warning", "Please enter a quantity.", "warning");
-      return;
-    }
-    if (!startDay) {
-      Swal.fire("Warning", "Please enter a start day.", "warning");
-      return;
-    }
-    if (!endDate) {
-      Swal.fire("Warning", "Please enter an end date.", "warning");
-      return;
-    }
-    // debugger;
 
     var raw_data = {
       voucherId: 0,
@@ -90,6 +109,7 @@ $(document).ready(function () {
       endDate: endDate + "T00:00:00.000Z",
       deleted: false,
     };
+
     // debugger;
     $.ajax({
       type: "POST",
@@ -108,6 +128,7 @@ $(document).ready(function () {
           console.log(data.error);
         } else {
           Swal.fire("Success", "Voucher added successfully.", "success");
+          exampleModal.hide();
           fetchVouchers(currentPage, pageSize);
         }
       })
@@ -160,10 +181,7 @@ $(document).ready(function () {
           $("input[name='startDay']").val(data.startDay.split("T")[0]);
           $("input[name='endDate']").val(data.endDate.split("T")[0]);
 
-          var modal = new bootstrap.Modal(
-            document.getElementById("exampleModal")
-          );
-          modal.show();
+          exampleModal.show();
           $("#exampleModalLabel").text("Update Voucher");
         } else {
           Swal.fire(
@@ -187,28 +205,16 @@ $(document).ready(function () {
     var startDay = $("input[name='startDay']").val();
     var endDate = $("input[name='endDate']").val();
 
-    if (!voucherName) {
-      Swal.fire("Warning!", "Please enter a voucher name.", "warning");
-      return;
-    }
-    if (!price) {
-      Swal.fire("Warning!", "Please enter a price.", "warning");
-      return;
-    }
-    if (!minimumPrice) {
-      Swal.fire("Warning!", "Please enter a minimum price.", "warning");
-      return;
-    }
-    if (!quantity) {
-      Swal.fire("Warning!", "Please enter a quantity.", "warning");
-      return;
-    }
-    if (!startDay) {
-      Swal.fire("Warning!", "Please enter a start day.", "warning");
-      return;
-    }
-    if (!endDate) {
-      Swal.fire("Warning!", "Please enter an end date.", "warning");
+    if (
+      !validateVoucherData(
+        voucherName,
+        price,
+        minimumPrice,
+        quantity,
+        startDay,
+        endDate
+      )
+    ) {
       return;
     }
 
@@ -237,10 +243,7 @@ $(document).ready(function () {
     })
       .done(function (data) {
         if (!data.error) {
-          var modal = bootstrap.Modal.getInstance(
-            document.getElementById("exampleModal")
-          );
-          modal.hide();
+          exampleModal.hide();
           Swal.fire("Success", "Voucher updated successfully.", "success");
           fetchVouchers(currentPage, pageSize);
         } else {
@@ -254,6 +257,8 @@ $(document).ready(function () {
 
   // ===============================================> delete voucher <===========================================
   function deleteVoucher(voucherId) {
+    Swal.fire("Warning!", "Deletion is not allowed", "warning");
+    return;
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/voucher/delete/" + voucherId,
@@ -530,7 +535,6 @@ $(document).ready(function () {
   }
 
   // ===============================================> pagination <=============================================
-  // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
     if (currentPage > 1) {
@@ -539,14 +543,12 @@ $(document).ready(function () {
     }
   });
 
-  // Next button click handler
   $(".btn-next").on("click", function (e) {
     e.preventDefault();
     currentPage++;
     fetchVouchers(currentPage, pageSize);
   });
 
-  // Page number buttons click handlers
   $(".btn-onePage").on("click", function (e) {
     e.preventDefault();
     currentPage = 1;
@@ -565,13 +567,9 @@ $(document).ready(function () {
     fetchVouchers(currentPage, pageSize);
   });
 
-  // Update pagination button states
   function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
     $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
 
-    // Adjust active class for current page button
     $(".pagination .page-item").removeClass("active");
     if (currentPage === 1) $(".btn-onePage").addClass("active");
     if (currentPage === 2) $(".btn-twoPage").addClass("active");
@@ -580,23 +578,12 @@ $(document).ready(function () {
 
   // ==============================================> fetch vouchers <=============================================
   function fetchVouchers(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/Voucher/page=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        updateTable(response);
-        updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/Voucher/page=${pageNumber}&pageSize=${pageSize}`;
+    apiCall("GET", url, null, function (response) {
+      updateTable(response);
+      updatePaginationButtons();
     });
   }
-
-  fetchVouchers(currentPage, pageSize);
 
   // ===============================================> fetch deleted vouchers <=============================================
   function fetchDeletedVouchers(pageNumber, pageSize) {
@@ -617,5 +604,28 @@ $(document).ready(function () {
     });
   }
 
+  // ==========================================> api call <===========================================================
+  function apiCall(method, url, data = null, successCallback) {
+    return $.ajax({
+      url: url,
+      type: method,
+      data: data,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      success: function (response) {
+        if (successCallback) {
+          successCallback(response);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        Swal.fire("Error", "Error: " + error, "error");
+      },
+    });
+  }
+
+  // =============================================> call function <==============================================================
+  fetchVouchers(currentPage, pageSize);
   fetchDeletedVouchers(currentPage, pageSize);
 });

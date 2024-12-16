@@ -18,6 +18,7 @@ $(document).ready(function () {
   var status = 1;
   $(".btn-add-staff").click(function () {
     status = 1;
+    $("#exampleModalLabel").text("Create Staff");
   });
 
   $(".btn-update-staff").click(function () {
@@ -28,7 +29,6 @@ $(document).ready(function () {
   $(".btn-delete-staff").click(function () {
     status = 3;
     deleteVirtualStaff();
-    // deleteStaff();
   });
 
   $(".btn-handle-func").click(function () {
@@ -38,14 +38,46 @@ $(document).ready(function () {
     if (status == 2) {
       updateStaff();
     }
-    // if (status == 3) {
-    //   deleteStaff();
-    // }
   });
+
+  // ===================================> validate staff data <===========================================
+  function validateStaffData(
+    staffName,
+    birthday,
+    phoneNumber,
+    gender,
+    address,
+    position
+  ) {
+    if (!staffName) {
+      Swal.fire("Warning!", "Please enter a staff name.", "warning");
+      return false;
+    }
+    if (!birthday) {
+      Swal.fire("Warning!", "Please enter a birthday.", "warning");
+      return false;
+    }
+    if (!phoneNumber) {
+      Swal.fire("Warning!", "Please enter a phone number.", "warning");
+      return false;
+    }
+    if (!gender || gender === "Gender") {
+      Swal.fire("Warning!", "Please select a gender.", "warning");
+      return false;
+    }
+    if (!address) {
+      Swal.fire("Warning!", "Please enter an address.", "warning");
+      return false;
+    }
+    if (!position) {
+      Swal.fire("Warning!", "Please enter a position.", "warning");
+      return false;
+    }
+    return true;
+  }
 
   // ===================================> add staff <===========================================
   function addStaff() {
-    //   alert("Add Staff");
     // Retrieve and validate form data
     var staffName = $(".staffname").val();
     var birthday = $("input[name='date']").val();
@@ -55,29 +87,16 @@ $(document).ready(function () {
     var address = $("input[name='address']").val();
     var position = $("input[name='position']").val();
 
-    // Basic validation
-    if (!staffName) {
-      alert("Please enter a staffname.");
-      return;
-    }
-    if (!birthday) {
-      alert("Please enter a birthday.");
-      return;
-    }
-    if (!phoneNumber) {
-      alert("Please enter a phone number.");
-      return;
-    }
-    if (!gender || gender === "Gender") {
-      alert("Please select a gender.");
-      return;
-    }
-    if (!address) {
-      alert("Please enter an address.");
-      return;
-    }
-    if (!position) {
-      alert("Please enter a position.");
+    if (
+      !validateStaffData(
+        staffName,
+        birthday,
+        phoneNumber,
+        gender,
+        address,
+        position
+      )
+    ) {
       return;
     }
 
@@ -92,6 +111,7 @@ $(document).ready(function () {
       position: position,
       deleted: false,
     };
+
     // debugger;
     $.ajax({
       type: "POST",
@@ -105,15 +125,13 @@ $(document).ready(function () {
       data: JSON.stringify(raw_data),
     })
       .done(function (data) {
-        // console.log(data);
         // debugger;
         if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error);
-          console.log(data.error);
+          Swal.fire("Warning!", data.error, "warning");
         } else {
-          alert("Add Staff Success");
-          console.log("Add Staff Success");
-          fetchStaffs(1, 5);
+          Swal.fire("Success!", "Add Staff Success", "success");
+          exampleModal.hide();
+          fetchStaffs(currentPage, pageSize);
         }
       })
       .fail(function () {
@@ -125,12 +143,20 @@ $(document).ready(function () {
   // ===================================> turn on modal to update <===========================================
   function TurnOnModalToUpdate() {
     if ($("input.staff-checkbox:checked").length === 0) {
-      alert("Please select at least one staff to update.");
+      Swal.fire(
+        "Success!",
+        "Please select at least one staff to update.",
+        "success"
+      );
       return;
     }
 
     if ($("input.staff-checkbox:checked").length > 1) {
-      alert("Choose only a staff to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select only one staff to update.",
+        "warning"
+      );
       return;
     }
 
@@ -155,19 +181,14 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
         staffFound = data;
         // debugger;
         if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error);
-          console.log(data.error);
+          Swal.fire("Error!", data.error, "error");
+          // console.log(data.error);
         } else {
-          // alert("Find Staff Success");
-          // console.log("Find Staff Success");
-          // Cập nhật giá trị các trường trong modal
           $(".staffname").val(staffFound.staffName);
-          let date = new Date(staffFound.birthday); // Tạo đối tượng Date từ chuỗi ngày
+          let date = new Date(staffFound.birthday);
           let formattedDate = date.toISOString().split("T")[0]; // Chuyển sang yyyy-MM-dd
           $("input[name='date']").val(formattedDate);
           // $("input[name='date']").val(staffFound.birthday);
@@ -177,15 +198,10 @@ $(document).ready(function () {
           $("input[name='address']").val(staffFound.address);
           $("input[name='position']").val(staffFound.position);
 
-          // Mở modal sau khi dữ liệu đã được cập nhật
-          // $("#exampleModal").modal("show");
-          var modal = new bootstrap.Modal(
-            document.getElementById("exampleModal")
-          );
-          modal.show();
+          exampleModal.show();
 
-          $("#exampleModalLabel").text("Update Staff"); // Thay đổi tiêu đề modal
-          $(".modal-title").text("Update Staff"); // Nếu bạn muốn đặt tiêu đề từ class modal-title
+          $("#exampleModalLabel").text("Update Staff");
+          $(".modal-title").text("Update Staff");
         }
       })
       .fail(function () {
@@ -195,8 +211,6 @@ $(document).ready(function () {
 
   // ====================================> update staff <================================================
   async function updateStaff() {
-    // alert("Update Staff Success");
-    // debugger;
     var staffName = $(".staffname").val();
     var birthday = $("input[name='date']").val();
     var phoneNumber = $("input[name='phonenumber']").val();
@@ -204,6 +218,19 @@ $(document).ready(function () {
     var gender = $(".form-select").val();
     var address = $("input[name='address']").val();
     var position = $("input[name='position']").val();
+
+    if (
+      !validateStaffData(
+        staffName,
+        birthday,
+        phoneNumber,
+        gender,
+        address,
+        position
+      )
+    ) {
+      return;
+    }
 
     let imageUser = await uploadImage();
 
@@ -231,14 +258,13 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", "Update staff failed: " + data.error, "error");
         }
         exampleModal.hide();
-        alert("Update Staff Success");
-        fetchStaffs(1, 5);
+        Swal.fire("Success!", "Update staff success.", "success");
+        fetchStaffs(currentPage, pageSize);
       })
       .fail(function () {
         console.log("Request failed: ", textStatus, errorThrown);
@@ -247,6 +273,8 @@ $(document).ready(function () {
 
   // =====================================> delete staff <================================================
   function deleteStaff(staffId) {
+    Swal.fire("Warning!", "Deletion is not allowed", "warning");
+    return;
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/Staff/delete/" + staffId,
@@ -258,13 +286,16 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire(
+            "Success!",
+            "Delete staff failed: " + data.error,
+            "success"
+          );
         }
-        alert("Delete Staff Success");
-        fetchStaffs(1, 5);
+        Swal.fire("Success!", "Delete staff success.", "success");
+        fetchStaffs(currentPage, pageSize);
       })
       .fail(function () {
         console.log("Request failed: ", textStatus, errorThrown);
@@ -274,12 +305,20 @@ $(document).ready(function () {
   // ======================================> delete virtual staff <===========================================================
   function deleteVirtualStaff() {
     if ($("input.staff-checkbox:checked").length === 0) {
-      alert("Please select at least one staff to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one staff to delete.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.staff-checkbox:checked").length > 1) {
-      alert("Choose only a staff to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select only one staff to update.",
+        "warning"
+      );
       return;
     }
 
@@ -351,10 +390,10 @@ $(document).ready(function () {
     })
       .done(function (data) {
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", data.error, "error");
         }
         // debugger;
-        alert("Delete Virtual Staff Success");
+        Swal.fire("Success!", "Delete vritual staff success.", "warning");
         fetchDeletedStaffs(currentPage, pageSize);
         fetchStaffs(currentPage, pageSize);
       })
@@ -495,13 +534,12 @@ $(document).ready(function () {
       .done(function (data) {
         if (data && !data.error) {
           // debugger;
-          // success
-          alert("Restore staff success!");
+          Swal.fire("Success!", "Restore staff success.", "success");
           trashCanModal.hide();
           fetchStaffs(currentPage, pageSize);
           fetchDeletedStaffs(currentPage, pageSize);
         } else {
-          alert("Error updating staff: " + data.error);
+          Swal.fire("Error!", "Error updating staff: " + data.error, "error");
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -510,7 +548,6 @@ $(document).ready(function () {
   }
 
   // ====================================> pagination <=============================================================
-  // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
     if (currentPage > 1) {
@@ -519,14 +556,12 @@ $(document).ready(function () {
     }
   });
 
-  // Next button click handler
   $(".btn-next").on("click", function (e) {
     e.preventDefault();
     currentPage++;
     fetchStaffs(currentPage, pageSize);
   });
 
-  // Page number buttons click handlers
   $(".btn-onePage").on("click", function (e) {
     e.preventDefault();
     currentPage = 1;
@@ -545,13 +580,9 @@ $(document).ready(function () {
     fetchStaffs(currentPage, pageSize);
   });
 
-  // Update pagination button states
   function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
     $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
 
-    // Adjust active class for current page button
     $(".pagination .page-item").removeClass("active");
     if (currentPage === 1) $(".btn-onePage").addClass("active");
     if (currentPage === 2) $(".btn-twoPage").addClass("active");
@@ -560,44 +591,45 @@ $(document).ready(function () {
 
   // ===================================> fetch staffs <=============================================================
   function fetchStaffs(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/staff/page=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        updateTable(response);
-        updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/staff/page=${pageNumber}&pageSize=${pageSize}`;
+
+    apiCall("GET", url, null, function (response) {
+      updateTable(response);
+      updatePaginationButtons();
     });
   }
-
-  fetchStaffs(currentPage, pageSize);
 
   // ====================================> fetch deleted staffs <=============================================================
   function fetchDeletedStaffs(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/staff/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        $(".badge").text(response.length || 0);
-        updateTableDeleted(response);
-        updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/staff/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+
+    apiCall("GET", url, null, function (response) {
+      $(".badge").text(response.length || 0);
+      updateTableDeleted(response);
+      updatePaginationButtons();
     });
   }
 
-  fetchDeletedStaffs(currentPage, pageSize);
+  // ==========================================> api call <===========================================================
+  function apiCall(method, url, data = null, successCallback) {
+    return $.ajax({
+      url: url,
+      type: method,
+      data: data,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      success: function (response) {
+        if (successCallback) {
+          successCallback(response);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        Swal.fire("Error", "Error: " + error, "error");
+      },
+    });
+  }
 
   // =====================================> upload image <=============================================================
   function uploadImage() {
@@ -616,18 +648,29 @@ $(document).ready(function () {
       })
         .done(function (data) {
           if (data && data.fullPath) {
-            // alert(`File đã upload tại đường dẫn: ${data.fullPath}`);
+            // Swal.fire(
+            //   "Success!",
+            //   `File upload at ${data.fullPath}`,
+            //   "success"
+            // );
             resolve(data.fullPath.toString());
           } else {
-            alert("Upload thất bại.");
+            Swal.fire(
+              "Error!",
+              "File upload failed. Please try again later.",
+              "error"
+            );
             reject("Upload failed.");
           }
         })
         .fail(function (jqXHR, textStatus, errorThrown) {
           console.log("Request failed:", textStatus, errorThrown);
-          alert("Đã có lỗi xảy ra khi tải lên.");
           reject(errorThrown);
         });
     });
   }
+
+  // ======================================> call function <=============================================================
+  fetchDeletedStaffs(currentPage, pageSize);
+  fetchStaffs(currentPage, pageSize);
 });

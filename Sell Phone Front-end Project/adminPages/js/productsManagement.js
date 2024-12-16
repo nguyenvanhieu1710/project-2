@@ -1,6 +1,7 @@
 $(document).ready(function () {
   var token = localStorage.getItem("admin");
   var productId = "";
+  var categoryIdList = [];
 
   let currentPage = 1;
   const pageSize = 5;
@@ -19,6 +20,7 @@ $(document).ready(function () {
   var status = 1;
   $(".btn-add-product").click(function () {
     status = 1;
+    $("#exampleModalLabel").text("Create Product");
   });
 
   $(".btn-update-product").click(function () {
@@ -29,7 +31,6 @@ $(document).ready(function () {
   $(".btn-delete-product").click(function () {
     status = 3;
     deleteVirtualProduct();
-    // deleteProduct();
   });
 
   $(".btn-handle-func").click(function () {
@@ -39,9 +40,6 @@ $(document).ready(function () {
     if (status == 2) {
       updateProduct();
     }
-    // if (status == 3) {
-    //   deleteProduct();
-    // }
   });
 
   // ===================================> validate <===================================
@@ -58,64 +56,64 @@ $(document).ready(function () {
 
     // Validate Product Name
     if (!productName) {
-      alert("Please enter a Product Name.");
+      Swal.fire("Warning!", "Please enter a Product Name.", "warning");
       return false;
     }
 
     // Validate Quantity
     if (!quantity) {
-      alert("Please enter a Quantity.");
+      Swal.fire("Warning!", "Please enter a Quantity.", "warning");
       return false;
     } else if (quantity <= 0) {
-      alert("Quantity must be greater than zero.");
+      Swal.fire("Warning!", "Quantity must be greater than zero.", "warning");
       return false;
     }
 
     // Validate Price
     if (!price) {
-      alert("Please enter a Price.");
+      Swal.fire("Warning!", "Please enter a Price.", "warning");
       return false;
     } else if (price <= 0) {
-      alert("Price must be greater than zero.");
+      Swal.fire("Warning!", "Price must be greater than zero.", "warning");
       return false;
     }
 
     // Validate Description
     if (!description) {
-      alert("Please enter a Description.");
+      Swal.fire("Warning!", "Please enter a Description.", "warning");
       return false;
     }
 
     // Validate Brand
     if (!brand) {
-      alert("Please enter a Brand.");
+      Swal.fire("Warning!", "Please enter a Brand.", "warning");
       return false;
     }
 
     // Validate Product Image
     if (!productImage) {
-      alert("Please upload a Product Image.");
+      Swal.fire("Warning!", "Please upload a Product Image.", "warning");
       return false;
     }
 
     // Validate Star Rating
     if (!star) {
-      alert("Please enter a Star rating.");
+      Swal.fire("Warning!", "Please enter a Star rating.", "warning");
       return false;
     } else if (star < 1 || star > 5) {
-      alert("Star rating must be between 1 and 5.");
+      Swal.fire("Warning!", "Star rating must be between 1 and 5.", "warning");
       return false;
     }
 
     // Validate Category ID
     if (!categoryId) {
-      alert("Please enter a Category ID.");
+      Swal.fire("Warning!", "Please enter a Category ID.", "warning");
       return false;
     }
 
     // Validate Product Details
     if (!productDetail) {
-      alert("Please enter Product Details.");
+      Swal.fire("Warning!", "Please enter Product Details.", "warning");
       return false;
     }
   }
@@ -164,15 +162,13 @@ $(document).ready(function () {
       data: JSON.stringify(raw_data),
     })
       .done(function (data) {
-        // console.log(data);
         // debugger;
         if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error);
-          console.log(data.error);
+          Swal.fire("Error!", data.error, "error");
         } else {
-          alert("Add Product Success");
+          Swal.fire("Success!", "Add Product Success.", "success");
           exampleModal.hide();
-          fetchProducts(1, 5);
+          fetchProducts(currentPage, pageSize);
         }
       })
       .fail(function () {
@@ -184,21 +180,27 @@ $(document).ready(function () {
   // ===================================> turn on modal to update <===================================
   function TurnOnModalToUpdate() {
     if ($("input.product-checkbox:checked").length === 0) {
-      alert("Please select at least one product to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one product to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.product-checkbox:checked").length > 1) {
-      alert("Choose only a product to update.");
+      Swal.fire(
+        "Warning!",
+        "You can only update one product at a time.",
+        "warning"
+      );
       return;
     }
 
     $(".product-checkbox:checked").each(function () {
-      // Lấy dòng (tr) chứa checkbox này
       let row = $(this).closest("tr");
 
-      // Lấy thông tin từ các cột trong dòng
-      let id = row.find("td").eq(0).text(); // Cột ID
+      let id = row.find("td").eq(0).text();
 
       productId = id;
     });
@@ -217,17 +219,11 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
         productFound = data;
         // debugger;
         if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error);
-          console.log(data.error);
+          Swal.fire("Error!", data.error, "error");
         } else {
-          // alert("Find Product Success");
-          // console.log("Find Product Success");
-
           $("input[name='productName']").val(productFound.productName);
           $("input[name='quantity']").val(productFound.quantity);
           $("input[name='price']").val(productFound.price);
@@ -238,12 +234,7 @@ $(document).ready(function () {
           $("input[name='categoryId']").val(productFound.categoryId);
           $("textarea[name='productDetail']").val(productFound.productDetail);
 
-          // Mở modal sau khi dữ liệu đã được cập nhật
-          // $("#exampleModal").modal("show");
-          var modal = new bootstrap.Modal(
-            document.getElementById("exampleModal")
-          );
-          modal.show();
+          exampleModal.show();
 
           $("#exampleModalLabel").text("Update Product");
           $(".modal-title").text("Update Product");
@@ -256,8 +247,6 @@ $(document).ready(function () {
 
   // ===================================> update product <===================================
   function updateProduct() {
-    // alert("Update Product Success");
-    // debugger;
     var productName = $("input[name='productName']").val();
     var quantity = $("input[name='quantity']").val();
     var price = $("input[name='price']").val();
@@ -299,20 +288,13 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
         // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", data.error, "error");
         } else {
-          alert("Update Product Success");
-          // Đóng modal sau khi cập nhật thành công
-          //     $("#exampleModal").modal("hide");
-          //   var modal = new bootstrap.Modal(
-          //     document.getElementById("exampleModal")
-          //   );
-          //   modal.hide();
-          fetchProducts(1, 5);
+          Swal.fire("Success!", "Product updated successfully.", "success");
+          exampleModal.hide();
+          fetchProducts(currentPage, pageSize);
         }
       })
       .fail(function () {
@@ -322,6 +304,8 @@ $(document).ready(function () {
 
   // ===================================> delete product <===================================
   function deleteProduct(productId) {
+    Swal.fire("Warning!", "Deletion is not allowed", "warning");
+    return;
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/Product/delete/" + productId,
@@ -333,15 +317,14 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", data.error, "error");
         }
-        alert("Delete Product Success");
+        Swal.fire("Success!", "Product deleted successfully.", "success");
         trashCanModal.hide();
         fetchDeletedProducts(currentPage, pageSize);
-        fetchProducts(1, 5);
+        fetchProducts(currentPage, pageSize);
       })
       .fail(function () {
         console.log("Request failed: ", textStatus, errorThrown);
@@ -351,12 +334,20 @@ $(document).ready(function () {
   // =========================================> delete virtual product <==================================================================
   function deleteVirtualProduct() {
     if ($("input.product-checkbox:checked").length === 0) {
-      alert("Please select at least one product to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one product to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.product-checkbox:checked").length > 1) {
-      alert("Choose only a product to update.");
+      Swal.fire(
+        "Warning!",
+        "You can only update one product at a time.",
+        "warning"
+      );
       return;
     }
 
@@ -415,12 +406,11 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", data.error, "error");
         }
-        alert("Delete Virtual Product Success");
+        Swal.fire("Success!", "Delete Virtual Product Success", "success");
         fetchDeletedProducts(currentPage, pageSize);
         fetchProducts(currentPage, pageSize);
       })
@@ -431,28 +421,16 @@ $(document).ready(function () {
 
   // ====================================> search product <===================================
   function searchProduct(name, currentPage, pageSize) {
-    $.ajax({
-      type: "GET",
-      url:
-        "http://localhost:4006/api-admin/product/search-and-pagination?pageNumber=" +
-        currentPage +
-        "&pageSize=" +
-        pageSize +
-        "&name=" +
-        name,
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json",
-      },
-      processData: false,
-      contentType: false,
-    })
-      .done(function (data) {
-        updateTable(data);
-      })
-      .fail(function () {
-        console.log("Request failed: ", textStatus, errorThrown);
-      });
+    const url =
+      "http://localhost:4006/api-admin/product/search-and-pagination?pageNumber=" +
+      currentPage +
+      "&pageSize=" +
+      pageSize +
+      "&name=" +
+      name;
+    apiCall("GET", url, null, function (response) {
+      updateTable(response);
+    });
   }
 
   // ====================================> search product <===================================
@@ -562,13 +540,12 @@ $(document).ready(function () {
       .done(function (data) {
         if (data && !data.error) {
           // debugger;
-          // success
-          alert("Restore product success!");
+          Swal.fire("Success!", "Restore product successfully!", "success");
           trashCanModal.hide();
           fetchDeletedProducts(currentPage, pageSize);
           fetchProducts(currentPage, pageSize);
         } else {
-          alert("Error updating product: " + data.error);
+          Swal.fire("Error!", "Error updating product: " + data.error, "error");
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -577,7 +554,6 @@ $(document).ready(function () {
   }
 
   // ====================================> pagination <===================================
-  // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
     if (currentPage > 1) {
@@ -586,14 +562,12 @@ $(document).ready(function () {
     }
   });
 
-  // Next button click handler
   $(".btn-next").on("click", function (e) {
     e.preventDefault();
     currentPage++;
     fetchProducts(currentPage, pageSize);
   });
 
-  // Page number buttons click handlers
   $(".btn-onePage").on("click", function (e) {
     e.preventDefault();
     currentPage = 1;
@@ -612,13 +586,9 @@ $(document).ready(function () {
     fetchProducts(currentPage, pageSize);
   });
 
-  // Update pagination button states
   function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
     $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
 
-    // Adjust active class for current page button
     $(".pagination .page-item").removeClass("active");
     if (currentPage === 1) $(".btn-onePage").addClass("active");
     if (currentPage === 2) $(".btn-twoPage").addClass("active");
@@ -627,44 +597,22 @@ $(document).ready(function () {
 
   // ==================================> fetch products <================================================
   function fetchProducts(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/product/page=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        updateTable(response);
-        updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/product/page=${pageNumber}&pageSize=${pageSize}`;
+    apiCall("GET", url, null, function (response) {
+      updateTable(response);
+      updatePaginationButtons();
     });
   }
-
-  fetchProducts(currentPage, pageSize);
 
   // ===================================> fetch products deleted <================================================
   function fetchDeletedProducts(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/product/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        $(".badge").text(response.length || 0);
-        updateTableDeleted(response);
-        updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/product/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+    apiCall("GET", url, null, function (response) {
+      $(".badge").text(response.length || 0);
+      updateTableDeleted(response);
+      updatePaginationButtons();
     });
   }
-
-  fetchDeletedProducts(currentPage, pageSize);
 
   // ===================================> upload image <===================================
   function uploadImage() {
@@ -683,18 +631,107 @@ $(document).ready(function () {
       })
         .done(function (data) {
           if (data && data.fullPath) {
-            // alert(`File đã upload tại đường dẫn: ${data.fullPath}`);
+            // Swal.fire(
+            //   "Success!",
+            //   `File has been uploaded at: ${data.fullPath}`,
+            //   "success"
+            // );
             resolve(data.fullPath.toString());
           } else {
-            alert("Upload thất bại.");
+            Swal.fire(
+              "Error!",
+              "File upload failed. Please try again later.",
+              "error"
+            );
             reject("Upload failed.");
           }
         })
         .fail(function (jqXHR, textStatus, errorThrown) {
           console.log("Request failed:", textStatus, errorThrown);
-          alert("Đã có lỗi xảy ra khi tải lên.");
+          Swal.fire(
+            "Warning!",
+            "An error occurred while uploading the file.",
+            "warning"
+          );
           reject(errorThrown);
         });
     });
   }
+
+  // ==========================================> get category id list <===========================================================
+  function getCategoryIdList() {
+    const url = "http://localhost:4006/api-admin/category/get-all";
+    apiCall("GET", url, null, function (response) {
+      response.forEach((element) => {
+        categoryIdList.push(element.categoryId);
+      });
+    });
+  }
+
+  // ==========================================> render category id list <===========================================================
+  let isListVisible = false;
+  function renderCategoryIdList() {
+    const categoryIdListDiv = document.getElementById("categoryIdList");
+    const toggleButton = document.getElementById("btnViewCategoryIdList");
+
+    if (isListVisible) {
+      categoryIdListDiv.style.display = "none";
+      toggleButton.textContent = "View Category Id List";
+      isListVisible = false;
+    } else {
+      categoryIdListDiv.innerHTML = "";
+      if (categoryIdList.length === 0) {
+        categoryIdListDiv.innerHTML = `
+          <div class="alert alert-info">No category found. Please fetch the list first.</div>
+        `;
+      } else {
+        const listGroup = document.createElement("ul");
+        listGroup.className = "list-group";
+
+        categoryIdList.forEach((categoryId) => {
+          const listItem = document.createElement("li");
+          listItem.className = "list-group-item";
+          listItem.textContent = `Category ID: ${categoryId}`;
+          listGroup.appendChild(listItem);
+        });
+
+        categoryIdListDiv.appendChild(listGroup);
+      }
+
+      categoryIdListDiv.style.display = "block";
+      toggleButton.textContent = "Hide Category Id List";
+      isListVisible = true;
+    }
+  }
+
+  // ==========================================> button view category id list <===========================================================
+  document
+    .getElementById("btnViewCategoryIdList")
+    .addEventListener("click", renderCategoryIdList);
+
+  // ==========================================> api call <===========================================================
+  function apiCall(method, url, data = null, successCallback) {
+    return $.ajax({
+      url: url,
+      type: method,
+      data: data,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      success: function (response) {
+        if (successCallback) {
+          successCallback(response);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        Swal.fire("Error", "Error: " + error, "error");
+      },
+    });
+  }
+
+  // ====================================> call function <===========================================================
+  getCategoryIdList();
+  fetchProducts(currentPage, pageSize);
+  fetchDeletedProducts(currentPage, pageSize);
 });

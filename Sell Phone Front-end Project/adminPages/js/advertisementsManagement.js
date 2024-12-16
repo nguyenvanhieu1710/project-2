@@ -1,6 +1,7 @@
 $(document).ready(function () {
   var token = localStorage.getItem("admin");
   var advertisementId = "";
+  var staffIdList = [];
 
   let currentPage = 1;
   const pageSize = 5;
@@ -19,6 +20,7 @@ $(document).ready(function () {
   var status = 1;
   $(".btn-add-advertisement").click(function () {
     status = 1;
+    $("#exampleModalLabel").text("Add Advertisement");
   });
 
   $(".btn-update-advertisement").click(function () {
@@ -29,24 +31,46 @@ $(document).ready(function () {
   $(".btn-delete-advertisement").click(function () {
     status = 3;
     deleteVirtualAdvertisement();
-    // deleteAdvertisement();
   });
 
   $(".btn-handle-func").click(function () {
     if (status == 1) {
       addAdvertisement();
-      var modal = new bootstrap.Modal(document.getElementById("exampleModal"));
-      modal.hide();
     }
     if (status == 2) {
       updateAdvertisement();
-      var modal = new bootstrap.Modal(document.getElementById("exampleModal"));
-      modal.hide();
     }
-    // if (status == 3) {
-    //   deleteAdvertisement();
-    // }
   });
+
+  // ================================> validate data <======================================================
+  function validateAdvertisement() {
+    var advertisementName = $("input[name='advertisementName']").val();
+    var advertisementImage = $("input[name='advertisementImage']")[0].files[0];
+    var location = $("input[name='location']").val();
+    var advertiserId = $("input[name='advertiserId']").val();
+
+    if (!advertisementName || advertisementName.trim() === "") {
+      Swal.fire("Warning!", "Please enter an advertisement name.", "warning");
+      return false;
+    }
+
+    if (advertisementImage === undefined && !advertisementId) {
+      Swal.fire("Warning!", "Please select an advertisement image.", "warning");
+      return false;
+    }
+
+    if (!location || location.trim() === "") {
+      Swal.fire("Warning!", "Please enter a location.", "warning");
+      return false;
+    }
+
+    if (!advertiserId || advertiserId.trim() === "") {
+      Swal.fire("Warning!", "Please enter an advertiser ID.", "warning");
+      return false;
+    }
+
+    return true;
+  }
 
   // ===============================> add advertisement <===================================
   async function addAdvertisement() {
@@ -55,21 +79,7 @@ $(document).ready(function () {
     var location = $("input[name='location']").val();
     var advertiserId = $("input[name='advertiserId']").val();
 
-    // Basic validation
-    if (!advertisementName) {
-      alert("Please enter an advertisement name.");
-      return;
-    }
-    if (!advertisementImage) {
-      alert("Please select an advertisement image.");
-      return;
-    }
-    if (!location) {
-      alert("Please enter a location.");
-      return;
-    }
-    if (!advertiserId) {
-      alert("Please enter an advertiser ID.");
+    if (!validateAdvertisement()) {
       return;
     }
 
@@ -97,22 +107,19 @@ $(document).ready(function () {
       data: JSON.stringify(raw_data),
     })
       .done(function (data) {
-        // console.log(data);
         //   debugger;
         if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error);
-          console.log(data.error);
+          Swal.fire(
+            "Error!",
+            "Add Advertisement Failed: " + data.error,
+            "error"
+          );
+          // console.log(data.error);
         } else {
           // debugger;
-          alert("Add Advertisement Success");
-          console.log("Add Advertisement Success");
-
-          var modal = new bootstrap.Modal(
-            document.getElementById("exampleModal")
-          );
-          modal.hide();
-
-          fetchAdvertisements(1, 5);
+          Swal.fire("Success!", "Add Advertisement Success", "success");
+          exampleModal.hide();
+          fetchAdvertisements(currentPage, pageSize);
         }
       })
       .fail(function () {
@@ -124,20 +131,26 @@ $(document).ready(function () {
   // ==============================> tourn on modal to update <===================================
   function TurnOnModalToUpdate() {
     if ($("input.advertisement-checkbox:checked").length === 0) {
-      alert("Please select at least one advertisement to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one advertisement to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.advertisement-checkbox:checked").length > 1) {
-      alert("Choose only a advertisement to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select only one advertisement to update.",
+        "warning"
+      );
       return;
     }
 
     $(".advertisement-checkbox:checked").each(function () {
-      // Lấy dòng (tr) chứa checkbox này
       let row = $(this).closest("tr");
 
-      // Lấy thông tin từ các cột trong dòng
       let id = row.find("td").eq(0).text();
 
       advertisementId = id;
@@ -158,29 +171,24 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
         // debugger;
         if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error);
-          console.log(data.error);
+          Swal.fire(
+            "Error!",
+            "Find Advertisement Failed: " + data.error,
+            "error"
+          );
+          // console.log(data.error);
         } else {
-          // alert("Find Advertisement Success");
-          // console.log("Find Advertisement Success");
           $("input[name='advertisementName']").val(data.advertisementName);
           // $("input[name='advertisementImage']")[0].files[0];
           $("input[name='location']").val(data.location);
           $("input[name='advertiserId']").val(data.advertiserId);
 
-          // Mở modal sau khi dữ liệu đã được cập nhật
-          // $("#exampleModal").modal("show");
-          var modal = new bootstrap.Modal(
-            document.getElementById("exampleModal")
-          );
-          modal.show();
+          exampleModal.show();
 
-          $("#exampleModalLabel").text("Update Advertisement"); // Thay đổi tiêu đề modal
-          $(".modal-title").text("Update Advertisement"); // Nếu bạn muốn đặt tiêu đề từ class modal-title
+          $("#exampleModalLabel").text("Update Advertisement");
+          $(".modal-title").text("Update Advertisement");
         }
       })
       .fail(function () {
@@ -190,13 +198,14 @@ $(document).ready(function () {
 
   // ==============================> update advertisement <===================================
   function updateAdvertisement() {
-    // alert("Update Advertisement Success");
-    // debugger;
-
     var advertisementName = $("input[name='advertisementName']").val();
     var advertisementImage = $("input[name='advertisementImage']")[0].files[0];
     var location = $("input[name='location']").val();
     var advertiserId = $("input[name='advertiserId']").val();
+
+    if (!validateAdvertisement()) {
+      return;
+    }
 
     var raw_data = {
       advertisementId: advertisementId,
@@ -219,19 +228,18 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire(
+            "Error!",
+            "Error updating advertisement: " + data.error,
+            "error"
+          );
         }
-        // Đóng modal sau khi cập nhật thành công
-        // $("#exampleModal").modal("hide");
-        var modal = new bootstrap.Modal(
-          document.getElementById("exampleModal")
-        );
-        modal.hide();
-        alert("Update Advertisement Success");
-        fetchAdvertisements(1, 5);
+
+        exampleModal.hide();
+        Swal.fire("Success!", "Update Advertisement Success", "success");
+        fetchAdvertisements(currentPage, pageSize);
       })
       .fail(function () {
         console.log("Request failed: ", textStatus, errorThrown);
@@ -240,6 +248,8 @@ $(document).ready(function () {
 
   // ==============================> delete advertisement <===================================
   function deleteAdvertisement(advertisementId) {
+    Swal.fire("Warning!", "Deletion is not allowed", "warning");
+    return;
     $.ajax({
       type: "POST",
       url:
@@ -253,13 +263,12 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", data.error, "error");
         }
-        alert("Delete Advertisement Success");
-        fetchAdvertisements(1, 5);
+        Swal.fire("Success!", "Delete Advertisement Success", "success");
+        fetchAdvertisements(currentPage, pageSize);
       })
       .fail(function () {
         console.log("Request failed: ", textStatus, errorThrown);
@@ -269,12 +278,20 @@ $(document).ready(function () {
   // ===============================> delete virtual advertisement <===================================
   function deleteVirtualAdvertisement() {
     if ($("input.advertisement-checkbox:checked").length === 0) {
-      alert("Please select at least one advertisement to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one advertisement to delete.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.advertisement-checkbox:checked").length > 1) {
-      alert("Choose only a advertisement to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select only one advertisement to delete.",
+        "warning"
+      );
       return;
     }
 
@@ -317,12 +334,15 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", data.error, "error");
         }
-        alert("Delete Virtual Advertisement Success");
+        Swal.fire(
+          "Success!",
+          "Delete Virtual Advertisement Success",
+          "success"
+        );
         fetchDeletedAdvertisements(currentPage, pageSize);
         fetchAdvertisements(currentPage, pageSize);
       })
@@ -452,13 +472,16 @@ $(document).ready(function () {
       .done(function (data) {
         if (data && !data.error) {
           // debugger;
-          // success
-          alert("Restore advertisement success!");
+          Swal.fire("Success!", "Restore advertisement success!", "success");
           trashCanModal.hide();
           fetchAdvertisements(currentPage, pageSize);
           fetchDeletedAdvertisements(currentPage, pageSize);
         } else {
-          alert("Error updating advertisement: " + data.error);
+          Swal.fire(
+            "Error!",
+            "Error updating advertisement: " + data.error,
+            "error"
+          );
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -467,7 +490,6 @@ $(document).ready(function () {
   }
 
   // ==============================> pagination <===================================
-  // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
     if (currentPage > 1) {
@@ -476,14 +498,12 @@ $(document).ready(function () {
     }
   });
 
-  // Next button click handler
   $(".btn-next").on("click", function (e) {
     e.preventDefault();
     currentPage++;
     fetchAdvertisements(currentPage, pageSize);
   });
 
-  // Page number buttons click handlers
   $(".btn-onePage").on("click", function (e) {
     e.preventDefault();
     currentPage = 1;
@@ -503,13 +523,9 @@ $(document).ready(function () {
   });
 
   // ==============================> update pagination button <===================================
-  // Update pagination button states
   function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
     $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
 
-    // Adjust active class for current page button
     $(".pagination .page-item").removeClass("active");
     if (currentPage === 1) $(".btn-onePage").addClass("active");
     if (currentPage === 2) $(".btn-twoPage").addClass("active");
@@ -518,44 +534,23 @@ $(document).ready(function () {
 
   // ==============================> fetch data <===================================
   function fetchAdvertisements(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/advertisement/page=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        updateTable(response);
-        updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/advertisement/page=${pageNumber}&pageSize=${pageSize}`;
+    apiCall("GET", url, null, function (response) {
+      updateTable(response);
+      updatePaginationButtons();
+      // debugger;
     });
   }
-
-  fetchAdvertisements(currentPage, pageSize);
 
   // =============================> fetch data deleted <===================================
   function fetchDeletedAdvertisements(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/advertisement/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        $(".badge").text(response.length || 0);
-        updateTableDeleted(response);
-        updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/advertisement/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+    apiCall("GET", url, null, function (response) {
+      $(".badge").text(response.length || 0);
+      updateTableDeleted(response);
+      updatePaginationButtons();
     });
   }
-
-  fetchDeletedAdvertisements(currentPage, pageSize);
 
   // ==============================> upload image <===================================
   function uploadImage() {
@@ -574,18 +569,99 @@ $(document).ready(function () {
       })
         .done(function (data) {
           if (data && data.fullPath) {
-            // alert(`File đã upload tại đường dẫn: ${data.fullPath}`);
+            // Swal.fire(
+            //   "Success!",
+            //   `File đã upload tại đường dẫn: ${data.fullPath}`,
+            //   "success"
+            // );
             resolve(data.fullPath.toString());
           } else {
-            alert("Upload thất bại.");
+            Swal.fire("Error!", "Upload image failed!", "error");
             reject("Upload failed.");
           }
         })
         .fail(function (jqXHR, textStatus, errorThrown) {
           console.log("Request failed:", textStatus, errorThrown);
-          alert("Đã có lỗi xảy ra khi tải lên.");
+          Swal.fire("Error!", "Đã có lỗi xảy ra khi tải lên.", "error");
           reject(errorThrown);
         });
     });
   }
+
+  // ==========================================> get staff id list <===========================================================
+  function getStaffIdList() {
+    const url = "http://localhost:4006/api-admin/staff/get-all";
+    apiCall("GET", url, null, function (response) {
+      response.forEach((element) => {
+        staffIdList.push(element.staffId);
+      });
+    });
+  }
+
+  // ==========================================> render staff id list <===========================================================
+  let isListVisible = false;
+  function renderStaffIdList() {
+    const advertiserIdListDiv = document.getElementById("advertiserIdList");
+    const toggleButton = document.getElementById("btnViewAdvertiserIdList");
+
+    if (isListVisible) {
+      advertiserIdListDiv.style.display = "none";
+      toggleButton.textContent = "View Advertiser Id List";
+      isListVisible = false;
+    } else {
+      advertiserIdListDiv.innerHTML = "";
+      if (staffIdList.length === 0) {
+        advertiserIdListDiv.innerHTML = `
+          <div class="alert alert-info">No staff found. Please fetch the list first.</div>
+        `;
+      } else {
+        const listGroup = document.createElement("ul");
+        listGroup.className = "list-group";
+
+        staffIdList.forEach((staffId) => {
+          const listItem = document.createElement("li");
+          listItem.className = "list-group-item";
+          listItem.textContent = `Staff ID: ${staffId}`;
+          listGroup.appendChild(listItem);
+        });
+
+        advertiserIdListDiv.appendChild(listGroup);
+      }
+
+      advertiserIdListDiv.style.display = "block";
+      toggleButton.textContent = "Hide Advertiser Id List";
+      isListVisible = true;
+    }
+  }
+
+  // ==========================================> button view staff id list <===========================================================
+  document
+    .getElementById("btnViewAdvertiserIdList")
+    .addEventListener("click", renderStaffIdList);
+
+  // ==========================================> api call <===========================================================
+  function apiCall(method, url, data = null, successCallback) {
+    return $.ajax({
+      url: url,
+      type: method,
+      data: data,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      success: function (response) {
+        if (successCallback) {
+          successCallback(response);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        Swal.fire("Error", "Error: " + error, "error");
+      },
+    });
+  }
+
+  // ====================================> call function <===========================================================
+  getStaffIdList();
+  fetchAdvertisements(currentPage, pageSize);
+  fetchDeletedAdvertisements(currentPage, pageSize);
 });

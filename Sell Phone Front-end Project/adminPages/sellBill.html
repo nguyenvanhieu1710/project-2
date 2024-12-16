@@ -87,13 +87,13 @@
 
                         <nav aria-label="Page navigation example">
                             <ul class="pagination justify-content-end">
-                                <li class="page-item disabled">
+                                <li class="page-item disabled btn-previous">
                                     <a class="page-link" href="#" tabindex="-1">Previous</a>
                                 </li>
-                                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                <li class="page-item">
+                                <li class="page-item btn-onePage"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item btn-twoPage"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item btn-ThreePage"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item btn-next">
                                     <a class="page-link" href="#">Next</a>
                                 </li>
                             </ul>
@@ -105,7 +105,7 @@
         <!-- Modal create -->
         <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
             aria-hidden="true">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Create bill</h5>
@@ -124,19 +124,27 @@
                                             <label for="userId" class="form-label">User ID</label>
                                             <input type="number" name="userId" class="form-control border"
                                                 placeholder="Enter User ID">
+                                            <div id="userIdList" class="mt-2" style="display: none;"></div>
+                                            <button type="button" id="btnViewUserIdList" class="btn btn-primary mt-2">
+                                                View User Id List
+                                            </button>
                                         </div>
                                         <div class="mb-3">
                                             <label for="staffId" class="form-label">Staff ID</label>
                                             <input type="number" name="staffId" class="form-control border"
                                                 placeholder="Enter Staff ID">
+                                            <div id="staffIdList" class="mt-2" style="display: none;"></div>
+                                            <button type="button" id="btnViewStaffIdList" class="btn btn-primary mt-2">
+                                                View Staff Id List
+                                            </button>
                                         </div>
                                         <div class="mb-3">
                                             <label for="orderStatus" class="form-label">Order Status</label>
                                             <select name="orderStatus" class="form-select">
                                                 <option selected>Choose Order Status</option>
-                                                <option value="Pending">Pending</option>
-                                                <option value="Completed">Completed</option>
-                                                <option value="Shipped">Shipped</option>
+                                                <option value="Pending Confirmation">Pending Confirmation</option>
+                                                <option value="Shipping">Shipping</option>
+                                                <option value="Delivered">Delivered</option>
                                                 <option value="Canceled">Canceled</option>
                                             </select>
                                         </div>
@@ -150,7 +158,7 @@
                                         </div>
                                         <div class="mb-3">
                                             <label for="deliveryAddress" class="form-label">Delivery Address</label>
-                                            <input type="text" name="deliveryAddress" class="form-control"
+                                            <input type="text" name="deliveryAddress"
                                                 placeholder="Enter Delivery Address">
                                         </div>
                                         <div class="mb-3">
@@ -164,34 +172,55 @@
                                 <hr class="my-4">
 
                                 <!-- Order Details -->
-                                <h4 class="mb-3">Order Details</h4>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Product ID</th>
-                                                <th>Quantity</th>
-                                                <th>Price</th>
-                                                <th>Discount Amount</th>
-                                                <th>Voucher ID</th>
-                                                <th>Status</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="orderDetailsBody">
-                                            <!-- Dynamic rows will be added here -->
-                                        </tbody>
-                                    </table>
-                                    <button type="button" class="btn btn-primary" onclick="addOrderDetailRow()">Add
-                                        Detail</button>
+                                <h5 class="mb-3">Order Details</h5>
+                                <div id="orderDetailsContainer">
+                                    <div class="row mb-3">
+                                        <div class="col-md-2">
+                                            <label for="orderDetailId" class="form-label">Order Detail ID</label>
+                                            <input type="number" name="orderDetailId[]" class="form-control border" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="productId" class="form-label">Product ID</label>
+                                            <input type="number" name="productId[]" class="form-control border"
+                                                placeholder="Enter Product ID" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="quantity" class="form-label">Quantity</label>
+                                            <input type="number" name="quantity[]" class="form-control border"
+                                                placeholder="Enter Quantity" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="price" class="form-label">Price</label>
+                                            <input type="number" name="price[]" class="form-control border"
+                                                placeholder="Enter Price" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="discountAmount" class="form-label">Discount Amount</label>
+                                            <input type="number" name="discountAmount[]" class="form-control border"
+                                                placeholder="Enter Discount" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="voucherId" class="form-label">Voucher ID</label>
+                                            <input type="number" name="voucherId[]" class="form-control border"
+                                                placeholder="Enter Voucher ID" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="status" class="form-label">Status</label>
+                                            <input type="text" name="status[]" class="form-control border"
+                                                placeholder="Enter Status" />
+                                        </div>
+                                    </div>
                                 </div>
+
+                                <button type="button" class="btn btn-primary mb-3" id="addOrderDetailButton">Add Another
+                                    Detail</button>
                             </form>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-handle-func">Save changes</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary btn-handle-func">Save changes</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -235,7 +264,8 @@
                                             <td>
                                                 <button type="button"
                                                     class="btn btn-primary btn-restore">Restore</button>
-                                                <button type="button" class="btn btn-danger btn-delete">Delete</button>
+                                                <button type="button"
+                                                    class="btn btn-danger btn-deleteActual">Delete</button>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -271,10 +301,10 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <!-- Dynamic order details will be inserted here -->
-                        <table class="table table-bordered">
+                        <table class="table table-bordered" id="orderDetailsTable">
                             <thead>
                                 <tr>
+                                    <th>Bill Detail ID</th>
                                     <th>Product ID</th>
                                     <th>Quantity</th>
                                     <th>Price</th>
@@ -283,7 +313,6 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Rows are dynamically generated -->
                             </tbody>
                         </table>
                     </div>
@@ -294,37 +323,6 @@
     </section>
 
     <script src="../adminPages/js/sellBillManagement.js"></script>
-    <script>
-        function addOrderDetailRow() {
-            const tbody = document.getElementById("orderDetailsBody");
-            const row = `
-        <tr>
-            <td><input type="number" class="form-control" name="productId" placeholder="Product ID"></td>
-            <td><input type="number" class="form-control" name="quantity" placeholder="Quantity"></td>
-            <td><input type="number" class="form-control" name="price" placeholder="Price"></td>
-            <td><input type="number" class="form-control" name="discountAmount" placeholder="Discount Amount"></td>
-            <td><input type="number" class="form-control" name="voucherId" placeholder="Voucher ID"></td>
-            <td>
-                <select class="form-select" name="orderDetailStatus">
-                    <option value="0">Pending</option>
-                    <option value="1">Completed</option>
-                    <option value="2">Canceled</option>
-                </select>
-            </td>
-            <td>
-                <button type="button" class="btn btn-danger btn-sm" onclick="removeOrderDetailRow(this)">Remove</button>
-            </td>
-        </tr>
-    `;
-            tbody.insertAdjacentHTML("beforeend", row);
-        }
-
-        function removeOrderDetailRow(button) {
-            const row = button.closest("tr");
-            row.remove();
-        }
-
-    </script>
 </body>
 
 </html>

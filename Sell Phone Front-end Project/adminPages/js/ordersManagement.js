@@ -1,19 +1,9 @@
 $(document).ready(function () {
   var token = localStorage.getItem("admin");
   function displayOrder() {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/Bill/get-all`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        updateTable(response);
-        // updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/Bill/get-all`;
+    apiCall("GET", url, null, function (response) {
+      updateTable(response);
     });
   }
 
@@ -30,29 +20,58 @@ $(document).ready(function () {
         case "Delivered":
           statusClass = "delivered";
           break;
-        case "Cancelled":
+        case "Canceled":
           statusClass = "cancelled";
           break;
-        case "Shipped":
+        case "Shipping":
           statusClass = "shipped";
           break;
-        case "Pending":
+        case "Pending Confirmation":
           statusClass = "pending";
           break;
         default:
           statusClass = "unknown";
       }
+
+      var totalAmount = 0;
+      order.listjson_orderDetail.forEach(function (orderDetail) {
+        totalAmount += orderDetail.price * orderDetail.quantity;
+      });
+
       var row = `<tr>                     
                      <td> ${order.orderId} </td>
                         <td> <img src="../../img/anh-trang.jpg" alt="User Image"></td>
                         <td> ${order.deliveryAddress} </td>
                         <td> ${order.dayBuy} </td>
                         <td>
-                            <p class="status ${statusClass}">${order.orderStatus}</p>
+                            <p class="status ${statusClass}">${
+        order.orderStatus
+      }</p>
                         </td>
-                        <td> <strong> $0.00 </strong></td>
+                        <td> <strong> $${totalAmount.toFixed(2)} </strong></td>
                  </tr>`;
       tbody.append(row);
+    });
+  }
+
+  // ==========================================> api call <===========================================================
+  function apiCall(method, url, data = null, successCallback) {
+    return $.ajax({
+      url: url,
+      type: method,
+      data: data,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      success: function (response) {
+        if (successCallback) {
+          successCallback(response);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        Swal.fire("Error", "Error: " + error, "error");
+      },
     });
   }
 

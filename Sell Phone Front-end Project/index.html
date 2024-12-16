@@ -34,6 +34,10 @@
 	<script src="angular/angular.min.js"></script>
 	<script src="angular/global.js"></script>
 	<script src="angular/index.js"></script>
+
+	<!-- SweetAlert2 -->
+	<link rel="stylesheet" href="css/sweetalert2.min.css" />
+	<script src="js/sweetalert2.min.js"></script>
 </head>
 
 <body ng-app="MyProject" ng-controller="IndexCtrl">
@@ -166,9 +170,9 @@
 					<li class="active"><a href="#">Home</a></li>
 					<li><a href="#new-products">New Products</a></li>
 					<li><a href="#hot-deal">Hot Deals</a></li>
-					<li><a href="store.html">Categories</a></li>
 					<li><a href="#top-selling">Top Selling</a></li>
-					<li><a href="store.html">Phones</a></li>
+					<li><a href="store.html">Categories</a></li>
+					<!-- <li><a href="store.html">Phones</a></li> -->
 					<li><a href="order.html">Orders</a></li>
 					<li><a href="news.html">News</a></li>
 					<!-- <li><a href="#">Accessories</a></li> -->
@@ -326,9 +330,12 @@
 						<div class="section-nav">
 							<ul class="section-tab-nav tab-nav">
 								<li class="active"><a data-toggle="tab" href="#tab1">Phones</a></li>
-								<li><a data-toggle="tab" href="#tab1">Iphone</a></li>
-								<li><a data-toggle="tab" href="#tab1">Samsung</a></li>
-								<li><a data-toggle="tab" href="#tab1">Accessories</a></li>
+								<li ng-click="getProductByBrand('IPhone')"><a data-toggle="tab" href="#tab1">Iphone</a>
+								</li>
+								<li ng-click="getProductByBrand('Samsung')"><a data-toggle="tab"
+										href="#tab1">Samsung</a></li>
+								<li ng-click="getProductByBrand('Xiaomi')"><a data-toggle="tab" href="#tab1">Xiaomi</a>
+								</li>
 							</ul>
 						</div>
 					</div>
@@ -629,7 +636,7 @@
 								<li class="active"><a data-toggle="tab" href="#tab2">Phones</a></li>
 								<li><a data-toggle="tab" href="#tab2">IPhone</a></li>
 								<li><a data-toggle="tab" href="#tab2">Samsung</a></li>
-								<li><a data-toggle="tab" href="#tab2">Accessories</a></li>
+								<li><a data-toggle="tab" href="#tab2">Xiaomi</a></li>
 							</ul>
 						</div>
 					</div>
@@ -889,7 +896,7 @@
 							<!-- product widget -->
 							<div class="product-widget" ng-repeat="product in productList | limitTo:3">
 								<div class="product-img">
-									<img src="./img/iphone-16-pro-max-titan.jpg" alt="">
+									<img ng-src="{{product.productImage}}" alt="Product Image">
 								</div>
 								<div class="product-body">
 									<p class="product-category">Category</p>
@@ -934,7 +941,7 @@
 							<!-- product widget -->
 							<div class="product-widget" ng-repeat="product in productList | limitTo:3">
 								<div class="product-img">
-									<img src="./img/iphone-16-pro-max-titan-white.jpg" alt="">
+									<img ng-src="{{product.productImage}}" alt="Product Image">
 								</div>
 								<div class="product-body">
 									<p class="product-category">Category</p>
@@ -987,7 +994,7 @@
 							<!-- product widget -->
 							<div class="product-widget" ng-repeat="product in productList | limitTo:3">
 								<div class="product-img">
-									<img src="./img/iphone-16-pro-max-titan-white.jpg" alt="">
+									<img ng-src="{{product.productImage}}" alt="Product Image">
 								</div>
 								<div class="product-body">
 									<p class="product-category">Category</p>
@@ -1030,7 +1037,7 @@
 							<!-- product widget -->
 							<div class="product-widget" ng-repeat="product in productList | limitTo:3">
 								<div class="product-img">
-									<img src="./img/iphone-16-pro-max-titan-white.jpg" alt="">
+									<img ng-src="{{product.productImage}}" alt="Product Image">
 								</div>
 								<div class="product-body">
 									<p class="product-category">Category</p>
@@ -1086,7 +1093,7 @@
 							<!-- product widget -->
 							<div class="product-widget" ng-repeat="product in productList | limitTo:3">
 								<div class="product-img">
-									<img src="./img/iphone-16-pro-max-titan.jpg" alt="">
+									<img ng-src="{{product.productImage}}" alt="Product Image">
 								</div>
 								<div class="product-body">
 									<p class="product-category">Category</p>
@@ -1129,7 +1136,7 @@
 							<!-- product widget -->
 							<div class="product-widget" ng-repeat="product in productList | limitTo:3">
 								<div class="product-img">
-									<img src="./img/iphone-16-pro-max-titan-white.jpg" alt="">
+									<img ng-src="{{product.productImage}}" alt="Product Image">
 								</div>
 								<div class="product-body">
 									<p class="product-category">Category</p>
@@ -1356,21 +1363,12 @@
 	<div id="mainDiv"></div>
 	<!-- Custom Javascript -->
 	<script src="js/index.js"></script>
+	<script src="js/global.js"></script>
 	<script>
 		var user = localStorage.getItem('user');
 		if (!user) {
-			// window.location.href = 'login.html';
-		}
-
-		var myAccount = document.getElementById('my-account');
-		myAccount.addEventListener('click', function () {
-			if (user) {
-				window.location.href = 'profile.html';
-			}
-			else {
-				window.location.href = 'login.html';
-			}
-		});
+			window.location.href = 'login.html';
+		}		
 	</script>
 </body>
 

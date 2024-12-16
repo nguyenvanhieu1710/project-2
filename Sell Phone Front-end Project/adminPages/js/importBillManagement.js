@@ -1,9 +1,12 @@
 $(document).ready(function () {
   var token = localStorage.getItem("admin");
   var importBillId = "";
+  var supplierIdList = [];
+  var staffIdList = [];
+  var productIdList = [];
 
   let currentPage = 1;
-  const pageSize = 5;
+  const pageSize = 10;
 
   // Modal create bootstrap
   const exampleModal = new bootstrap.Modal(
@@ -24,6 +27,7 @@ $(document).ready(function () {
   var status = 1;
   $(".btn-add-importBill").click(function () {
     status = 1;
+    $("#exampleModalLabel").text("Create Import Bill");
   });
 
   $(".btn-update-importBill").click(function () {
@@ -34,7 +38,6 @@ $(document).ready(function () {
   $(".btn-delete-importBill").click(function () {
     status = 3;
     deleteVirtualImportBill();
-    // deleteImportBill();
   });
 
   $(".btn-handle-func").click(function () {
@@ -44,10 +47,63 @@ $(document).ready(function () {
     if (status == 2) {
       updateImportBill();
     }
-    // if (status == 3) {
-    //   deleteImportBill();
-    // }
   });
+
+  // ===============================> validate data <===================================
+  function validateImportBill() {
+    var supplierId = $("input[name='supplierId']").val();
+    var staffId = $("input[name='staffId']").val();
+    var inputDay = $("input[name='inputDay']").val();
+
+    if (!supplierId || supplierId.trim() === "") {
+      Swal.fire("Warning!", "Please enter supplier ID.", "warning");
+      return false;
+    }
+
+    if (!staffId || staffId.trim() === "") {
+      Swal.fire("Warning!", "Please enter staff ID.", "warning");
+      return false;
+    }
+
+    if (!inputDay || inputDay.trim() === "") {
+      Swal.fire("Warning!", "Please enter input day.", "warning");
+      return false;
+    } else if (!/^\d{4}-\d{2}-\d{2}$/.test(inputDay)) {
+      Swal.fire("Warning!", "Please enter a valid input day.", "warning");
+      return false;
+    }
+
+    $("input[name='productId[]']").each(function (index) {
+      var productId = $(this).val();
+      var importPrice = $("input[name='importPrice[]']").eq(index).val();
+      var importQuantity = $("input[name='importQuantity[]']").eq(index).val();
+
+      if (!productId || productId.trim() === "") {
+        Swal.fire("Warning!", "Please enter product ID.", "warning");
+        return false;
+      }
+
+      if (!importPrice || isNaN(importPrice) || parseFloat(importPrice) <= 0) {
+        Swal.fire("Warning!", "Please enter a valid import price.", "warning");
+        return false;
+      }
+
+      if (
+        !importQuantity ||
+        isNaN(importQuantity) ||
+        parseInt(importQuantity) <= 0
+      ) {
+        Swal.fire(
+          "Warning!",
+          "Please enter a valid import quantity.",
+          "warning"
+        );
+        return false;
+      }
+    });
+
+    return true;
+  }
 
   // ===============================> add importBill <===================================
   function addImportBill() {
@@ -70,8 +126,7 @@ $(document).ready(function () {
       }
     });
 
-    if (!supplierId || !staffId || !inputDay) {
-      alert("Please fill in all required fields.");
+    if (!validateImportBill()) {
       return;
     }
 
@@ -82,7 +137,7 @@ $(document).ready(function () {
       listjson_importBillDetail: importBillDetails,
     };
 
-    // debugger;
+    debugger;
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/ImportBill/create",
@@ -114,27 +169,28 @@ $(document).ready(function () {
   // ==============================> turn on modal to update <===================================
   function TurnOnModalToUpdate() {
     if ($("input.importBill-checkbox:checked").length === 0) {
-      alert("Please select at least one importBill to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one importBill to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.importBill-checkbox:checked").length > 1) {
-      alert("Choose only a importBill to update.");
+      Swal.fire("Warning!", "Choose only a importBill to update.", "warning");
       return;
     }
 
     $(".importBill-checkbox:checked").each(function () {
-      // Lấy dòng (tr) chứa checkbox này
       let row = $(this).closest("tr");
 
-      // Lấy thông tin từ các cột trong dòng
-      let id = row.find("td").eq(0).text(); // Cột ID
+      let id = row.find("td").eq(0).text();
 
       importBillId = id;
     });
     //   debugger;
 
-    var importBillFound = {};
     $.ajax({
       type: "GET",
       url:
@@ -148,30 +204,46 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
-        importBillFound = data;
         // debugger;
         if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("error!", data.error, "error");
           console.log(data.error);
         } else {
-          // alert("Find ImportBill Success");
-          // console.log("Find ImportBill Success");
+          $("input[name='supplierId']").val(data.supplierId);
+          $("input[name='staffId']").val(data.staffId);
+          $("input[name='inputDay']").val(data.inputDay);
 
-          $("input[name='importBillName']").val(importBillFound.importBillName);
-          $("input[name='phoneNumber']").val(importBillFound.phoneNumber);
-          $("input[name='address']").val(importBillFound.address);
+          const importBillDetails = data.listjson_importBillDetail;
+          $("#importBillDetailsContainer").empty();
 
-          // Mở modal sau khi dữ liệu đã được cập nhật
-          // $("#exampleModal").modal("show");
-          var modal = new bootstrap.Modal(
-            document.getElementById("exampleModal")
-          );
-          modal.show();
+          importBillDetails.forEach((detail, index) => {
+            const detailRow = `
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="productId" class="form-label">Product ID</label>
+              <input type="number" name="productId[]" class="form-control border" value="${detail.productId}" placeholder="Enter Product ID">
+            </div>
+            <div class="col-md-4">
+              <label for="importPrice" class="form-label">Import Price</label>
+              <input type="number" name="importPrice[]" class="form-control border" value="${detail.importPrice}" placeholder="Enter Import Price">
+            </div>
+            <div class="col-md-4">
+              <label for="importQuantity" class="form-label">Import Quantity</label>
+              <input type="number" name="importQuantity[]" class="form-control border" value="${detail.importQuantity}" placeholder="Enter Quantity">
+            </div>
+            <div class="col-md-4">
+              <label for="importBillDetailId" class="form-label" style="visibility: hidden;">Import Bill Detail ID</label>
+              <input type="hidden" name="importBillDetailId[]" class="form-control border" value="${detail.importBillDetailId}">
+            </div>
+          </div>
+        `;
 
-          $("#exampleModalLabel").text("Update ImportBill"); // Thay đổi tiêu đề modal
-          $(".modal-title").text("Update ImportBill"); // Nếu bạn muốn đặt tiêu đề từ class modal-title
+            $("#importBillDetailsContainer").append(detailRow);
+          });
+
+          exampleModal.show();
+          $("#exampleModalLabel").text("Update ImportBill");
+          $(".modal-title").text("Update ImportBill");
         }
       })
       .fail(function () {
@@ -181,20 +253,44 @@ $(document).ready(function () {
 
   // ===============================> update importBill <===================================
   function updateImportBill() {
-    // alert("Update ImportBill Success");
-    // debugger;
-    var importBillName = $("input[name='importBillName']").val();
-    var phoneNumber = $("input[name='phoneNumber']").val();
-    var address = $("input[name='address']").val();
+    var supplierId = $("input[name='supplierId']").val();
+    var staffId = $("input[name='staffId']").val();
+    var inputDay = $("input[name='inputDay']").val();
+
+    var importBillDetails = [];
+    $("input[name='productId[]']").each(function (index) {
+      var productId = $(this).val();
+      var importPrice = $("input[name='importPrice[]']").eq(index).val();
+      var importQuantity = $("input[name='importQuantity[]']").eq(index).val();
+      var importBillDetailId = $("input[name='importBillDetailId[]']")
+        .eq(index)
+        .val();
+
+      if (productId && importPrice && importQuantity) {
+        importBillDetails.push({
+          importBillDetailId: importBillDetailId,
+          importBillId: importBillId,
+          productId: productId,
+          importPrice: importPrice,
+          importQuantity: importQuantity,
+          importBillDetailStatus: 2, // 2 means "Update" in this context, 1 means "Add", 3 means "Delete"
+        });
+      }
+    });
+
+    if (!validateImportBill()) {
+      return;
+    }
 
     var raw_data = {
       importBillId: importBillId,
-      importBillName: importBillName,
-      phoneNumber: phoneNumber,
-      address: address,
-      deleted: false,
+      supplierId: supplierId,
+      staffId: staffId,
+      inputDay: inputDay,
+      listjson_importBillDetail: importBillDetails,
     };
 
+    // debugger;
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/ImportBill/update",
@@ -207,19 +303,13 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", data.error, "error");
         }
-        // Đóng modal sau khi cập nhật thành công
-        // $("#exampleModal").modal("hide");
-        var modal = new bootstrap.Modal(
-          document.getElementById("exampleModal")
-        );
-        modal.hide();
-        alert("Update ImportBill Success");
-        fetchImportBills(1, 5);
+        exampleModal.hide();
+        Swal.fire("Success!", "Update ImportBill Success!", "success");
+        fetchImportBills(currentPage, pageSize);
       })
       .fail(function () {
         console.log("Request failed: ", textStatus, errorThrown);
@@ -228,6 +318,8 @@ $(document).ready(function () {
 
   // ================================> delete importBill <===================================
   function deleteImportBill(importBillId) {
+    Swal.fire("Warning!", "Deletion is not allowed", "warning");
+    return;
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/ImportBill/delete/" + importBillId,
@@ -239,13 +331,14 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Warning!", data.error, "warning");
         }
-        alert("Delete ImportBill Success");
-        fetchImportBills(1, 5);
+        Swal.fire("Success!", "Delete ImportBill Success!", "success");
+        trashCanModal.hide();
+        fetchImportBills(currentPage, pageSize);
+        fetchDeletedImportBills(currentPage, pageSize);
       })
       .fail(function () {
         console.log("Request failed: ", textStatus, errorThrown);
@@ -255,65 +348,110 @@ $(document).ready(function () {
   // =========================================> delete virtual importBill <==================================================================
   function deleteVirtualImportBill() {
     if ($("input.importBill-checkbox:checked").length === 0) {
-      alert("Please select at least one importBill to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one importBill to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.importBill-checkbox:checked").length > 1) {
-      alert("Choose only a importBill to update.");
+      Swal.fire("Warning!", "Choose only a importBill to update.", "warning");
       return;
     }
 
-    var importBillName;
-    var content;
-    var importBillImage;
-    var postingDate;
-    var personPostingId;
+    var supplierId = null;
+    var staffId = null;
+    var inputDay = null;
+    var listjson_importBillDetail = null;
 
     $(".importBill-checkbox:checked").each(function () {
       let row = $(this).closest("tr");
 
       let id = row.find("td").eq(0).text();
-      importBillName = row.find("td").eq(1).text();
-      content = row.find("td").eq(2).text();
-      importBillImage = row.find("td").eq(3).text();
-      postingDate = row.find("td").eq(4).text();
-      personPostingId = row.find("td").eq(5).text();
 
       importBillId = id;
     });
 
-    var raw_data = {
-      importBillId: importBillId,
-      importBillName: importBillName,
-      content: content,
-      importBillImage: importBillImage,
-      postingDate: postingDate,
-      personPostingId: personPostingId,
-      deleted: true,
-    };
     // debugger;
-
     $.ajax({
-      type: "POST",
-      url: "http://localhost:4006/api-admin/ImportBill/update",
+      type: "GET",
+      url:
+        "http://localhost:4006/api-admin/importBill/get-data-by-id/" +
+        importBillId,
       headers: {
         Authorization: "Bearer " + token,
         "Content-Type": "application/json",
       },
-      data: JSON.stringify(raw_data),
       processData: false,
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
-        if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+        // debugger;
+        if (data != null && data.error != null && data.error != "undefined") {
+          Swal.fire("Error!", data.error, "error");
+          console.log(data.error);
+        } else {
+          // debugger;
+          supplierId = data.supplierId;
+          staffId = data.staffId;
+          inputDay = data.inputDay;
+          listjson_importBillDetail = data.listjson_importBillDetail;
+
+          if (
+            !supplierId ||
+            !staffId ||
+            !inputDay ||
+            !listjson_importBillDetail
+          ) {
+            Swal.fire(
+              "Warning!",
+              "Can't delete virtual importBill.",
+              "warning"
+            );
+            return;
+          }
+
+          var raw_data = {
+            importBillId: importBillId,
+            supplierId: supplierId,
+            staffId: staffId,
+            inputDay: inputDay,
+            deleted: true,
+            listjson_importBillDetail: listjson_importBillDetail,
+          };
+
+          // debugger;
+          $.ajax({
+            type: "POST",
+            url: "http://localhost:4006/api-admin/ImportBill/update",
+            headers: {
+              Authorization: "Bearer " + token,
+              "Content-Type": "application/json",
+            },
+            data: JSON.stringify(raw_data),
+            processData: false,
+            contentType: false,
+          })
+            .done(function (data) {
+              // debugger;
+              if (data.error != null && data.error != "undefined") {
+                Swal.fire("Error!", data.error, "error");
+              } else {
+                Swal.fire(
+                  "Success!",
+                  "Delete virtual importBill success.",
+                  "success"
+                );
+                fetchDeletedImportBills(currentPage, pageSize);
+                fetchImportBills(currentPage, pageSize);
+              }
+            })
+            .fail(function () {
+              console.log("Request failed: ", textStatus, errorThrown);
+            });
         }
-        alert("Delete Virtual ImportBill Success");
-        fetchDeletedImportBill(currentPage, pageSize);
-        fetchImportBill(currentPage, pageSize);
       })
       .fail(function () {
         console.log("Request failed: ", textStatus, errorThrown);
@@ -322,28 +460,16 @@ $(document).ready(function () {
 
   // ================================> search importBill <===================================
   function searchImportBill(name, currentPage, pageSize) {
-    $.ajax({
-      type: "GET",
-      url:
-        "http://localhost:4006/api-admin/importBill/search-and-pagination?pageNumber=" +
-        currentPage +
-        "&pageSize=" +
-        pageSize +
-        "&name=" +
-        name,
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json",
-      },
-      processData: false,
-      contentType: false,
-    })
-      .done(function (data) {
-        updateTable(data);
-      })
-      .fail(function () {
-        console.log("Request failed: ", textStatus, errorThrown);
-      });
+    const url =
+      "http://localhost:4006/api-admin/importBill/search-by-productname-and-pagination?pageNumber=" +
+      currentPage +
+      "&pageSize=" +
+      pageSize +
+      "&name=" +
+      name;
+    apiCall("GET", url, null, function (data) {
+      updateTable(data);
+    });
   }
 
   // ================================> search importBill <===================================
@@ -359,8 +485,16 @@ $(document).ready(function () {
 
   // ===============================> update table <===================================
   function updateTable(data) {
+    // debugger;
     var tbody = $("#activeTable tbody");
     tbody.empty();
+
+    if (data.length < 0) {
+      tbody.append(
+        `<tr><td colspan="6" class="text-center">No import bills found</td></tr>`
+      );
+      return;
+    }
     data.forEach(function (importBill, index) {
       var row = `<tr>
                        <th scope="row">
@@ -389,10 +523,27 @@ $(document).ready(function () {
                        <td>${importBill.staffId}</td>
                        <td>${importBill.inputDay}</td>
                        <td>
-                         <button type="button" class="btn btn-primary">Restore</button>
-                         <button type="button" class="btn btn-danger">Delete</button>
+                         <button type="button" class="btn btn-primary btn-restore">Restore</button>
+                         <button type="button" class="btn btn-danger btn-deleteActual">Delete</button>
                        </td>
                      </tr>`;
+      tbody.append(row);
+    });
+  }
+
+  // ===================================> update importBillDetailsModal <=============================================================
+  function updateImportBillDetailsModal(data) {
+    // debugger;
+    var tbody = $("#importBillDetailsModal tbody");
+    tbody.empty();
+
+    data.listjson_importBillDetail.forEach(function (detail) {
+      var row = `<tr>
+                   <td>${detail.importBillDetailId}</td>
+                   <td>${detail.productId}</td>
+                   <td>${detail.importQuantity}</td>
+                   <td>${detail.importPrice}</td>
+                 </tr>`;
       tbody.append(row);
     });
   }
@@ -409,6 +560,23 @@ $(document).ready(function () {
     openImportBillDetail(importBill.importBillId);
   });
 
+  // =====================================> open import Bill detail <=============================================================
+  function openImportBillDetail(importBillId) {
+    $.ajax({
+      type: "GET",
+      url: `http://localhost:4006/api-admin/importBill/get-data-by-id/${importBillId}`,
+      headers: { Authorization: "Bearer " + token },
+      success: function (response) {
+        // debugger;
+        updateImportBillDetailsModal(response);
+        importBillDetailsModal.show();
+      },
+      error: function (error) {
+        console.error("Failed to fetch import bill details: ", error);
+      },
+    });
+  }
+
   // ====================================> restore importBill <=============================================================
   $("#deletedTable tbody").on("click", ".btn-restore", function () {
     const currentRow = $(this).closest("tr");
@@ -416,15 +584,49 @@ $(document).ready(function () {
 
     const importBill = {
       importBillId: currentRow.find("td").eq(0).text(),
-      importBillName: currentRow.find("td").eq(1).text(),
-      content: currentRow.find("td").eq(2).text(),
-      importBillImage: currentRow.find("td").eq(3).text(),
-      postingDate: currentRow.find("td").eq(4).text(),
-      personPostingId: currentRow.find("td").eq(5).text(),
-      deleted: false,
+      supplierId: currentRow.find("td").eq(1).text(),
+      staffId: currentRow.find("td").eq(2).text(),
+      inputDay: currentRow.find("td").eq(3).text(),
     };
 
-    restoreImportBill(importBill);
+    var importBillId = importBill.importBillId;
+
+    // debugger;
+    $.ajax({
+      type: "GET",
+      url:
+        "http://localhost:4006/api-admin/importBill/get-data-by-id/" +
+        importBillId,
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      processData: false,
+      contentType: false,
+    })
+      .done(function (data) {
+        // debugger;
+        if (!data || typeof data !== "object") {
+          Swal.fire("Error!", "Can't restore importBill", "error");
+        } else {
+          // debugger;
+          listjson_importBillDetail = data.listjson_importBillDetail;
+
+          var raw_data = {
+            importBillId: importBillId,
+            supplierId: importBill.supplierId,
+            staffId: importBill.staffId,
+            inputDay: importBill.inputDay,
+            deleted: false,
+            listjson_importBillDetail: listjson_importBillDetail,
+          };
+
+          restoreImportBill(raw_data);
+        }
+      })
+      .fail(function (jqXHR, textStatus, errorThrown) {
+        console.log("Request failed: ", textStatus, errorThrown);
+      });
   });
 
   // ====================================> delete importBill <=============================================================
@@ -455,13 +657,16 @@ $(document).ready(function () {
       .done(function (data) {
         if (data && !data.error) {
           // debugger;
-          // success
-          alert("Restore importBill success!");
+          Swal.fire("Success!", "Restore importBill success!", "success");
           trashCanModal.hide();
-          fetchImportBill(currentPage, pageSize);
-          fetchDeletedImportBill(currentPage, pageSize);
+          fetchImportBills(currentPage, pageSize);
+          fetchDeletedImportBills(currentPage, pageSize);
         } else {
-          alert("Error updating importBill: " + data.error);
+          Swal.fire(
+            "Error!",
+            "Error restoring importBill: " + data.error,
+            "error"
+          );
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -469,12 +674,7 @@ $(document).ready(function () {
       });
   }
 
-  function openImportBillDetail(importBillId) {
-    importBillDetailsModal.show();
-  }
-
   // ================================> pagination <===================================
-  // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
     if (currentPage > 1) {
@@ -483,14 +683,12 @@ $(document).ready(function () {
     }
   });
 
-  // Next button click handler
   $(".btn-next").on("click", function (e) {
     e.preventDefault();
     currentPage++;
     fetchImportBills(currentPage, pageSize);
   });
 
-  // Page number buttons click handlers
   $(".btn-onePage").on("click", function (e) {
     e.preventDefault();
     currentPage = 1;
@@ -509,51 +707,96 @@ $(document).ready(function () {
     fetchImportBills(currentPage, pageSize);
   });
 
-  // Update pagination button states
   function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
     $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
 
-    // Adjust active class for current page button
     $(".pagination .page-item").removeClass("active");
     if (currentPage === 1) $(".btn-onePage").addClass("active");
     if (currentPage === 2) $(".btn-twoPage").addClass("active");
     if (currentPage === 3) $(".btn-ThreePage").addClass("active");
   }
 
-  // =================================> fetch data để hiển thị lên table <===================================
-
+  // =================================> fetch data <===================================
   function fetchImportBills(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/importBill/page=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        updateTable(response);
-        updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/importBill/page=${pageNumber}&pageSize=${pageSize}`;
+    apiCall("GET", url, null, function (response) {
+      updateTable(response);
+      updatePaginationButtons();
     });
   }
-
-  fetchImportBills(currentPage, pageSize);
 
   // ===================================> fetch data deleted <===================================
   function fetchDeletedImportBills(pageNumber, pageSize) {
+    const url = `http://localhost:4006/api-admin/importBill/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+    apiCall("GET", url, null, function (response) {
+      $(".badge").text(response.length || 0);
+      updateTableDeleted(response);
+      updatePaginationButtons();
+    });
+  }
+
+  // ==========================================> get staff id list <===========================================================
+  function getStaffIdList() {
+    const url = "http://localhost:4006/api-admin/staff/get-all";
+    apiCall("GET", url, null, function (response) {
+      response.forEach((element) => {
+        staffIdList.push(element.staffId);
+      });
+    });
+  }
+
+  // ==========================================> render staff id list <===========================================================
+  let isListVisible = false;
+  function renderStaffIdList() {
+    const staffIdListDiv = document.getElementById("staffIdList");
+    const toggleButton = document.getElementById("btnViewStaffIdList");
+
+    if (isListVisible) {
+      staffIdListDiv.style.display = "none";
+      toggleButton.textContent = "View Staff Id List";
+      isListVisible = false;
+    } else {
+      staffIdListDiv.innerHTML = "";
+      if (staffIdList.length === 0) {
+        staffIdListDiv.innerHTML = `
+          <div class="alert alert-info">No staff found. Please fetch the list first.</div>
+        `;
+      } else {
+        const listGroup = document.createElement("ul");
+        listGroup.className = "list-group";
+
+        staffIdList.forEach((staffId) => {
+          const listItem = document.createElement("li");
+          listItem.className = "list-group-item";
+          listItem.textContent = `Staff ID: ${staffId}`;
+          listGroup.appendChild(listItem);
+        });
+
+        staffIdListDiv.appendChild(listGroup);
+      }
+
+      staffIdListDiv.style.display = "block";
+      toggleButton.textContent = "Hide Staff Id List";
+      isListVisible = true;
+    }
+  }
+
+  // ==========================================> button view staff id list <===========================================================
+  document
+    .getElementById("btnViewStaffIdList")
+    .addEventListener("click", renderStaffIdList);
+
+  // ==========================================> get Supplier id list <===========================================================
+  function getSupplierIdList() {
     $.ajax({
       type: "GET",
-      url: `http://localhost:4006/api-admin/importBill/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      url: "http://localhost:4006/api-admin/Supplier/get-all",
       headers: { Authorization: "Bearer " + token },
       success: function (response) {
         // debugger;
-        $(".badge").text(response.length || 0);
-        updateTable(response);
-        updatePaginationButtons();
+        response.forEach((element) => {
+          supplierIdList.push(element.supplierId);
+        });
         // debugger;
       },
       error: function (error) {
@@ -562,7 +805,97 @@ $(document).ready(function () {
     });
   }
 
-  fetchDeletedImportBills(currentPage, pageSize);
+  // ==========================================> render Supplier id list <===========================================================
+  let isSupplierIdListVisible = false;
+  function renderSupplierIdList() {
+    const supplierIdListDiv = document.getElementById("supplierIdList");
+    const toggleButton = document.getElementById("btnViewSupplierIdList");
+
+    if (isSupplierIdListVisible) {
+      supplierIdListDiv.style.display = "none";
+      toggleButton.textContent = "View Supplier Id List";
+      isSupplierIdListVisible = false;
+    } else {
+      supplierIdListDiv.innerHTML = "";
+      if (staffIdList.length === 0) {
+        supplierIdListDiv.innerHTML = `
+          <div class="alert alert-info">No supplier found. Please fetch the list first.</div>
+        `;
+      } else {
+        const listGroup = document.createElement("ul");
+        listGroup.className = "list-group";
+
+        supplierIdList.forEach((supplierId) => {
+          const listItem = document.createElement("li");
+          listItem.className = "list-group-item";
+          listItem.textContent = `Supplier ID: ${supplierId}`;
+          listGroup.appendChild(listItem);
+        });
+
+        supplierIdListDiv.appendChild(listGroup);
+      }
+
+      supplierIdListDiv.style.display = "block";
+      toggleButton.textContent = "Hide Supplier Id List";
+      isSupplierIdListVisible = true;
+    }
+  }
+
+  // ==========================================> button view Supplier id list <===========================================================
+  document
+    .getElementById("btnViewSupplierIdList")
+    .addEventListener("click", renderSupplierIdList);
+
+  // ==========================================> get product id list <===========================================================
+  function getProductIdList() {
+    const url = "http://localhost:4006/api-admin/product/get-all";
+    apiCall("GET", url, null, (response) => {
+      // debugger
+      response.forEach((element) => productIdList.push(element.productId));
+      // debugger
+    });
+  }
+
+  // ==========================================> render product id list <===========================================================
+  let isProductIdListVisible = false;
+  function renderProductIdList() {
+    const productIdListDiv = document.getElementById("productIdList");
+    const toggleButton = document.getElementById("btnViewProductIdList");
+
+    if (isProductIdListVisible) {
+      productIdListDiv.style.display = "none";
+      toggleButton.textContent = "View Product Id List";
+      isProductIdListVisible = false;
+    } else {
+      productIdListDiv.innerHTML = "";
+      if (staffIdList.length === 0) {
+        productIdListDiv.innerHTML = `
+            <div class="alert alert-info">No product found. Please fetch the list first.</div>
+          `;
+      } else {
+        const listGroup = document.createElement("ul");
+        listGroup.className = "list-group";
+
+        productIdList.forEach((productId) => {
+          const listItem = document.createElement("li");
+          listItem.className = "list-group-item";
+          listItem.textContent = `Product ID: ${productId}`;
+          listGroup.appendChild(listItem);
+        });
+
+        productIdListDiv.appendChild(listGroup);
+      }
+
+      productIdListDiv.style.display = "block";
+      toggleButton.textContent = "Hide Product Id List";
+      isProductIdListVisible = true;
+    }
+  }
+
+  // ==========================================> button view product id list <===========================================================
+  document
+    .getElementById("btnViewProductIdList")
+    .addEventListener("click", renderProductIdList);
 
   // =====================================> handle interface <================================================================
   // JavaScript for adding dynamic fields for import bill details
@@ -585,7 +918,39 @@ $(document).ready(function () {
           <label for="importQuantity" class="form-label">Import Quantity</label>
           <input type="number" name="importQuantity[]" class="form-control border" placeholder="Enter Quantity">
       </div>
+      <div class="col-md-4">
+          <label for="importBillDetailId" class="form-label" style="visibility: hidden;">Import Bill Detail ID</label>
+          <input type="hidden" name="importBillDetailId[]" class="form-control border" value="0">
+      </div>
   `;
       container.appendChild(newDetail);
     });
+
+  // ==========================================> api call <===========================================================
+  function apiCall(method, url, data = null, successCallback) {
+    return $.ajax({
+      url: url,
+      type: method,
+      data: data,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      success: function (response) {
+        if (successCallback) {
+          successCallback(response);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        Swal.fire("Error", "Error: " + error, "error");
+      },
+    });
+  }
+
+  // ====================================> call function <===========================================================
+  getStaffIdList();
+  getSupplierIdList();
+  getProductIdList();
+  fetchImportBills(currentPage, pageSize);
+  fetchDeletedImportBills(currentPage, pageSize);
 });

@@ -83,13 +83,13 @@
 
                         <nav aria-label="Page navigation example">
                             <ul class="pagination justify-content-end">
-                                <li class="page-item disabled">
+                                <li class="page-item disabled btn-previous">
                                     <a class="page-link" href="#" tabindex="-1">Previous</a>
                                 </li>
-                                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                <li class="page-item">
+                                <li class="page-item btn-onePage"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item btn-twoPage"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item btn-ThreePage"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item btn-next">
                                     <a class="page-link" href="#">Next</a>
                                 </li>
                             </ul>
@@ -119,6 +119,12 @@
                                         <input type="number" name="supplierId" class="form-control border"
                                             placeholder="Enter Supplier ID">
                                     </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div id="supplierIdList" class="mt-2" style="display: none;"></div>
+                                        <button type="button" id="btnViewSupplierIdList" class="btn btn-primary mt-2">
+                                            View Supplier Id List
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div class="row">
@@ -127,6 +133,11 @@
                                         <label for="staffId" class="form-label">Staff ID</label>
                                         <input type="number" name="staffId" class="form-control border"
                                             placeholder="Enter Staff ID">
+
+                                        <div id="staffIdList" class="mt-3" style="display: none;"></div>
+                                        <button type="button" id="btnViewStaffIdList" class="btn btn-primary mt-2">
+                                            View Staff Id List
+                                        </button>
                                     </div>
 
                                     <!-- Input Day -->
@@ -138,6 +149,10 @@
 
                                 <hr>
                                 <h5 class="mb-3">Import Bill Details</h5>
+                                <div id="productIdList" class="mt-0 mb-2" style="display: none;"></div>
+                                <button type="button" id="btnViewProductIdList" class="btn btn-primary mb-3">
+                                    View Product Id List
+                                </button>
                                 <div id="importBillDetailsContainer">
                                     <div class="row mb-3">
                                         <div class="col-md-4">
@@ -154,6 +169,12 @@
                                             <label for="importQuantity" class="form-label">Import Quantity</label>
                                             <input type="number" name="importQuantity[]" class="form-control border"
                                                 placeholder="Enter Quantity">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="importBillDetailId" class="form-label"
+                                                style="visibility: hidden;">Import Bill Detail ID</label>
+                                            <input type="hidden" name="importBillDetailId[]" class="form-control border"
+                                                value="0">
                                         </div>
                                     </div>
                                 </div>
@@ -240,17 +261,16 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <table class="table table-bordered">
+                        <table class="table table-bordered" id="importBillDetailsTable">
                             <thead>
                                 <tr>
+                                    <th>Import Bill ID</th>
                                     <th>Product ID</th>
                                     <th>Quantity</th>
                                     <th>Price</th>
                                 </tr>
                             </thead>
-                            <tbody>
-
-                            </tbody>
+                            <tbody></tbody>
                         </table>
                     </div>
                 </div>

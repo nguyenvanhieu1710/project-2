@@ -1,5 +1,5 @@
 var app = angular.module("MyProject", []);
-app.controller("IndexCtrl", function ($scope, $http) {
+app.controller("IndexCtrl", function ($scope, $http, $timeout) {
   $scope.categoryList;
   $scope.productList;
   $scope.bestSellingProductList;
@@ -8,49 +8,55 @@ app.controller("IndexCtrl", function ($scope, $http) {
 
   // ==========================================> Category <=====================================================
   $scope.DisPlayCategory = function () {
-    $http({
-      method: "GET",
-      url: current_url + "/api-user/category/get-all",
-    })
-      .then(function (response) {
-        $scope.categoryList = response.data;
-        // debugger;
-      })
-      .catch(function (error) {
-        console.log("Request failed: " + error.data);
-      });
+    $scope.apiCall(current_url + "/api-user/category/get-all", function (data) {
+      $scope.categoryList = data;
+      // debugger;
+    });
   };
 
   // ===========================================> Product <=====================================================
   $scope.DisPlayProduct = function () {
-    $http({
-      method: "GET",
-      url: current_url + "/api-user/product/get-all",
-    })
-      .then(function (response) {
-        $scope.productList = response.data;
-        makeScript("js/main.js");
-        // debugger;
-      })
-      .catch(function (error) {
-        console.log("Request failed: " + error.data);
-      });
+    $scope.apiCall(current_url + "/api-user/product/get-all", function (data) {
+      $scope.productList = data;
+      makeScript("js/main.js");
+      // debugger;
+    });
   };
 
   // ==========================================> Best Selling Product <=====================================================
   $scope.DisPlayBestSellingProduct = function () {
-    $http({
-      method: "GET",
-      url: current_url + "/api-user/product/get-best-selling-product",
-    })
-      .then(function (response) {
-        $scope.bestSellingProductList = response.data;
-        makeScript("js/main.js");
+    $scope.apiCall(
+      current_url + "/api-user/product/get-best-selling-product",
+      function (data) {
+        $scope.bestSellingProductList = data;
         // debugger;
-      })
-      .catch(function (error) {
-        console.log("Request failed: " + error.data);
-      });
+      }
+    );
+  };
+
+  $scope.getProductByBrand = function (brand) {
+    $scope.productList = [];
+    // debugger;
+    $scope.apiCall(current_url + "/api-user/product/get-all", function (data) {
+      // debugger;
+      $scope.productList = data.filter((product) => product.brand == brand);
+      setTimeout(() => {
+        const slider = $(".products-slick");
+        if (slider.hasClass("slick-initialized")) {
+          slider.slick("unslick");
+        }
+
+        slider.slick({
+          slidesToShow: 4,
+          slidesToScroll: 1,
+          autoplay: true,
+          autoplaySpeed: 2000,
+          arrows: true,
+          dots: false,
+          appendArrows: "#slick-nav-1",
+        });
+      }, 0);
+    });
   };
 
   // ==========================================> Product Detail <=====================================================
@@ -59,6 +65,16 @@ app.controller("IndexCtrl", function ($scope, $http) {
     window.location.href = "productDetail.html?productId=" + product.productId;
   };
 
+  // ==============================================> Handle Cart <===============================================
+  $scope.getCart = function () {
+    return JSON.parse(localStorage.getItem("cart")) || [];
+  };
+
+  $scope.setCart = function (cart) {
+    $scope.cart = cart;
+    localStorage.setItem("cart", JSON.stringify(cart));
+    $scope.updateCartSummary();
+  };
   //================================================> Cart <=================================================
   $scope.loadCart = function () {
     // debugger;
@@ -69,7 +85,7 @@ app.controller("IndexCtrl", function ($scope, $http) {
   // ========================================> Add to cart <================================================
   $scope.addToCart = function (product) {
     // debugger;
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let cart = $scope.getCart();
 
     let existingProduct = cart.find(
       (item) => item.productId === product.productId
@@ -84,18 +100,12 @@ app.controller("IndexCtrl", function ($scope, $http) {
         price: product.price,
         quantity: 1,
         image: product.productImage,
+        selected: false,
       });
     }
 
-    $scope.cart = cart;
-    $scope.updateCartInStorage();
-    $scope.updateCartSummary();
-    alert(`${product.productName} đã được thêm vào giỏ hàng!`);
-  };
-
-  // =======================================> Update cart in storage <================================================
-  $scope.updateCartInStorage = function () {
-    localStorage.setItem("cart", JSON.stringify($scope.cart));
+    $scope.setCart(cart);
+    alert(`${product.productName} has been added to the cart!`);
   };
 
   // ======================================> Remove from cart <================================================
@@ -103,8 +113,7 @@ app.controller("IndexCtrl", function ($scope, $http) {
     $scope.cart = $scope.cart.filter(
       (item) => item.productId !== product.productId
     );
-    $scope.updateCartInStorage();
-    $scope.updateCartSummary();
+    $scope.setCart($scope.cart);
   };
 
   // ======================================> Update cart summary <================================================
@@ -160,6 +169,20 @@ app.controller("IndexCtrl", function ($scope, $http) {
   // =====================================> Default Layout <================================================
   $scope.defaultLayout = function () {
     document.getElementById("product-has-been-searched").style.display = "none";
+  };
+
+  // ==============================================> call api <===============================================
+  $scope.apiCall = function (url, successCallback) {
+    $http({
+      method: "GET",
+      url: url,
+    })
+      .then(function (response) {
+        successCallback(response.data);
+      })
+      .catch(function (error) {
+        console.log("Request failed: " + error.data);
+      });
   };
 
   // =====================================> call function <================================================

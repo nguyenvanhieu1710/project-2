@@ -30,6 +30,10 @@
 	<script src="angular/angular.min.js"></script>
 	<script src="angular/global.js"></script>
 	<script src="angular/productDetail.js"></script>
+
+	<!-- SweetAlert2 -->
+	<link rel="stylesheet" href="css/sweetalert2.min.css" />
+	<script src="js/sweetalert2.min.js"></script>
 </head>
 
 <body ng-app="MyProject" ng-controller="ProductDetailCtrl">
@@ -45,7 +49,7 @@
 				</ul>
 				<ul class="header-links pull-right">
 					<!-- <li><a href="#"><i class="fa fa-dollar"></i> USD</a></li> -->
-					<li><a href="login.html"><i class="fa fa-user-o"></i> My Account</a></li>
+					<li><a href="#" id="my-account"><i class="fa fa-user-o"></i> My Account</a></li>
 				</ul>
 			</div>
 		</div>
@@ -97,39 +101,31 @@
 							<!-- /Wishlist -->
 
 							<!-- Cart -->
-							<div class="dropdown">
+							<div class="dropdown shopping-cart">
 								<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
 									<i class="fa fa-shopping-cart"></i>
 									<span>Your Cart</span>
-									<div class="qty">3</div>
+									<div class="qty">{{ totalQuantity }}</div>
 								</a>
 								<div class="cart-dropdown">
 									<div class="cart-list">
-										<div class="product-widget">
+										<!-- thêm track by $index để tránh bị trùng lặp -->
+										<div class="product-widget" ng-repeat="item in cart track by $index">
 											<div class="product-img">
-												<img src="./img/product01.png" alt="">
+												<img ng-src="{{ item.image }}" alt="Product Image">
 											</div>
 											<div class="product-body">
-												<h3 class="product-name"><a href="#">product name goes here</a></h3>
-												<h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
+												<h3 class="product-name"><a href="#">{{ item.productName }}</a></h3>
+												<h4 class="product-price"><span class="qty">x{{ item.quantity }}</span>
+													${{ item.price }}</h4>
 											</div>
-											<button class="delete"><i class="fa fa-close"></i></button>
-										</div>
-
-										<div class="product-widget">
-											<div class="product-img">
-												<img src="./img/product02.png" alt="">
-											</div>
-											<div class="product-body">
-												<h3 class="product-name"><a href="#">product name goes here</a></h3>
-												<h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
-											</div>
-											<button class="delete"><i class="fa fa-close"></i></button>
+											<button class="delete" ng-click="removeFromCart(item)"><i
+													class="fa fa-close"></i></button>
 										</div>
 									</div>
 									<div class="cart-summary">
-										<small>3 Item(s) selected</small>
-										<h5>SUBTOTAL: $2940.00</h5>
+										<small>{{ totalQuantity }} Item(s) selected</small>
+										<h5>SUBTOTAL: ${{ subtotal }}</h5>
 									</div>
 									<div class="cart-btns">
 										<a href="shoppingCart.html">View Cart</a>
@@ -191,10 +187,9 @@
 			<div class="row">
 				<div class="col-md-12">
 					<ul class="breadcrumb-tree">
-						<li><a href="#">Home</a></li>
+						<li><a href="index.html">Home</a></li>
 						<li><a href="#">All Categories</a></li>
 						<li><a href="#">Phones</a></li>
-						<!-- <li><a href="#">Headphones</a></li> -->
 						<li class="active">{{product.productName}}</li>
 					</ul>
 				</div>
@@ -261,16 +256,15 @@
 						<h2 class="product-name">{{product.productName}}</h2>
 						<div>
 							<div class="product-rating">
-								<i class="fa fa-star"></i>
-								<i class="fa fa-star"></i>
-								<i class="fa fa-star"></i>
-								<i class="fa fa-star"></i>
-								<i class="fa fa-star-o"></i>
+								<i class="fa" ng-repeat="star in getStars(product.star) track by $index"
+									ng-class="star === 'filled' ? 'fa-star' : 'fa-star-o'"></i>
 							</div>
+
 							<a class="review-link" href="#">10 Review(s) | Add your review</a>
 						</div>
 						<div>
-							<h3 class="product-price">${{product.price}} <del class="product-old-price">$990.00</del>
+							<h3 class="product-price">${{product.price}} <del class="product-old-price">${{product.price
+									* 3}}</del>
 							</h3>
 							<span class="product-available">In Stock</span>
 						</div>
@@ -285,7 +279,8 @@
 									<span class="qty-down">-</span>
 								</div>
 							</div>
-							<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+							<button class="add-to-cart-btn" ng-click="addToCart(product)"><i
+									class="fa fa-shopping-cart"></i> add to cart</button>
 						</div>
 
 						<ul class="product-btns">
@@ -296,7 +291,7 @@
 						<ul class="product-links">
 							<li>Category:</li>
 							<li><a href="#">Phones</a></li>
-							<li><a href="#">Accessories</a></li>
+							<!-- <li><a href="#">Accessories</a></li> -->
 						</ul>
 
 						<ul class="product-links">
@@ -339,13 +334,7 @@
 							<div id="tab2" class="tab-pane fade in">
 								<div class="row">
 									<div class="col-md-12">
-										<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-											tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-											quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-											consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-											cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-											non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-										</p>
+										<p>{{product.productDetail}}.</p>
 									</div>
 								</div>
 							</div>
@@ -571,10 +560,11 @@
 							<div id="tab" class="tab-pane active">
 								<div class="products-slick" data-nav="#slick-nav-1">
 									<!-- product -->
-									<div class="product" ng-repeat="product in productList">
+									<div class="product" ng-repeat="product in productRelatedList">
 										<a href="#" ng-click="openProductDetail(product)">
 											<div class="product-img">
-												<img src="./img/iphone-16-pro-max-titan.jpg" alt="">
+												<img ng-src="{{product.productImage}}" alt="Product Image" width="250"
+													height="250">
 												<div class="product-label">
 													<span class="sale">-30%</span>
 													<span class="new">NEW</span>
@@ -900,7 +890,8 @@
 	<script src="js/jquery.zoom.min.js"></script>
 	<!-- <script src="js/main.js"></script> -->
 	<div id="mainDiv"></div>
-
+	<!-- Custom JS -->
+	<script src="js/global.js"></script>
 </body>
 
 </html>

@@ -13,7 +13,6 @@
 
     <!-- Bootstrap -->
     <link type="text/css" rel="stylesheet" href="css/bootstrap.min.css" />
-    <!-- <link type="text/css" rel="stylesheet" href="css/bootstrap.css" /> -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap-grid.min.css"
         integrity="sha512-i1b/nzkVo97VN5WbEtaPebBG8REvjWeqNclJ6AItj7msdVcaveKrlIIByDpvjk5nwHjXkIqGZscVxOrTb9tsMA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -36,6 +35,10 @@
     <script src="angular/angular.min.js"></script>
     <script src="angular/global.js"></script>
     <script src="angular/order.js"></script>
+
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="css/sweetalert2.min.css" />
+    <script src="js/sweetalert2.min.js"></script>
 </head>
 
 <body ng-app="MyProject" ng-controller="OrderCtrl">
@@ -173,12 +176,11 @@
             <div id="responsive-nav">
                 <!-- NAV -->
                 <ul class="main-nav nav navbar-nav">
-                    <li class="active"><a href="#">All Orders</a></li>
-                    <li><a href="#">Pending Confirmation</a></li>
-                    <li><a href="#">Shipping</a></li>
-                    <li><a href="#">Delivered</a></li>
-                    <li><a href="#">Cancelled</a></li>
-                    <li><a href="#">Return goods</a></li>
+                    <li class="active" ng-click="getOrderByStatus('All Orders')"><a href="#">All Orders</a></li>
+                    <li ng-click="getOrderByStatus('Pending Confirmation')"><a href="#">Pending Confirmation</a></li>
+                    <li ng-click="getOrderByStatus('Shipping')"><a href="#">Shipping</a></li>
+                    <li ng-click="getOrderByStatus('Delivered')"><a href="#">Delivered</a></li>
+                    <li ng-click="getOrderByStatus('Cancelled')"><a href="#">Cancelled</a></li>
                 </ul>
                 <!-- /NAV -->
             </div>
@@ -195,8 +197,9 @@
             <!-- row -->
             <div class="row">
                 <div class="search-container">
-                    <input type="text" class="search-input" placeholder="Search for orders...">
-                    <i class="fa fa-search search-icon"></i>
+                    <input type="text" ng-model="searchText" class="search-input"
+                        placeholder="Search for orders by product name...">
+                    <i class="fa fa-search search-icon" ng-click="searchOrderByProductName()"></i>
                 </div>
                 <!-- Order List -->
                 <div id="order-list">
@@ -210,73 +213,33 @@
                         <!-- Product Information -->
                         <div class="product-info mt-3">
                             <img src="images/order-delivery.png" alt="Product Image">
-                            <div>
-                                <!-- <div class="product-title">Product Name Example</div> -->
-                                <div class="product-quantity">Quantity: 1</div>
+                            <div class="ml-auto order-summary">
+                                <div><strong>Order Date:</strong> {{order.dayBuy | date:'dd/MM/yyyy'}}</div>
                             </div>
                             <div class="ml-auto order-summary">
-                                <div>Total Price: <span>$100.00</span></div>
+                                <div><strong>Total Price:</strong> <span>${{calculateTotalPrice(order)}}</span></div>
                             </div>
                         </div>
 
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-end mt-3">
-                            <button class="btn btn-outline-secondary btn-sm btn-action">Cancel Order</button>
-                            <button class="btn btn-outline-primary btn-sm btn-action">View Details</button>
+                            <!-- <button class="btn btn-outline-secondary btn-sm btn-action">Cancel Order</button> -->
+                            <button class="btn btn-outline-primary btn-sm btn-action" data-toggle="modal"
+                                data-target="#orderDetailsModal" ng-click="viewDetails(order)">View Details</button>
                         </div>
                     </div>
-
-                    <!-- Another Order Item -->
-                    <!-- <div class="order-item">
-                        <div class="d-flex justify-content-between">
-                            <div class="order-status">Delivered</div>
-                            <div class="order-id">Order ID: #654321</div>
-                        </div>
-
-                        <div class="product-info mt-3">
-                            <img src="https://via.placeholder.com/80" alt="Product Image">
-                            <div>
-                                <div class="product-title">Another Product Name</div>
-                                <div class="product-quantity">Quantity: 2</div>
-                            </div>
-                            <div class="ml-auto order-summary">
-                                <div>Total Price: <span>$200.00</span></div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-end mt-3">
-                            <button class="btn btn-outline-secondary btn-sm btn-action">Rate Product</button>
-                            <button class="btn btn-outline-primary btn-sm btn-action">View Details</button>
-                        </div>
-                    </div> -->
                 </div>
                 <!-- End Order List -->
                 <!-- store bottom filter -->
                 <div class="store-filter clearfix">
-                    <!-- <span class="store-qty">Showing {{pageSize}} products</span> -->
                     <ul class="store-pagination">
-                        <li ng-click="prevPage()" ng-class="{'disabled':currentPage == 1}"><a href="#"><i
-                                    class="fa fa-angle-left"></i></a></li>
-                        <li class="active" ng-click="changePage(1)" ng-class="{'active':currentPage == 1}">1</li>
-                        <li ng-click="changePage(2)" ng-class="{'active':currentPage == 2}"><a href="#">2</a></li>
-                        <li ng-click="changePage(3)" ng-class="{'active':currentPage == 3}"><a href="#">3</a></li>
-                        <li ng-click="changePage(4)" ng-class="{'active':currentPage == 4}"><a href="#">4</a></li>
-                        <li ng-click="nextPage()"><a href="#"><i class="fa fa-angle-right"></i></a></li>
+                        <li class="page-item btn-previous"><a href="#"><i class="fa fa-angle-left"></i></a></li>
+                        <li class="page-item active btn-onePage">1</li>
+                        <li class="page-item btn-twoPage"><a href="#">2</a></li>
+                        <li class="page-item btn-ThreePage"><a href="#">3</a></li>
+                        <li class="page-item btn-next"><a href="#"><i class="fa fa-angle-right"></i></a></li>
                     </ul>
                 </div>
-                <style>
-                    .disabled {
-                        pointer-events: none;
-                    }
-
-                    .disabled:hover {
-                        cursor: not-allowed;
-                    }
-
-                    .store-pagination li.active a {
-                        color: #fff;
-                    }
-                </style>
                 <!-- /store bottom filter -->
             </div>
             <!-- /row -->
@@ -422,6 +385,58 @@
         <!-- /bottom footer -->
     </footer>
     <!-- /FOOTER -->
+
+    <!-- Modal for Order Details -->
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h5 class="modal-title" id="orderDetailsLabel">Order Details</h5>
+                </div>
+                <div class="modal-body">
+                    <!-- Order Information -->
+                    <div class="order-info">
+                        <p><strong>Order ID:</strong> {{selectedOrder.orderId}}</p>
+                        <p><strong>Order Status:</strong> {{selectedOrder.orderStatus}}</p>
+                        <p><strong>Order Date:</strong> {{selectedOrder.dayBuy | date:'dd/MM/yyyy'}}</p>
+                        <p><strong>Delivery Address:</strong> {{selectedOrder.deliveryAddress}}</p>
+                        <p><strong>Rating:</strong> {{selectedOrder.evaluate}}/5</p>
+                    </div>
+
+                    <!-- Order Details Table -->
+                    <table class="table table-bordered" id="orderDetailsTable">
+                        <thead>
+                            <tr>
+                                <th>Product ID</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Discount</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="orderDetail in selectedOrder.listjson_orderDetail">
+                                <td>{{orderDetail.productId}}</td>
+                                <td>{{orderDetail.quantity}}</td>
+                                <td>${{orderDetail.price}}</td>
+                                <td>${{orderDetail.discountAmount}}</td>
+                                <td>${{(orderDetail.quantity * orderDetail.price) - orderDetail.discountAmount}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Total Price -->
+                    <div class="total-summary">
+                        <strong>Total Price:</strong> ${{calculateTotalPrice(selectedOrder)}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Modal for Order Details -->
 
     <!-- jQuery Plugins -->
     <script src="js/jquery.min.js"></script>

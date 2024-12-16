@@ -7,6 +7,7 @@ app.controller("NewsCtrl", function ($scope, $http) {
   $scope.news;
   $scope.status; // 0: create, 1: update
 
+  // ==============================================> handle status <===============================================
   $scope.handleStatus = function (status) {
     // debugger;
     $scope.status = status;
@@ -17,6 +18,7 @@ app.controller("NewsCtrl", function ($scope, $http) {
     }
   };
 
+  // ==============================================> execute function <===============================================
   $scope.executeFunction = function () {
     if ($scope.status == 0) {
       $scope.addNews();
@@ -27,19 +29,9 @@ app.controller("NewsCtrl", function ($scope, $http) {
 
   // ==============================================> Load News <===============================================
   $scope.loadNews = function () {
-    // debugger;
-    $http({
-      method: "GET",
-      url: current_url + "/api-user/news/get-all",
-    })
-      .then(function (response) {
-        // debugger;
-        $scope.newsList = response.data;
-        // makeScript("js/main.js");
-      })
-      .catch(function (error) {
-        console.log("Request failed: " + error.data);
-      });
+    $scope.apiCall(current_url + "/api-user/news/get-all", function (data) {
+      $scope.newsList = data;
+    });
   };
 
   // =============================================> select news <===================================
@@ -228,6 +220,20 @@ app.controller("NewsCtrl", function ($scope, $http) {
       return null;
     }
   }
+
+  // ==============================================> call api <===============================================
+  $scope.apiCall = function (url, successCallback) {
+    $http({
+      method: "GET",
+      url: url,
+    })
+      .then(function (response) {
+        successCallback(response.data);
+      })
+      .catch(function (error) {
+        console.log("Request failed: " + error.data);
+      });
+  };
 
   // ============================================> call function <===================================
   $scope.loadNews();

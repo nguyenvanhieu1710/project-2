@@ -6,18 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart</title>
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="css/bootstrap-v4dot3dot1.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <!-- Jquery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/shoppingCart.css">
     <!-- Angular -->
     <script src="angular/angular.min.js"></script>
     <script src="angular/global.js"></script>
     <script src="angular/cart.js"></script>
+
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="css/sweetalert2.min.css" />
+    <script src="js/sweetalert2.min.js"></script>
 </head>
 
 <body ng-app="MyProject" ng-controller="CartCtrl">
@@ -29,6 +30,7 @@
                         <table class="table table-borderless table-shopping-cart">
                             <thead class="text-muted">
                                 <tr class="small text-uppercase">
+                                    <th scope="col">#</th>
                                     <th scope="col">Product</th>
                                     <th scope="col" width="120">Quantity</th>
                                     <th scope="col" width="120">Price</th>
@@ -36,7 +38,11 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr ng-repeat="item in cart">
+                                <tr ng-repeat="item in cart track by $index">
+                                    <td>
+                                        <input type="checkbox" ng-model="item.selected"
+                                            ng-change="updateSelectedStatus(item.productId, item.selected)">
+                                    </td>
                                     <td>
                                         <figure class="itemside align-items-center">
                                             <div class="aside"><img ng-src="{{item.image}}" alt="Product Image"
@@ -47,16 +53,17 @@
                                         </figure>
                                     </td>
                                     <td>
-                                        <input type="text" class="form-control" aria-label="Username"
-                                            ng-model="item.quantity" aria-describedby="basic-addon1">
+                                        <input type="number" class="form-control border" aria-label="quantity"
+                                            ng-model="item.quantity"
+                                            ng-change="updateQuantity(item.productId, item.quantity)"
+                                            aria-describedby="basic-addon1">
                                     </td>
                                     <td>
-                                        <div class="price-wrap"> <var class="price">${{item.price}}</var> <small
-                                                class="text-muted"> $9.20 each </small> </div>
+                                        <div class="price-wrap"> <var class="price">${{item.price}}</var> </div>
                                     </td>
                                     <td class="text-right d-none d-md-block">
-                                        <a data-original-title="Save to Wishlist" title="" href="" class="btn btn-light"
-                                            data-toggle="tooltip" data-abc="true"> <i class="fa fa-heart"></i></a>
+                                        <!-- <a data-original-title="Save to Wishlist" title="" href="" class="btn btn-light"
+                                            data-toggle="tooltip" data-abc="true"> <i class="fa fa-heart"></i></a> -->
                                         <button ng-click="removeFromCart(item)" class="btn btn-light" data-abc="true">
                                             Remove</button>
                                     </td>
@@ -71,7 +78,7 @@
                     <div class="card-body">
                         <form>
                             <div class="form-group"> <label>Have coupon?</label>
-                                <div class="input-group"> <input type="text" class="form-control coupon" name=""
+                                <div class="input-group"> <input type="text" class="form-control border coupon" name=""
                                         placeholder="Coupon code"> <span class="input-group-append"> <button
                                             class="btn btn-primary btn-apply coupon">Apply</button> </span> </div>
                             </div>

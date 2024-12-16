@@ -19,6 +19,7 @@ $(document).ready(function () {
   var status = 1;
   $(".btn-add-user").click(function () {
     status = 1;
+    $("#exampleModalLabel").text("Create User");
   });
 
   $(".btn-update-user").click(function () {
@@ -29,7 +30,6 @@ $(document).ready(function () {
   $(".btn-delete-user").click(function () {
     status = 3;
     deleteVirtualUser();
-    // deleteUser();
   });
 
   $(".btn-handle-func").click(function () {
@@ -39,10 +39,76 @@ $(document).ready(function () {
     if (status == 2) {
       updateUser();
     }
-    // if (status == 3) {
-    //   deleteUser();
-    // }
   });
+
+  // ===================================> handle validate <===========================================
+  function validateUserForm() {
+    const userName = document.querySelector(".username").value.trim();
+    const birthday = document.querySelector("input[name='date']").value.trim();
+    const phoneNumber = document
+      .querySelector("input[name='phonenumber']")
+      .value.trim();
+    const imageInput = document.querySelector("#formFile");
+    const image = imageInput ? imageInput.files[0] : null;
+    const gender = document.querySelector(".form-select").value;
+    const address = document
+      .querySelector("input[name='address']")
+      .value.trim();
+
+    if (!userName) {
+      Swal.fire("Warning!", "Please enter a username!", "warning");
+      return false;
+    }
+
+    const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
+    if (!birthday || !dateRegex.test(birthday)) {
+      Swal.fire(
+        "Warning!",
+        "Please enter a valid birthday (yyyy-MM-dd)!",
+        "warning"
+      );
+      return false;
+    }
+
+    const phoneRegex = /^\d{10,15}$/;
+    if (!phoneNumber || !phoneRegex.test(phoneNumber)) {
+      Swal.fire(
+        "Warning!",
+        "Please enter a valid phone number (10-15 digits)!",
+        "warning"
+      );
+      return false;
+    }
+
+    if (image) {
+      const validImageTypes = ["image/jpeg", "image/png"];
+      if (!validImageTypes.includes(image.type)) {
+        Swal.fire(
+          "Warning!",
+          "Please upload a valid image (JPEG/PNG)!",
+          "warning"
+        );
+        return false;
+      }
+
+      if (image.size > 2 * 1024 * 1024) {
+        Swal.fire("Warning!", "Image size should not exceed 2MB!", "warning");
+        return false;
+      }
+    }
+
+    if (!gender || gender === "Gender") {
+      Swal.fire("Warning!", "Please select a gender!", "warning");
+      return false;
+    }
+
+    if (!address) {
+      Swal.fire("Warning!", "Please enter an address!", "warning");
+      return false;
+    }
+
+    return true;
+  }
 
   // ====================================> add user <===========================================
   async function addUser() {
@@ -54,31 +120,7 @@ $(document).ready(function () {
     var gender = $(".form-select").val();
     var address = $("input[name='address']").val();
 
-    // Basic validation
-    if (!userName) {
-      Swal.fire("Warning!", "Please enter a username!", "warning");
-      return;
-    }
-    if (!birthday) {
-      Swal.fire("Warning!", "Please enter a birthday!", "warning");
-      return;
-    }
-    if (!phoneNumber) {
-      Swal.fire("Warning!", "Please enter a phone number!", "warning");
-      return;
-    }
-    if (!image) {
-      Swal.fire("Warning!", "Please select an image!", "warning");
-      return;
-    }
-    if (!gender || gender === "Gender") {
-      Swal.fire("Warning!", "Please select a gender!", "warning");
-      return;
-    }
-    if (!address) {
-      Swal.fire("Warning!", "Please enter an address!", "warning");
-      return;
-    }
+    if (!validateUserForm()) return;
 
     let imageUser = await uploadImage();
     // debugger;
@@ -112,7 +154,7 @@ $(document).ready(function () {
           // console.log(data.error);
         } else {
           Swal.fire("Success!", "Add user success!", "success");
-          // console.log("Add User Success");
+          exampleModal.hide();
           fetchUsers(currentPage, pageSize);
         }
       })
@@ -194,6 +236,8 @@ $(document).ready(function () {
     var address = $("input[name='address']").val();
     var ranking = $("input[name='ranking']").val();
 
+    if (!validateUserForm()) return;
+
     let imageUser = await uploadImage();
 
     var raw_data = {
@@ -234,6 +278,8 @@ $(document).ready(function () {
 
   // ====================================> delete user <==========================================================
   function deleteUser(userId) {
+    Swal.fire("Warning!", "Deletion is not allowed", "warning");
+    return;
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/Users/delete/" + userId,
@@ -249,7 +295,9 @@ $(document).ready(function () {
           Swal.fire("Error!", "Error updating user: " + data.error, "error");
         }
         Swal.fire("Success!", "Delete Actual User Success!", "success");
+        trashCanModal.hide();
         fetchUsers(currentPage, pageSize);
+        fetchDeletedUsers(currentPage, pageSize);
       })
       .fail(function () {
         console.log("Request failed: ", textStatus, errorThrown);
@@ -477,7 +525,6 @@ $(document).ready(function () {
   }
 
   // ======================================> pagination <========================================================================
-  // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
     if (currentPage > 1) {
@@ -486,14 +533,12 @@ $(document).ready(function () {
     }
   });
 
-  // Next button click handler
   $(".btn-next").on("click", function (e) {
     e.preventDefault();
     currentPage++;
     fetchUsers(currentPage, pageSize);
   });
 
-  // Page number buttons click handlers
   $(".btn-onePage").on("click", function (e) {
     e.preventDefault();
     currentPage = 1;
@@ -512,13 +557,9 @@ $(document).ready(function () {
     fetchUsers(currentPage, pageSize);
   });
 
-  // Update pagination button states
   function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
     $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
 
-    // Adjust active class for current page button
     $(".pagination .page-item").removeClass("active");
     if (currentPage === 1) $(".btn-onePage").addClass("active");
     if (currentPage === 2) $(".btn-twoPage").addClass("active");
@@ -527,44 +568,30 @@ $(document).ready(function () {
 
   // ========================================> fetch users <=======================================================
   function fetchUsers(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/users/page=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
+    apiCall(
+      "GET",
+      `http://localhost:4006/api-admin/users/page=${pageNumber}&pageSize=${pageSize}`,
+      null,
+      function (response) {
         updateTable(response);
         updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
-    });
+      }
+    );
   }
-
-  fetchUsers(currentPage, pageSize);
 
   // =======================================> fetch deleted users <================================================
   function fetchDeletedUsers(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/Users/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
+    apiCall(
+      "GET",
+      `http://localhost:4006/api-admin/Users/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      null,
+      function (response) {
         $(".badge").text(response.length || 0);
         updateTableDeleted(response);
         updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
-    });
+      }
+    );
   }
-
-  fetchDeletedUsers(currentPage, pageSize);
 
   // =======================================> upload image <=============================================================
   function uploadImage() {
@@ -601,4 +628,29 @@ $(document).ready(function () {
         });
     });
   }
+
+  // ==========================================> api call <===========================================================
+  function apiCall(method, url, data = null, successCallback) {
+    return $.ajax({
+      url: url,
+      type: method,
+      data: data,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      success: function (response) {
+        if (successCallback) {
+          successCallback(response);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        Swal.fire("Error", "Error: " + error, "error");
+      },
+    });
+  }
+
+  // =========================================> call function <=============================================================
+  fetchUsers(currentPage, pageSize);
+  fetchDeletedUsers(currentPage, pageSize);
 });

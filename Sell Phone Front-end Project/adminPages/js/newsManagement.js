@@ -1,6 +1,7 @@
 $(document).ready(function () {
   var token = localStorage.getItem("admin");
   var newsId = "";
+  var userIdList = [];
 
   let currentPage = 1;
   const pageSize = 5;
@@ -19,6 +20,7 @@ $(document).ready(function () {
   var status = 1;
   $(".btn-add-news").click(function () {
     status = 1;
+    $("#exampleModalLabel").text("Create News");
   });
 
   $(".btn-update-news").click(function () {
@@ -29,7 +31,6 @@ $(document).ready(function () {
   $(".btn-delete-news").click(function () {
     status = 3;
     deleteVirtualNews();
-    // deleteNews();
   });
 
   $(".btn-handle-func").click(function () {
@@ -39,9 +40,6 @@ $(document).ready(function () {
     if (status == 2) {
       updateNews();
     }
-    // if (status == 3) {
-    //   deleteNews();
-    // }
   });
 
   // ===============================> validate <===================================
@@ -54,31 +52,31 @@ $(document).ready(function () {
 
     // Validate News Name
     if (!newsName) {
-      alert("Please enter a News Name.");
+      Swal.fire("Warning!", "Please enter a News Name.", "warning");
       return false;
     }
 
     // Validate Content
     if (!content) {
-      alert("Please enter the content.");
+      Swal.fire("Warning!", "Please enter the content.", "warning");
       return false;
     }
 
     // Validate News Image
     if (!newsImage) {
-      alert("Please upload a News Image.");
+      Swal.fire("Warning!", "Please upload a News Image.", "warning");
       return false;
     }
 
     // Validate Posting Date
     if (!postingDate) {
-      alert("Please select a Posting Date.");
+      Swal.fire("Warning!", "Please select a Posting Date.", "warning");
       return false;
     }
 
     // Validate Person Posting ID
     if (!personPostingId) {
-      alert("Please enter the Person Posting ID.");
+      Swal.fire("Warning!", "Please enter the Person Posting ID.", "warning");
       return false;
     }
 
@@ -122,12 +120,11 @@ $(document).ready(function () {
     })
       .done(function (data) {
         if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", data.error, "error");
           console.log(data.error);
         } else {
-          alert("Add News Success");
-          console.log("Add News Success");
-          fetchNews(1, 5);
+          Swal.fire("Success!", "Add News Success", "success");
+          fetchNews(currentPage, pageSize);
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -138,12 +135,20 @@ $(document).ready(function () {
   // ====================================> turn on modal to update <=========================================================
   function TurnOnModalToUpdate() {
     if ($("input.news-checkbox:checked").length === 0) {
-      alert("Please select at least one news to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one news to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.news-checkbox:checked").length > 1) {
-      alert("Choose only a news to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select only one news to update.",
+        "warning"
+      );
       return;
     }
 
@@ -168,17 +173,12 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
         newsFound = data;
         // debugger;
         if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", data.error, "error");
           console.log(data.error);
         } else {
-          // alert("Find News Success");
-          // console.log("Find News Success");
-
           $("input[name='newsName']").val(newsFound.newsName);
           $("input[name='quantity']").val(newsFound.quantity);
           $("input[name='price']").val(newsFound.price);
@@ -189,12 +189,7 @@ $(document).ready(function () {
           $("input[name='categoryId']").val(newsFound.categoryId);
           $("textarea[name='newsDetail']").val(newsFound.newsDetail);
 
-          // Mở modal sau khi dữ liệu đã được cập nhật
-          // $("#exampleModal").modal("show");
-          var modal = new bootstrap.Modal(
-            document.getElementById("exampleModal")
-          );
-          modal.show();
+          exampleModal.show();
 
           $("#exampleModalLabel").text("Update News");
           $(".modal-title").text("Update News");
@@ -207,8 +202,6 @@ $(document).ready(function () {
 
   // ======================================> update news <===========================================================
   function updateNews() {
-    // alert("Update News Success");
-    // debugger;
     var newsName = $("input[name='newsName']").val();
     var quantity = $("input[name='quantity']").val();
     var price = $("input[name='price']").val();
@@ -250,15 +243,13 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
         // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Success!", data.error, "success");
         } else {
-          alert("Update News Success");
+          Swal.fire("Success!", "Update News Success.", "success");
           exampleModal.hide();
-          fetchNews(1, 5);
+          fetchNews(currentPage, pageSize);
         }
       })
       .fail(function () {
@@ -268,6 +259,8 @@ $(document).ready(function () {
 
   // =======================================> delete news <===========================================================
   function deleteNews(newsId) {
+    Swal.fire("Warning!", "Deletion is not allowed", "warning");
+    return;
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/News/delete/" + newsId,
@@ -279,13 +272,12 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", data.error, "error");
         }
-        alert("Delete News Success");
-        fetchNews(1, 5);
+        Swal.fire("Success!", "Delete News Success.", "success");
+        fetchNews(currentPage, pageSize);
       })
       .fail(function () {
         console.log("Request failed: ", textStatus, errorThrown);
@@ -295,12 +287,20 @@ $(document).ready(function () {
   // =========================================> delete virtual news <==================================================================
   function deleteVirtualNews() {
     if ($("input.news-checkbox:checked").length === 0) {
-      alert("Please select at least one news to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one news to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.news-checkbox:checked").length > 1) {
-      alert("Choose only a news to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select only one news to update.",
+        "warning"
+      );
       return;
     }
 
@@ -346,12 +346,11 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", data.error, "error");
         }
-        alert("Delete Virtual News Success");
+        Swal.fire("Success!", "Delete Virtual News Success", "success");
         fetchDeletedNews(currentPage, pageSize);
         fetchNews(currentPage, pageSize);
       })
@@ -486,13 +485,12 @@ $(document).ready(function () {
       .done(function (data) {
         if (data && !data.error) {
           // debugger;
-          // success
-          alert("Restore news success!");
+          Swal.fire("Success!", "News has been restored!", "success");
           trashCanModal.hide();
           fetchNews(currentPage, pageSize);
           fetchDeletedNews(currentPage, pageSize);
         } else {
-          alert("Error updating news: " + data.error);
+          Swal.fire("Error!", "Error updating news: " + data.error, "error");
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -501,7 +499,6 @@ $(document).ready(function () {
   }
 
   // ====================================> pagination <===========================================================
-  // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
     if (currentPage > 1) {
@@ -510,14 +507,12 @@ $(document).ready(function () {
     }
   });
 
-  // Next button click handler
   $(".btn-next").on("click", function (e) {
     e.preventDefault();
     currentPage++;
     fetchNews(currentPage, pageSize);
   });
 
-  // Page number buttons click handlers
   $(".btn-onePage").on("click", function (e) {
     e.preventDefault();
     currentPage = 1;
@@ -536,13 +531,9 @@ $(document).ready(function () {
     fetchNews(currentPage, pageSize);
   });
 
-  // Update pagination button states
   function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
     $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
 
-    // Adjust active class for current page button
     $(".pagination .page-item").removeClass("active");
     if (currentPage === 1) $(".btn-onePage").addClass("active");
     if (currentPage === 2) $(".btn-twoPage").addClass("active");
@@ -567,8 +558,6 @@ $(document).ready(function () {
     });
   }
 
-  fetchNews(currentPage, pageSize);
-
   // ===================================> fetch deleted news <===========================================================
   function fetchDeletedNews(pageNumber, pageSize) {
     $.ajax({
@@ -588,8 +577,6 @@ $(document).ready(function () {
     });
   }
 
-  fetchDeletedNews(currentPage, pageSize);
-
   // ===================================> upload image <===========================================================
   function uploadImage() {
     return new Promise((resolve, reject) => {
@@ -607,18 +594,102 @@ $(document).ready(function () {
       })
         .done(function (data) {
           if (data && data.fullPath) {
-            // alert(`File đã upload tại đường dẫn: ${data.fullPath}`);
+            // Swal.fire(
+            //   "Success!",
+            //   `File upload at ${data.fullPath}`,
+            //   "success"
+            // );
             resolve(data.fullPath.toString());
           } else {
-            alert("Upload thất bại.");
+            Swal.fire(
+              "Error!",
+              "File upload failed. Please try again later.",
+              "error"
+            );
             reject("Upload failed.");
           }
         })
         .fail(function (jqXHR, textStatus, errorThrown) {
           console.log("Request failed:", textStatus, errorThrown);
-          alert("Đã có lỗi xảy ra khi tải lên.");
           reject(errorThrown);
         });
     });
   }
+
+  // ==========================================> get user id list <===========================================================
+  function getUserIdList() {
+    const url = "http://localhost:4006/api-admin/users/get-all";
+    apiCall("GET", url, null, function (response) {
+      response.forEach((element) => {
+        userIdList.push(element.userId);
+      });
+    });
+  }
+
+  // ==========================================> render user id list <===========================================================
+  let isListVisible = false;
+  function renderUserIdList() {
+    const personPostingListDiv = document.getElementById("personPostingList");
+    const toggleButton = document.getElementById("btnViewPersonPostingList");
+
+    if (isListVisible) {
+      personPostingListDiv.style.display = "none";
+      toggleButton.textContent = "View Person Posting Id List";
+      isListVisible = false;
+    } else {
+      personPostingListDiv.innerHTML = "";
+      if (userIdList.length === 0) {
+        personPostingListDiv.innerHTML = `
+          <div class="alert alert-info">No users found. Please fetch the list first.</div>
+        `;
+      } else {
+        const listGroup = document.createElement("ul");
+        listGroup.className = "list-group";
+
+        userIdList.forEach((userId) => {
+          const listItem = document.createElement("li");
+          listItem.className = "list-group-item";
+          listItem.textContent = `User ID: ${userId}`;
+          listGroup.appendChild(listItem);
+        });
+
+        personPostingListDiv.appendChild(listGroup);
+      }
+
+      personPostingListDiv.style.display = "block";
+      toggleButton.textContent = "Hide Person Posting Id List";
+      isListVisible = true;
+    }
+  }
+
+  // ==========================================> button view user id list <===========================================================
+  document
+    .getElementById("btnViewPersonPostingList")
+    .addEventListener("click", renderUserIdList);
+
+  // ==========================================> api call <===========================================================
+  function apiCall(method, url, data = null, successCallback) {
+    return $.ajax({
+      url: url,
+      type: method,
+      data: data,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      success: function (response) {
+        if (successCallback) {
+          successCallback(response);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        Swal.fire("Error", "Error: " + error, "error");
+      },
+    });
+  }
+
+  // ====================================> call function <===========================================================
+  getUserIdList();
+  fetchNews(currentPage, pageSize);
+  fetchDeletedNews(currentPage, pageSize);
 });

@@ -19,6 +19,7 @@ $(document).ready(function () {
   var status = 1;
   $(".btn-add-category").click(function () {
     status = 1;
+    $("#exampleModalLabel").text("Add Category");
   });
 
   $(".btn-update-category").click(function () {
@@ -28,22 +29,34 @@ $(document).ready(function () {
 
   $(".btn-delete-category").click(function () {
     status = 3;
-    // deleteCategory();
     deleteVirtualCategory();
   });
 
   $(".btn-handle-func").click(function () {
     if (status == 1) {
-      // debugger;
       addCategory();
     }
     if (status == 2) {
       updateCategory();
     }
-    // if (status == 3) {
-    //   deleteCategory();
-    // }
   });
+
+  // ===============================> validate data <===================================
+  function validateCategoryData(categoryName, categoryImage, dadCategoryId) {
+    if (!categoryName) {
+      Swal.fire("Warning!", "Please enter a category name.", "warning");
+      return false;
+    }
+    if (!categoryImage) {
+      Swal.fire("Warning!", "Please select a category image.", "warning");
+      return false;
+    }
+    if (!dadCategoryId) {
+      Swal.fire("Warning!", "Please enter a dad category ID.", "warning");
+      return false;
+    }
+    return true;
+  }
 
   // ==============================> add category <===================================
   async function addCategory() {
@@ -51,16 +64,7 @@ $(document).ready(function () {
     var categoryImage = $("#categoryImage")[0].files[0];
     var dadCategoryId = $("input[name='dadCategoryId']").val();
 
-    if (!categoryName) {
-      alert("Please enter a category name.");
-      return;
-    }
-    if (!categoryImage) {
-      alert("Please select a category image.");
-      return;
-    }
-    if (!dadCategoryId) {
-      alert("Please enter a dad category ID.");
+    if (!validateCategoryData(categoryName, categoryImage, dadCategoryId)) {
       return;
     }
 
@@ -88,11 +92,10 @@ $(document).ready(function () {
     })
       .done(function (data) {
         if (data && data.error) {
-          alert(data.error);
+          Swal.fire("Error!", "Error adding category: " + data.error, "error");
           console.log(data.error);
         } else {
-          alert("Category added successfully.");
-          console.log("Category added successfully.");
+          Swal.fire("Success!", "Category added successfully.", "success");
           exampleModal.hide();
           fetchCategory(currentPage, pageSize);
         }
@@ -105,12 +108,16 @@ $(document).ready(function () {
   // ==============================> turn on modal to update <===================================
   function TurnOnModalToUpdate() {
     if ($("input.category-checkbox:checked").length === 0) {
-      alert("Please select at least one category to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one category to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.category-checkbox:checked").length > 1) {
-      alert("Choose only one category to update.");
+      Swal.fire("Warning!", "Choose only one category to update.", "warning");
       return;
     }
 
@@ -139,13 +146,14 @@ $(document).ready(function () {
           // $("#categoryImage")[0].files[0];
           $("input[name='dadCategoryId']").val(data.dadCategoryId);
 
-          var modal = new bootstrap.Modal(
-            document.getElementById("exampleModal")
-          );
-          modal.show();
+          exampleModal.show();
           $("#exampleModalLabel").text("Update Category");
         } else {
-          alert("Error retrieving category data: " + data.error);
+          Swal.fire(
+            "Error!",
+            "Error retrieving category data: " + data.error,
+            "error"
+          );
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -159,16 +167,7 @@ $(document).ready(function () {
     var categoryImage = $("#categoryImage")[0].files[0];
     var dadCategoryId = $("input[name='dadCategoryId']").val();
 
-    if (!categoryName) {
-      alert("Please enter a category name.");
-      return;
-    }
-    if (!categoryImage) {
-      alert("Please select a category image.");
-      return;
-    }
-    if (!dadCategoryId) {
-      alert("Please enter a dad category ID.");
+    if (!validateCategoryData(categoryName, categoryImage, dadCategoryId)) {
       return;
     }
 
@@ -194,14 +193,15 @@ $(document).ready(function () {
     })
       .done(function (data) {
         if (!data.error) {
-          var modal = bootstrap.Modal.getInstance(
-            document.getElementById("exampleModal")
-          );
-          alert("Update category success!");
+          Swal.fire("Success!", "Category updated successfully!", "success");
           exampleModal.hide();
           fetchCategory(currentPage, pageSize);
         } else {
-          alert("Error updating category: " + data.error);
+          Swal.fire(
+            "Error!",
+            "Error updating category: " + data.error,
+            "error"
+          );
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -211,6 +211,8 @@ $(document).ready(function () {
 
   // ===============================> delete category <===================================
   function deleteCategory(categoryId) {
+    Swal.fire("Warning!", "Deletion is not allowed", "warning");
+    return;
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/category/delete/" + categoryId,
@@ -222,12 +224,15 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire(
+            "Error!",
+            "Error deleting category: " + data.error,
+            "error"
+          );
         }
-        alert("Delete category Success");
+        Swal.fire("Success!", "Category deleted successfully!", "success");
         trashCanModal.hide();
         fetchDeletedCategory(currentPage, pageSize);
         fetchCategory(currentPage, pageSize);
@@ -240,12 +245,16 @@ $(document).ready(function () {
   // ==============================> delete virtual category <===================================
   function deleteVirtualCategory() {
     if ($("input.category-checkbox:checked").length === 0) {
-      alert("Please select at least one category to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one category to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.category-checkbox:checked").length > 1) {
-      alert("Choose only a category to update.");
+      Swal.fire("Warning!", "Choose only a category to update.", "warning");
       return;
     }
 
@@ -283,8 +292,6 @@ $(document).ready(function () {
       deleted: true,
     };
 
-    // alert(JSON.stringify(raw_data));
-
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/category/update",
@@ -299,12 +306,11 @@ $(document).ready(function () {
       .done(function (data) {
         if (data && !data.error) {
           // debugger;
-          // success
-          alert("Delete virtual category success!");
+          Swal.fire("Success!", "Delete virtual category success.", "success");
           fetchCategory(currentPage, pageSize);
           fetchDeletedCategory(currentPage, pageSize);
         } else {
-          alert("Error updating category: " + data.error);
+          Swal.fire("Error!", "Error: " + data.error, "error");
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -393,13 +399,16 @@ $(document).ready(function () {
       .done(function (data) {
         if (data && !data.error) {
           // debugger;
-          // success
-          alert("Restore category success!");
+          Swal.fire("Success!", "Restore category success.", "success");
           trashCanModal.hide();
           fetchCategory(currentPage, pageSize);
           fetchDeletedCategory(currentPage, pageSize);
         } else {
-          alert("Error updating category: " + data.error);
+          Swal.fire(
+            "Error!",
+            "Error updating category: " + data.error,
+            "error"
+          );
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -408,7 +417,6 @@ $(document).ready(function () {
   }
 
   // ===============================> pagination <===================================
-  // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
     if (currentPage > 1) {
@@ -417,14 +425,12 @@ $(document).ready(function () {
     }
   });
 
-  // Next button click handler
   $(".btn-next").on("click", function (e) {
     e.preventDefault();
     currentPage++;
     fetchCategory(currentPage, pageSize);
   });
 
-  // Page number buttons click handlers
   $(".btn-onePage").on("click", function (e) {
     e.preventDefault();
     currentPage = 1;
@@ -443,13 +449,9 @@ $(document).ready(function () {
     fetchCategory(currentPage, pageSize);
   });
 
-  // Update pagination button states
   function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
     $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
 
-    // Adjust active class for current page button
     $(".pagination .page-item").removeClass("active");
     if (currentPage === 1) $(".btn-onePage").addClass("active");
     if (currentPage === 2) $(".btn-twoPage").addClass("active");
@@ -458,44 +460,22 @@ $(document).ready(function () {
 
   // ===============================> fetch category <================================
   function fetchCategory(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/category/page=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        updateTable(response);
-        updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/category/page=${pageNumber}&pageSize=${pageSize}`;
+    apiCall("GET", url, null, function (response) {
+      updateTable(response);
+      updatePaginationButtons();
     });
   }
-
-  fetchCategory(currentPage, pageSize);
 
   // ==============================> fetch category deleted <================================
   function fetchDeletedCategory(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/Category/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        $(".badge").text(response.length || 0);
-        updateTableDeleted(response);
-        updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/Category/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+    apiCall("GET", url, null, function (response) {
+      $(".badge").text(response.length || 0);
+      updateTableDeleted(response);
+      updatePaginationButtons();
     });
   }
-
-  fetchDeletedCategory(currentPage, pageSize);
 
   // ===============================> upload image <===================================
   function uploadImage() {
@@ -514,18 +494,46 @@ $(document).ready(function () {
       })
         .done(function (data) {
           if (data && data.fullPath) {
-            // alert(`File đã upload tại đường dẫn: ${data.fullPath}`);
+            // Swal.fire("Success!", `File upload at ${data.fullPath}`, "success");
             resolve(data.fullPath.toString());
           } else {
-            alert("Upload thất bại.");
+            Swal.fire(
+              "Error!",
+              "File upload failed. Please try again later.",
+              "error"
+            );
             reject("Upload failed.");
           }
         })
         .fail(function (jqXHR, textStatus, errorThrown) {
           console.log("Request failed:", textStatus, errorThrown);
-          alert("Đã có lỗi xảy ra khi tải lên.");
           reject(errorThrown);
         });
     });
   }
+
+  // ==========================================> api call <===========================================================
+  function apiCall(method, url, data = null, successCallback) {
+    return $.ajax({
+      url: url,
+      type: method,
+      data: data,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      success: function (response) {
+        if (successCallback) {
+          successCallback(response);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        Swal.fire("Error", "Error: " + error, "error");
+      },
+    });
+  }
+
+  // ========================================> call function <==================================================
+  fetchCategory(currentPage, pageSize);
+  fetchDeletedCategory(currentPage, pageSize);
 });

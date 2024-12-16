@@ -1,5 +1,6 @@
 $(document).ready(function () {
   var token = localStorage.getItem("admin");
+  var bestSellingProduct = [];
   // ==================================> fetch products <================================================
   function fetchProducts() {
     $.ajax({
@@ -17,7 +18,7 @@ $(document).ready(function () {
     });
   }
 
-  //
+  // ===================================> fetch order <================================================
   function fetchOrder() {
     $.ajax({
       type: "GET",
@@ -34,54 +35,70 @@ $(document).ready(function () {
     });
   }
 
-  // ---------- CHARTS ----------
-
-  // Tạo tùy chọn cấu hình cho biểu đồ thanh.
-  // BAR CHART
-  const barChartOptions = {
-    series: [
-      {
-        data: [10, 8, 6, 4, 2],
+  // ===================================> get best selling product <================================================
+  function getBestSellingProduct() {
+    $.ajax({
+      type: "GET",
+      url: `http://localhost:4006/api-admin/product/get-best-selling-product`,
+      headers: { Authorization: "Bearer " + token },
+      success: function (response) {
+        // debugger;
+        bestSellingProduct = response;
+        let productNames = bestSellingProduct.map((item) => item.productName);
+        updateChart(productNames);
+        // debugger;
       },
-    ],
-    chart: {
-      type: "bar",
-      height: 350,
-      toolbar: {
+      error: function (error) {
+        console.error("Request failed: ", error);
+      },
+    });
+  }
+
+  // =========================================> Chart <=======================================================
+  // ===================================> update chart top 5 products <================================================
+  function updateChart(productNames) {
+    const options = {
+      chart: {
+        type: "bar",
+        height: 350,
+        toolbar: {
+          show: false,
+        },
+      },
+      colors: ["#246dec", "#cc3c43", "#367952", "#f5b74f", "#4f35a1"],
+      plotOptions: {
+        bar: {
+          distributed: true,
+          borderRadius: 4,
+          horizontal: false,
+          columnWidth: "40%",
+        },
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      legend: {
         show: false,
       },
-    },
-    colors: ["#246dec", "#cc3c43", "#367952", "#f5b74f", "#4f35a1"],
-    plotOptions: {
-      bar: {
-        distributed: true,
-        borderRadius: 4,
-        horizontal: false,
-        columnWidth: "40%",
+      yaxis: {
+        title: {
+          text: "Count",
+        },
       },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    legend: {
-      show: false,
-    },
-    xaxis: {
-      categories: ["Iphone", "Samsung", "Xiaomi", "Oppo", "Vivo"],
-    },
-    yaxis: {
-      title: {
-        text: "Count",
+      xaxis: {
+        categories: productNames,
       },
-    },
-  };
+      series: [
+        {
+          name: "Sales Count",
+          data: [10, 8, 6, 4, 2],
+        },
+      ],
+    };
 
-  // chèn biểu đồ vào #bar-chart
-  const barChart = new ApexCharts(
-    document.querySelector("#bar-chart"),
-    barChartOptions
-  );
-  barChart.render();
+    const chart = new ApexCharts(document.querySelector("#bar-chart"), options);
+    chart.render();
+  }
 
   // Tạo tùy chọn cấu hình cho biểu đồ vùng.
   // AREA CHART
@@ -143,4 +160,5 @@ $(document).ready(function () {
   // =======================================> call functions <=========================================================
   fetchProducts();
   fetchOrder();
+  getBestSellingProduct();
 });

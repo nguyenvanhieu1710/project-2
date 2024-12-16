@@ -19,6 +19,7 @@ $(document).ready(function () {
   var status = 1;
   $(".btn-add-supplier").click(function () {
     status = 1;
+    $("#exampleModalLabel").text("Create Supplier");
   });
 
   $(".btn-update-supplier").click(function () {
@@ -29,7 +30,6 @@ $(document).ready(function () {
   $(".btn-delete-supplier").click(function () {
     status = 3;
     deleteVirtualSupplier();
-    // deleteSupplier();
   });
 
   $(".btn-handle-func").click(function () {
@@ -39,10 +39,42 @@ $(document).ready(function () {
     if (status == 2) {
       updateSupplier();
     }
-    // if (status == 3) {
-    //   deleteSupplier();
-    // }
   });
+
+  // ===================================> handle validate <===================================
+  function validateSupplierForm() {
+    const supplierName = document
+      .querySelector("input[name='supplierName']")
+      .value.trim();
+    const phoneNumber = document
+      .querySelector("input[name='phoneNumber']")
+      .value.trim();
+    const address = document
+      .querySelector("input[name='address']")
+      .value.trim();
+
+    if (!supplierName) {
+      Swal.fire("Warning!", "Please enter a supplier name!", "warning");
+      return false;
+    }
+
+    const phoneRegex = /^\d{10,15}$/;
+    if (!phoneNumber || !phoneRegex.test(phoneNumber)) {
+      Swal.fire(
+        "Warning!",
+        "Please enter a valid phone number (10-15 digits)!",
+        "warning"
+      );
+      return false;
+    }
+
+    if (!address) {
+      Swal.fire("Warning!", "Please enter an address!", "warning");
+      return false;
+    }
+
+    return true;
+  }
 
   // ===================================> add supplier <===========================================
   function addSupplier() {
@@ -50,19 +82,7 @@ $(document).ready(function () {
     var phoneNumber = $("input[name='phoneNumber']").val();
     var address = $("input[name='address']").val();
 
-    // Basic validation
-    if (!supplierName) {
-      alert("Please enter a supplier name.");
-      return;
-    }
-    if (!phoneNumber) {
-      alert("Please enter a phone number.");
-      return;
-    }
-    if (!address) {
-      alert("Please enter an address.");
-      return;
-    }
+    if (!validateSupplierForm()) return;
 
     var raw_data = {
       supplierId: 0,
@@ -71,6 +91,7 @@ $(document).ready(function () {
       address: address,
       deleted: false,
     };
+
     // debugger;
     $.ajax({
       type: "POST",
@@ -84,15 +105,14 @@ $(document).ready(function () {
       data: JSON.stringify(raw_data),
     })
       .done(function (data) {
-        // console.log(data);
         // debugger;
         if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error);
-          console.log(data.error);
+          Swal.fire("Error!", "Add Supplier Failed: " + data.error, "error");
+          // console.log(data.error);
         } else {
-          alert("Add Supplier Success");
-          console.log("Add Supplier Success");
-          fetchSuppliers(1, 5);
+          Swal.fire("Success!", "Add Supplier Success.", "success");
+          exampleModal.hide();
+          fetchSuppliers(currentPage, pageSize);
         }
       })
       .fail(function () {
@@ -104,21 +124,23 @@ $(document).ready(function () {
   // ===================================> update supplier <===========================================
   function TurnOnModalToUpdate() {
     if ($("input.supplier-checkbox:checked").length === 0) {
-      alert("Please select at least one supplier to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one supplier to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.supplier-checkbox:checked").length > 1) {
-      alert("Choose only a supplier to update.");
+      Swal.fire("Warning!", "Choose only a supplier to update.", "warning");
       return;
     }
 
     $(".supplier-checkbox:checked").each(function () {
-      // Lấy dòng (tr) chứa checkbox này
       let row = $(this).closest("tr");
 
-      // Lấy thông tin từ các cột trong dòng
-      let id = row.find("td").eq(0).text(); // Cột ID
+      let id = row.find("td").eq(0).text();
 
       supplierId = id;
     });
@@ -137,30 +159,22 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         supplierFound = data;
         // debugger;
         if (data != null && data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire("Error!", "Error finding supplier: " + data.error, "error");
           console.log(data.error);
         } else {
-          // alert("Find Supplier Success");
-          // console.log("Find Supplier Success");
-
+          // debugger;
           $("input[name='supplierName']").val(supplierFound.supplierName);
           $("input[name='phoneNumber']").val(supplierFound.phoneNumber);
           $("input[name='address']").val(supplierFound.address);
 
-          // Mở modal sau khi dữ liệu đã được cập nhật
-          // $("#exampleModal").modal("show");
-          var modal = new bootstrap.Modal(
-            document.getElementById("exampleModal")
-          );
-          modal.show();
+          exampleModal.show();
 
-          $("#exampleModalLabel").text("Update Supplier"); // Thay đổi tiêu đề modal
-          $(".modal-title").text("Update Supplier"); // Nếu bạn muốn đặt tiêu đề từ class modal-title
+          $("#exampleModalLabel").text("Update Supplier");
+          $(".modal-title").text("Update Supplier");
         }
       })
       .fail(function () {
@@ -170,11 +184,12 @@ $(document).ready(function () {
 
   // ===================================> update supplier <===========================================
   function updateSupplier() {
-    // alert("Update Supplier Success");
     // debugger;
     var supplierName = $("input[name='supplierName']").val();
     var phoneNumber = $("input[name='phoneNumber']").val();
     var address = $("input[name='address']").val();
+
+    if (!validateSupplierForm()) return;
 
     var raw_data = {
       supplierId: supplierId,
@@ -196,19 +211,18 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire(
+            "Error!",
+            "Error updating supplier: " + data.error,
+            "error"
+          );
+        } else {
+          exampleModal.hide();
+          Swal.fire("Success!", "Supplier updated successfully.", "success");
+          fetchSuppliers(currentPage, pageSize);
         }
-        // Đóng modal sau khi cập nhật thành công
-        // $("#exampleModal").modal("hide");
-        var modal = new bootstrap.Modal(
-          document.getElementById("exampleModal")
-        );
-        modal.hide();
-        alert("Update Supplier Success");
-        fetchSuppliers(1, 5);
       })
       .fail(function () {
         console.log("Request failed: ", textStatus, errorThrown);
@@ -216,29 +230,9 @@ $(document).ready(function () {
   }
 
   // ===================================> delete supplier <===========================================
-  function deleteSupplier() {
-    if ($("input.supplier-checkbox:checked").length === 0) {
-      alert("Please select at least one supplier to update.");
-      return;
-    }
-
-    if ($("input.supplier-checkbox:checked").length > 1) {
-      alert("Choose only a supplier to update.");
-      return;
-    }
-
-    $(".supplier-checkbox:checked").each(function () {
-      // Lấy dòng (tr) chứa checkbox này
-      let row = $(this).closest("tr");
-
-      // Lấy thông tin từ các cột trong dòng
-      let id = row.find("td").eq(0).text(); // Cột ID
-
-      supplierId = id;
-    });
-
-    // debugger;
-
+  function deleteSupplier(supplierId) {
+    Swal.fire("Warning!", "Deletion is not allowed", "warning");
+    return;
     $.ajax({
       type: "POST",
       url: "http://localhost:4006/api-admin/Supplier/delete/" + supplierId,
@@ -250,13 +244,16 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire(
+            "Error!",
+            "Error deleting supplier: " + data.error,
+            "error"
+          );
         }
-        alert("Delete Supplier Success");
-        fetchSuppliers(1, 5);
+        Swal.fire("Success!", "Supplier deleted successfully.", "success");
+        fetchSuppliers(currentPage, pageSize);
       })
       .fail(function () {
         console.log("Request failed: ", textStatus, errorThrown);
@@ -266,12 +263,16 @@ $(document).ready(function () {
   // ===================================> delete virtual supplier <===========================================
   function deleteVirtualSupplier() {
     if ($("input.supplier-checkbox:checked").length === 0) {
-      alert("Please select at least one supplier to update.");
+      Swal.fire(
+        "Warning!",
+        "Please select at least one supplier to update.",
+        "warning"
+      );
       return;
     }
 
     if ($("input.supplier-checkbox:checked").length > 1) {
-      alert("Choose only a supplier to update.");
+      Swal.fire("Warning!", "Choose only a supplier to update.", "warning");
       return;
     }
 
@@ -312,12 +313,14 @@ $(document).ready(function () {
       contentType: false,
     })
       .done(function (data) {
-        // console.log(data);
-        // alert(data);
+        // debugger;
         if (data.error != null && data.error != "undefined") {
-          alert(data.error);
+          Swal.fire(
+            "Error!",
+            "Delete Virtual Supplier Failed: " + data.error,
+            "error"
+          );
         }
-        alert("Delete Virtual Supplier Success");
         fetchDeletedSuppliers(currentPage, pageSize);
         fetchSuppliers(currentPage, pageSize);
       })
@@ -444,13 +447,16 @@ $(document).ready(function () {
       .done(function (data) {
         if (data && !data.error) {
           // debugger;
-          // success
-          alert("Restore supplier success!");
+          Swal.fire("Success!", "Restore supplier success!", "success");
           trashCanModal.hide();
           fetchSuppliers(currentPage, pageSize);
           fetchDeletedSuppliers(currentPage, pageSize);
         } else {
-          alert("Error updating supplier: " + data.error);
+          Swal.fire(
+            "Error!",
+            "Error updating supplier: " + data.error,
+            "error"
+          );
         }
       })
       .fail(function (jqXHR, textStatus, errorThrown) {
@@ -459,7 +465,6 @@ $(document).ready(function () {
   }
 
   // ======================================> pagination <=============================================================
-  // Previous button click handler
   $(".btn-previous").on("click", function (e) {
     e.preventDefault();
     if (currentPage > 1) {
@@ -468,14 +473,12 @@ $(document).ready(function () {
     }
   });
 
-  // Next button click handler
   $(".btn-next").on("click", function (e) {
     e.preventDefault();
     currentPage++;
     fetchSuppliers(currentPage, pageSize);
   });
 
-  // Page number buttons click handlers
   $(".btn-onePage").on("click", function (e) {
     e.preventDefault();
     currentPage = 1;
@@ -494,13 +497,9 @@ $(document).ready(function () {
     fetchSuppliers(currentPage, pageSize);
   });
 
-  // Update pagination button states
   function updatePaginationButtons() {
-    // if đang ở trang đầu tiên thì ẩn btn previous
     $(".btn-previous").toggleClass("disabled", currentPage === 1);
-    // $(".btn-next").toggleClass("disabled", currentPage === totalPages);
 
-    // Adjust active class for current page button
     $(".pagination .page-item").removeClass("active");
     if (currentPage === 1) $(".btn-onePage").addClass("active");
     if (currentPage === 2) $(".btn-twoPage").addClass("active");
@@ -509,42 +508,45 @@ $(document).ready(function () {
 
   // ======================================> fetch supplier <=============================================================
   function fetchSuppliers(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/supplier/page=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        updateTable(response);
-        updatePaginationButtons();
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/supplier/page=${pageNumber}&pageSize=${pageSize}`;
+    apiCall("GET", url, null, function (response) {
+      updateTable(response);
+      updatePaginationButtons();
     });
   }
-
-  fetchSuppliers(currentPage, pageSize);
 
   // =======================================> fetch deleted supplier <=============================================================
   function fetchDeletedSuppliers(pageNumber, pageSize) {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/supplier/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        $(".badge").text(response.length || 0);
-        updateTableDeleted(response);
-        updatePaginationButtons();
-        // debugger;
+    const url = `http://localhost:4006/api-admin/supplier/get-data-deleted-pagination?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+    apiCall("GET", url, null, function (response) {
+      $(".badge").text(response.length || 0);
+      updateTableDeleted(response);
+      updatePaginationButtons();
+    });
+  }
+
+  // ==========================================> api call <===========================================================
+  function apiCall(method, url, data = null, successCallback) {
+    return $.ajax({
+      url: url,
+      type: method,
+      data: data,
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-      error: function (error) {
-        console.error("Request failed: ", error);
+      success: function (response) {
+        if (successCallback) {
+          successCallback(response);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        Swal.fire("Error", "Error: " + error, "error");
       },
     });
   }
 
+  // =======================================> call function <=============================================================
+  fetchSuppliers(currentPage, pageSize);
   fetchDeletedSuppliers(currentPage, pageSize);
 });
