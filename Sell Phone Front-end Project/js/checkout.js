@@ -10,6 +10,12 @@ document
   .getElementById("placeOrderBtn")
   .addEventListener("click", function (e) {
     e.preventDefault();
+
+    // field
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const address = document.getElementById("address").value;
+
     // các input radio có name là payment
     const paymentMethods = document.getElementsByName("payment");
     let selectedMethod = null;
@@ -83,7 +89,7 @@ document
       staffId: staffId,
       orderStatus: "Pending Confirmation",
       dayBuy: isoString,
-      deliveryAddress: "Ha Noi",
+      deliveryAddress: address ? address : "Hung Yen",
       evaluate: 5,
       deleted: false,
       listjson_orderDetail: orderDetail,
@@ -100,34 +106,41 @@ document
       data: JSON.stringify(order),
       processData: false,
       success: function (data) {
-        Swal.fire("Success", "Order created successfully", "success");
-        // delete product from cart in local storage
-        var updatedCart = cart.filter((item) => item.selected !== true);
-        localStorage.setItem("cart", JSON.stringify(updatedCart));
+        Swal.fire("Success", "Order created successfully", "success").then(
+          () => {
+            // delete product from cart in local storage
+            var updatedCart = cart.filter((item) => item.selected !== true);
+            localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+            // ============================> change page <=====================================
+            // debugger;
+            switch (selectedMethod) {
+              case "payment-1":
+                window.location.href = "payment.html";
+                break;
+              case "payment-2":
+                Swal.fire(
+                  "Success",
+                  "Please wait for order confirmation",
+                  "success"
+                );
+                window.location.href = "order.html";
+                break;
+              case "payment-3":
+                window.location.href = "payment.html";
+                break;
+              default:
+                Swal.fire("Error", "Invalid payment method!", "error");
+                break;
+            }
+          }
+        );
       },
       error: function (xhr, status, error) {
         console.error(error);
       },
     });
     // ===========================> end add order <=============================================
-
-    // ============================> change page <=====================================
-    // debugger;
-    switch (selectedMethod) {
-      case "payment-1":
-        window.location.href = "payment.html";
-        break;
-      case "payment-2":
-        Swal.fire("Success", "Please wait for order confirmation", "success");
-        window.location.href = "order.html";
-        break;
-      case "payment-3":
-        window.location.href = "payment.html";
-        break;
-      default:
-        Swal.fire("Error", "Invalid payment method!", "error");
-        break;
-    }
   });
 
 //   ===========================> get staffId <=====================================

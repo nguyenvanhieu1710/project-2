@@ -42,3 +42,12 @@ body {
   cursor: pointer;
   border: solid 1px #ba68c8;
 }
+
+/* Back To Home */
+.btn-back-to-home {
+  position: fixed;
+  top: 5px;
+  left: 10px;
+  cursor: pointer;
+  z-index: 9999;
+}

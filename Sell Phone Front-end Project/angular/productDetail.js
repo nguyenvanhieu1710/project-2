@@ -123,7 +123,11 @@ app.controller("ProductDetailCtrl", function ($scope, $http) {
     }
 
     $scope.setCart(cart);
-    alert(`${product.productName} has been added to the cart!`);
+    Swal.fire(
+      "Success!",
+      `${product.productName} has been added to the cart!`,
+      "success"
+    );
   };
 
   // ======================================> Remove from cart <================================================

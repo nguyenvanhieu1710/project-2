@@ -106,43 +106,35 @@
                             <!-- /Wishlist -->
 
                             <!-- Cart -->
-                            <div class="dropdown">
+                            <div class="dropdown shopping-cart">
                                 <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-shopping-cart"></i>
                                     <span>Your Cart</span>
-                                    <div class="qty">3</div>
+                                    <div class="qty">{{ totalQuantity }}</div>
                                 </a>
                                 <div class="cart-dropdown">
                                     <div class="cart-list">
-                                        <div class="product-widget">
+                                        <!-- thêm track by $index để tránh bị trùng lặp -->
+                                        <div class="product-widget" ng-repeat="item in cart track by $index">
                                             <div class="product-img">
-                                                <img src="./img/product01.png" alt="">
+                                                <img ng-src="{{ item.image }}" alt="Product Image">
                                             </div>
                                             <div class="product-body">
-                                                <h3 class="product-name"><a href="#">product name goes here</a></h3>
-                                                <h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
+                                                <h3 class="product-name"><a href="#">{{ item.productName }}</a></h3>
+                                                <h4 class="product-price"><span class="qty">x{{ item.quantity }}</span>
+                                                    ${{ item.price }}</h4>
                                             </div>
-                                            <button class="delete"><i class="fa fa-close"></i></button>
-                                        </div>
-
-                                        <div class="product-widget">
-                                            <div class="product-img">
-                                                <img src="./img/product02.png" alt="">
-                                            </div>
-                                            <div class="product-body">
-                                                <h3 class="product-name"><a href="#">product name goes here</a></h3>
-                                                <h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
-                                            </div>
-                                            <button class="delete"><i class="fa fa-close"></i></button>
+                                            <button class="delete" ng-click="removeFromCart(item)"><i
+                                                    class="fa fa-close"></i></button>
                                         </div>
                                     </div>
                                     <div class="cart-summary">
-                                        <small>3 Item(s) selected</small>
-                                        <h5>SUBTOTAL: $2940.00</h5>
+                                        <small>{{ totalQuantity }} Item(s) selected</small>
+                                        <h5>SUBTOTAL: ${{ subtotal }}</h5>
                                     </div>
                                     <div class="cart-btns">
-                                        <a href="#">View Cart</a>
-                                        <a href="#">Checkout <i class="fa fa-arrow-circle-right"></i></a>
+                                        <a href="shoppingCart.html">View Cart</a>
+                                        <a href="checkout.html">Checkout <i class="fa fa-arrow-circle-right"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -180,7 +172,7 @@
                     <li ng-click="getOrderByStatus('Pending Confirmation')"><a href="#">Pending Confirmation</a></li>
                     <li ng-click="getOrderByStatus('Shipping')"><a href="#">Shipping</a></li>
                     <li ng-click="getOrderByStatus('Delivered')"><a href="#">Delivered</a></li>
-                    <li ng-click="getOrderByStatus('Cancelled')"><a href="#">Cancelled</a></li>
+                    <li ng-click="getOrderByStatus('Canceled')"><a href="#">Canceled</a></li>
                 </ul>
                 <!-- /NAV -->
             </div>

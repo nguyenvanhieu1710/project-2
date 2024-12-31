@@ -105,13 +105,6 @@ app.controller("OrderCtrl", function ($scope, $http, $timeout) {
     return totalPrice;
   };
 
-  // =============================================> Cancel Order <===============================================
-  $scope.cancelOrder = function (orderId) {
-    // Perform cancellation logic (e.g., call API to cancel order)
-    console.log("Canceling order:", orderId);
-    Swal.fire("Canceled", "Order #" + orderId + " has been canceled.", "info");
-  };
-
   // ===========================================> View Order Details <===============================================
   $scope.viewDetails = function (order) {
     $scope.selectedOrder = order;
@@ -131,6 +124,74 @@ app.controller("OrderCtrl", function ($scope, $http, $timeout) {
       });
   };
 
+  // ==============================================> Handle Cart <===============================================
+  $scope.getCart = function () {
+    return JSON.parse(localStorage.getItem("cart")) || [];
+  };
+
+  $scope.setCart = function (cart) {
+    $scope.cart = cart;
+    localStorage.setItem("cart", JSON.stringify(cart));
+    $scope.updateCartSummary();
+  };
+  //================================================> Cart <=================================================
+  $scope.loadCart = function () {
+    // debugger;
+    $scope.cart = JSON.parse(localStorage.getItem("cart")) || [];
+    $scope.updateCartSummary();
+  };
+
+  // ========================================> Add to cart <================================================
+  $scope.addToCart = function (product) {
+    // debugger;
+    let cart = $scope.getCart();
+
+    let existingProduct = cart.find(
+      (item) => item.productId === product.productId
+    );
+
+    if (existingProduct) {
+      existingProduct.quantity += 1;
+    } else {
+      cart.push({
+        productId: product.productId,
+        productName: product.productName,
+        price: product.price,
+        quantity: 1,
+        image: product.productImage,
+        selected: false,
+      });
+    }
+
+    $scope.setCart(cart);
+    Swal.fire(
+      "Success!",
+      `${product.productName} has been added to the cart!`,
+      "success"
+    );
+  };
+
+  // ======================================> Remove from cart <================================================
+  $scope.removeFromCart = function (product) {
+    $scope.cart = $scope.cart.filter(
+      (item) => item.productId !== product.productId
+    );
+    $scope.setCart($scope.cart);
+  };
+
+  // ======================================> Update cart summary <================================================
+  $scope.updateCartSummary = function () {
+    $scope.totalQuantity = ($scope.cart || []).reduce(
+      (total, item) => total + (item.quantity || 0),
+      0
+    );
+    $scope.subtotal = ($scope.cart || []).reduce(
+      (total, item) => total + (item.price * item.quantity || 0),
+      0
+    );
+  };
+
   // ===============================================> call function <===============================================
   $scope.getAllOrderOfUser();
+  $scope.loadCart();
 });

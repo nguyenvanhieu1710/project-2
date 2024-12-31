@@ -23,6 +23,14 @@ app.controller("IndexCtrl", function ($scope, $http, $timeout) {
     });
   };
 
+  // =============================================> Get Stars <===============================================
+  $scope.getStars = function (star) {
+    star = parseInt(star) || 0;
+    const fullStars = new Array(star).fill("filled");
+    const emptyStars = new Array(5 - star).fill("empty");
+    return fullStars.concat(emptyStars);
+  };
+
   // ==========================================> Best Selling Product <=====================================================
   $scope.DisPlayBestSellingProduct = function () {
     $scope.apiCall(
@@ -105,7 +113,11 @@ app.controller("IndexCtrl", function ($scope, $http, $timeout) {
     }
 
     $scope.setCart(cart);
-    alert(`${product.productName} has been added to the cart!`);
+    Swal.fire(
+      "Success!",
+      `${product.productName} has been added to the cart!`,
+      "success"
+    );
   };
 
   // ======================================> Remove from cart <================================================

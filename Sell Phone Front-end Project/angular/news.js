@@ -5,6 +5,7 @@ app.controller("NewsCtrl", function ($scope, $http) {
   $scope.newsList;
   $scope.selectedNews;
   $scope.news;
+  $scope.userIdList = [];
   $scope.status; // 0: create, 1: update
 
   // ==============================================> handle status <===============================================
@@ -185,9 +186,9 @@ app.controller("NewsCtrl", function ($scope, $http) {
 
   // ============================================> upload image <================================
   async function uploadImage() {
-    const fileInput = document.getElementById("newsImage").files[0]; // Lấy tệp ảnh từ input
+    const fileInput = document.getElementById("newsImage").files[0];
     if (!fileInput) {
-      alert("Chưa chọn tệp ảnh!");
+      Swal.fire("Error!", "Please select an image.", "error");
       return null;
     }
 
@@ -195,7 +196,6 @@ app.controller("NewsCtrl", function ($scope, $http) {
     formData.append("file", fileInput);
 
     try {
-      // Gửi yêu cầu POST tới API để tải ảnh lên
       const response = await $http({
         method: "POST",
         url: "http://localhost:4006/api-user/news/upload-image",
@@ -203,29 +203,75 @@ app.controller("NewsCtrl", function ($scope, $http) {
           Authorization: "Bearer " + token,
         },
         data: formData,
-        transformRequest: angular.identity, // Giữ nguyên FormData
+        transformRequest: angular.identity,
         headers: { "Content-Type": undefined },
       });
 
-      // Kiểm tra nếu API trả về đường dẫn đầy đủ của ảnh
       if (response.data && response.data.fullPath) {
-        return response.data.fullPath.toString(); // Trả về đường dẫn đầy đủ của ảnh
+        return response.data.fullPath.toString();
       } else {
-        alert("Upload thất bại.");
+        Swal.fire("Error!", "Upload image failed!", "error");
         return null;
       }
     } catch (error) {
       console.error("Request failed:", error);
-      alert("Đã có lỗi xảy ra khi tải lên.");
+      Swal.fire("Error!", "Request failed: " + error, "error");
       return null;
     }
   }
+
+  // ==========================================> get user id list <===========================================================
+  $scope.getUserIdList = function () {
+    $scope.apiCall(current_url + "/api-user/users/get-all", function (data) {
+      $scope.userIdList = data;
+      // debugger;
+    });
+  };
+
+  // ==========================================> render user id list <===========================================================
+  let isListVisible = false;
+  $scope.renderUserIdList = function () {
+    const personPostingListDiv = document.getElementById("personPostingList");
+    const toggleButton = document.getElementById("btnViewPersonPostingList");
+
+    if (isListVisible) {
+      personPostingListDiv.style.display = "none";
+      toggleButton.textContent = "View Person Posting Id List";
+      isListVisible = false;
+    } else {
+      personPostingListDiv.innerHTML = "";
+      if ($scope.userIdList.length === 0) {
+        personPostingListDiv.innerHTML = `
+          <div class="alert alert-info">No users found. Please fetch the list first.</div>
+        `;
+      } else {
+        const listGroup = document.createElement("ul");
+        listGroup.className = "list-group";
+
+        $scope.userIdList.forEach((userId) => {
+          const listItem = document.createElement("li");
+          listItem.className = "list-group-item";
+          listItem.textContent = `User ID: ${userId.userId}`;
+          listGroup.appendChild(listItem);
+        });
+
+        personPostingListDiv.appendChild(listGroup);
+      }
+
+      personPostingListDiv.style.display = "block";
+      toggleButton.textContent = "Hide Person Posting Id List";
+      isListVisible = true;
+    }
+  };
 
   // ==============================================> call api <===============================================
   $scope.apiCall = function (url, successCallback) {
     $http({
       method: "GET",
       url: url,
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     })
       .then(function (response) {
         successCallback(response.data);
@@ -237,4 +283,5 @@ app.controller("NewsCtrl", function ($scope, $http) {
 
   // ============================================> call function <===================================
   $scope.loadNews();
+  $scope.getUserIdList();
 });

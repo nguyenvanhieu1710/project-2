@@ -256,7 +256,8 @@
 						<h2 class="product-name">{{product.productName}}</h2>
 						<div>
 							<div class="product-rating">
-								<i class="fa" ng-repeat="star in getStars(product.star) track by $index"
+								<i class="fa" style="margin-right: 1px;"
+									ng-repeat="star in getStars(product.star) track by $index"
 									ng-class="star === 'filled' ? 'fa-star' : 'fa-star-o'"></i>
 							</div>
 
@@ -576,11 +577,9 @@
 												<h4 class="product-price">${{product.price}} <del
 														class="product-old-price">${{product.price * 3}}</del></h4>
 												<div class="product-rating">
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
+													<i class="fa" style="margin-right: 1px;"
+														ng-repeat="star in getStars(product.star) track by $index"
+														ng-class="star === 'filled' ? 'fa-star' : 'fa-star-o'"></i>
 												</div>
 												<div class="product-btns">
 													<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span

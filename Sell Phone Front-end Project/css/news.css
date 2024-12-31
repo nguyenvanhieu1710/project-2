@@ -1020,3 +1020,20 @@ a:hover {
   font-size: 1.05rem;
 }
 /*# sourceMappingURL=style_1.css.map */
+
+/* back to home */
+.btn-back-to-home {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  cursor: pointer;
+  z-index: 9999;
+}
+
+.btn-open-modal-create {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  z-index: 9999;
+}

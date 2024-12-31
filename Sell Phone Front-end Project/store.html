@@ -217,11 +217,13 @@
 						<div class="checkbox-filter">
 							<div class="input-checkbox" ng-repeat="category in categoryList">
 								<input type="checkbox" id="category-{{category.categoryId}}"
-									ng-model="category.selected" ng-change="filterProductsByCategory()">
+									ng-model="selectedCategories[category.categoryId]"
+									ng-change="filterProductsByCategory()">
 								<label for="category-{{category.categoryId}}">
 									<span></span>
+									<span ng-style="{'display': 'none'}">{{category.categoryId}}</span>
 									{{category.categoryName}}
-									<small>({{category.productCount}})</small>
+									<small>({{getProductCountForCategory(category.categoryId)}})</small>
 								</label>
 							</div>
 
@@ -439,11 +441,9 @@
 									<h4 class="product-price">${{x.price}} <del class="product-old-price">$990.00</del>
 									</h4>
 									<div class="product-rating">
-										<i class="fa fa-star"></i>
-										<i class="fa fa-star"></i>
-										<i class="fa fa-star"></i>
-										<i class="fa fa-star"></i>
-										<i class="fa fa-star"></i>
+										<i class="fa" style="margin-right: 1px;"
+											ng-repeat="star in getStars(x.star) track by $index"
+											ng-class="star === 'filled' ? 'fa-star' : 'fa-star-o'"></i>
 									</div>
 									<div class="product-btns">
 										<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span

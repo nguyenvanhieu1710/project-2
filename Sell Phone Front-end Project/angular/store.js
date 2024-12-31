@@ -37,6 +37,14 @@ app.controller("StoreCtrl", function ($scope, $http) {
     );
   };
 
+  // =============================================> Get Stars <===============================================
+  $scope.getStars = function (star) {
+    star = parseInt(star) || 0;
+    const fullStars = new Array(star).fill("filled");
+    const emptyStars = new Array(5 - star).fill("empty");
+    return fullStars.concat(emptyStars);
+  };
+
   // =========================================> Best Selling Product <========================================================
   $scope.DisPlayBestSellingProduct = function () {
     $scope.apiCall(
@@ -73,6 +81,9 @@ app.controller("StoreCtrl", function ($scope, $http) {
 
   // ===========================================> Product Count For Category <=====================================================
   $scope.getProductCountForCategory = function (categoryId) {
+    if (!$scope.productList || !Array.isArray($scope.productList)) {
+      return 0;
+    }
     return $scope.productList.filter(function (product) {
       return product.categoryId === categoryId;
     }).length;
@@ -185,7 +196,11 @@ app.controller("StoreCtrl", function ($scope, $http) {
     }
 
     $scope.setCart(cart);
-    alert(`${product.productName} has been added to the cart!`);
+    Swal.fire(
+      "Success!",
+      `${product.productName} has been added to the cart!`,
+      "success"
+    );
   };
 
   // ======================================> Remove from cart <================================================

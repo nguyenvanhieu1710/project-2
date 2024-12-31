@@ -32,6 +32,7 @@ app.controller("CartCtrl", function ($scope, $http) {
     $scope.cart = $scope.cart.filter(
       (item) => item.productId !== product.productId
     );
+    Swal.fire("Success!", "Remove product from cart successfully!", "success");
     $scope.updateCartInStorage();
   };
 
@@ -51,7 +52,7 @@ app.controller("CartCtrl", function ($scope, $http) {
   // =====================================> Update quantity <===========================================
   $scope.updateQuantity = function (productId, quantity) {
     if (quantity < 1) {
-      alert("Quantity must be greater than zero.");
+      Swal.fire("Warning", "Quantity must be greater than zero.", "warning");
       return;
     }
 
@@ -59,7 +60,11 @@ app.controller("CartCtrl", function ($scope, $http) {
       (item) => item.productId === productId
     );
     if (product && quantity > product.quantity) {
-      alert(`Quantity cannot be greater than ${product.quantity}.`);
+      Swal.fire(
+        "Warning",
+        `Quantity cannot be greater than ${product.quantity}.`,
+        "warning"
+      );
       return;
     }
 

@@ -366,11 +366,9 @@
 												<h4 class="product-price">${{product.price}} <del
 														class="product-old-price">${{product.price * 3}}</del></h4>
 												<div class="product-rating">
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
+													<i class="fa" style="margin-right: 1px;"
+														ng-repeat="star in getStars(product.star) track by $index"
+														ng-class="star === 'filled' ? 'fa-star' : 'fa-star-o'"></i>
 												</div>
 												<div class="product-btns">
 													<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span
@@ -1334,15 +1332,18 @@
 
 			</div>
 			<ul class="messages">
-				<li class="other">asdasdasasdasdasasdasdasasdasdasasdasdasasdasdasasdasdas</li>
-				<li class="other">Are we dogs??? 🐶</li>
-				<li class="self">no... we're human</li>
-				<li class="other">are you sure???</li>
-				<li class="self">yes.... -___-</li>
-				<li class="other">if we're not dogs.... we might be monkeys 🐵</li>
-				<li class="self">i hate you</li>
-				<li class="other">don't be so negative! here's a banana 🍌</li>
-				<li class="self">......... -___-</li>
+				<li class="other">Hi Shop, I’d like to ask about the XYZ phone.</li>
+				<li class="self">Hello! Sure, what would you like to know about the product?</li>
+				<li class="other">Is this phone still in stock?</li>
+				<li class="self">Yes, it’s currently in stock. Which color are you interested in?</li>
+				<li class="other">I’m deciding between black and white. Is there any price difference?</li>
+				<li class="self">No, both colors are priced the same at 12,990,000 VND. We’re also offering a 5%
+					discount right now!</li>
+				<li class="other">Oh, are there any accessories included?</li>
+				<li class="self">Yes, when purchasing this phone, you’ll receive a free Bluetooth headset and a phone
+					case.</li>
+				<li class="other">Alright, thank you. I’ll think about it and place an order later.</li>
+				<li class="self">Sure, feel free to reach out if you need any further assistance. Thank you!</li>
 			</ul>
 			<div class="footer">
 				<div class="text-box" contenteditable="true" disabled="true"></div>
@@ -1365,10 +1366,10 @@
 	<script src="js/index.js"></script>
 	<script src="js/global.js"></script>
 	<script>
-		var user = localStorage.getItem('user');
-		if (!user) {
-			window.location.href = 'login.html';
-		}		
+		// var user = localStorage.getItem('user');
+		// if (!user) {
+		// 	window.location.href = 'login.html';
+		// }		
 	</script>
 </body>
 

@@ -101,43 +101,35 @@
 							<!-- /Wishlist -->
 
 							<!-- Cart -->
-							<div class="dropdown">
+							<div class="dropdown shopping-cart">
 								<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
 									<i class="fa fa-shopping-cart"></i>
 									<span>Your Cart</span>
-									<div class="qty">3</div>
+									<div class="qty">{{ totalQuantity }}</div>
 								</a>
 								<div class="cart-dropdown">
 									<div class="cart-list">
-										<div class="product-widget">
+										<!-- thêm track by $index để tránh bị trùng lặp -->
+										<div class="product-widget" ng-repeat="item in cart track by $index">
 											<div class="product-img">
-												<img src="./img/product01.png" alt="">
+												<img ng-src="{{ item.image }}" alt="Product Image">
 											</div>
 											<div class="product-body">
-												<h3 class="product-name"><a href="#">product name goes here</a></h3>
-												<h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
+												<h3 class="product-name"><a href="#">{{ item.productName }}</a></h3>
+												<h4 class="product-price"><span class="qty">x{{ item.quantity }}</span>
+													${{ item.price }}</h4>
 											</div>
-											<button class="delete"><i class="fa fa-close"></i></button>
-										</div>
-
-										<div class="product-widget">
-											<div class="product-img">
-												<img src="./img/product02.png" alt="">
-											</div>
-											<div class="product-body">
-												<h3 class="product-name"><a href="#">product name goes here</a></h3>
-												<h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
-											</div>
-											<button class="delete"><i class="fa fa-close"></i></button>
+											<button class="delete" ng-click="removeFromCart(item)"><i
+													class="fa fa-close"></i></button>
 										</div>
 									</div>
 									<div class="cart-summary">
-										<small>3 Item(s) selected</small>
-										<h5>SUBTOTAL: $2940.00</h5>
+										<small>{{ totalQuantity }} Item(s) selected</small>
+										<h5>SUBTOTAL: ${{ subtotal }}</h5>
 									</div>
 									<div class="cart-btns">
-										<a href="#">View Cart</a>
-										<a href="#">Checkout <i class="fa fa-arrow-circle-right"></i></a>
+										<a href="shoppingCart.html">View Cart</a>
+										<a href="checkout.html">Checkout <i class="fa fa-arrow-circle-right"></i></a>
 									</div>
 								</div>
 							</div>
@@ -172,7 +164,7 @@
 				<div class="col-md-12">
 					<h3 class="breadcrumb-header">Checkout</h3>
 					<ul class="breadcrumb-tree">
-						<li><a href="#">Home</a></li>
+						<li><a href="index.html">Home</a></li>
 						<li class="active">Checkout</li>
 					</ul>
 				</div>
@@ -196,48 +188,15 @@
 						<div class="section-title">
 							<h3 class="title">Billing address</h3>
 						</div>
-						<!-- <div class="form-group">
-							<input class="input" type="text" name="first-name" placeholder="First Name">
+						<div class="form-group">
+							<input id="name" class="input" type="text" name="name" placeholder="Name">
 						</div>
 						<div class="form-group">
-							<input class="input" type="text" name="last-name" placeholder="Last Name">
-						</div> -->
-						<div class="form-group">
-							<input class="input" type="text" name="name" placeholder="Name">
+							<input id="email" class="input" type="email" name="email" placeholder="Email">
 						</div>
 						<div class="form-group">
-							<input class="input" type="email" name="email" placeholder="Email">
+							<input id="address" class="input" type="text" name="address" placeholder="Address">
 						</div>
-						<div class="form-group">
-							<input class="input" type="text" name="address" placeholder="Address">
-						</div>
-						<div class="form-group">
-							<input class="input" type="text" name="city" placeholder="City">
-						</div>
-						<div class="form-group">
-							<input class="input" type="text" name="country" placeholder="Country">
-						</div>
-						<!-- <div class="form-group">
-							<input class="input" type="text" name="zip-code" placeholder="ZIP Code">
-						</div> -->
-						<!-- <div class="form-group">
-							<input class="input" type="tel" name="tel" placeholder="Telephone">
-						</div> -->
-						<!-- <div class="form-group">
-							<div class="input-checkbox">
-								<input type="checkbox" id="create-account">
-								<label for="create-account">
-									<span></span>
-									Create Account?
-								</label>
-								<div class="caption">
-									<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-										incididunt.</p>
-									<input class="input" type="password" name="password"
-										placeholder="Enter Your Password">
-								</div>
-							</div>
-						</div> -->
 					</div>
 					<!-- /Billing Details -->
 

@@ -53,15 +53,15 @@
                                         </figure>
                                     </td>
                                     <td>
-                                        <input type="number" class="form-control border" aria-label="quantity"
+                                        <input type="number" class="form-control border mt-3" aria-label="quantity"
                                             ng-model="item.quantity"
                                             ng-change="updateQuantity(item.productId, item.quantity)"
                                             aria-describedby="basic-addon1">
                                     </td>
                                     <td>
-                                        <div class="price-wrap"> <var class="price">${{item.price}}</var> </div>
+                                        <div class="price-wrap mt-4"> <var class="price">${{item.price}}</var> </div>
                                     </td>
-                                    <td class="text-right d-none d-md-block">
+                                    <td class="text-right d-none d-md-block mt-3">
                                         <!-- <a data-original-title="Save to Wishlist" title="" href="" class="btn btn-light"
                                             data-toggle="tooltip" data-abc="true"> <i class="fa fa-heart"></i></a> -->
                                         <button ng-click="removeFromCart(item)" class="btn btn-light" data-abc="true">

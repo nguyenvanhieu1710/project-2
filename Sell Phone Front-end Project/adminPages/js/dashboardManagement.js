@@ -3,35 +3,43 @@ $(document).ready(function () {
   var bestSellingProduct = [];
   // ==================================> fetch products <================================================
   function fetchProducts() {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/product/get-all`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        $(".total-quantity-product").text(response.length);
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/product/get-all`;
+    apiCall("GET", url, null, function (response) {
+      $(".total-quantity-product").text(response.length);
     });
   }
 
   // ===================================> fetch order <================================================
   function fetchOrder() {
-    $.ajax({
-      type: "GET",
-      url: `http://localhost:4006/api-admin/Bill/get-all`,
-      headers: { Authorization: "Bearer " + token },
-      success: function (response) {
-        // debugger;
-        $(".total-quantity-purchase-orders").text(response.length);
-        // debugger;
-      },
-      error: function (error) {
-        console.error("Request failed: ", error);
-      },
+    const url = `http://localhost:4006/api-admin/Bill/get-all`;
+    apiCall("GET", url, null, function (response) {
+      let purchaseOrders = new Array(12).fill(0);
+      let salesOrders = new Array(12).fill(0);
+
+      response.forEach((order) => {
+        const month = new Date(order.dayBuy).getMonth();
+
+        if (
+          order.orderStatus === "Pending Confirmation" ||
+          order.orderStatus === "Shipping"
+        ) {
+          purchaseOrders[month]++;
+        } else if (order.orderStatus === "Delivered") {
+          salesOrders[month]++;
+        }
+      });
+
+      areaChart.updateSeries([
+        { name: "Purchase Orders", data: purchaseOrders },
+        { name: "Sales Orders", data: salesOrders },
+      ]);
+
+      $(".total-quantity-purchase-orders").text(
+        purchaseOrders.reduce((a, b) => a + b, 0)
+      );
+      $(".total-quantity-sales-orders").text(
+        salesOrders.reduce((a, b) => a + b, 0)
+      );
     });
   }
 
@@ -45,7 +53,8 @@ $(document).ready(function () {
         // debugger;
         bestSellingProduct = response;
         let productNames = bestSellingProduct.map((item) => item.productName);
-        updateChart(productNames);
+        let quantity = bestSellingProduct.map((item) => item.quantity);
+        updateChart(productNames, quantity);
         // debugger;
       },
       error: function (error) {
@@ -54,9 +63,37 @@ $(document).ready(function () {
     });
   }
 
+  function getUser() {
+    const url = "http://localhost:4006/api-admin/Users/get-all";
+    apiCall("GET", url, null, function (response) {
+      $(".total-customers").text(response.length);
+    });
+  }
+
+  // ==========================================> api call <===========================================================
+  function apiCall(method, url, data = null, successCallback) {
+    return $.ajax({
+      url: url,
+      type: method,
+      data: data,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      success: function (response) {
+        if (successCallback) {
+          successCallback(response);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        Swal.fire("Error", "Error: " + error, "error");
+      },
+    });
+  }
+
   // =========================================> Chart <=======================================================
   // ===================================> update chart top 5 products <================================================
-  function updateChart(productNames) {
+  function updateChart(productNames, quantity) {
     const options = {
       chart: {
         type: "bar",
@@ -91,7 +128,7 @@ $(document).ready(function () {
       series: [
         {
           name: "Sales Count",
-          data: [10, 8, 6, 4, 2],
+          data: quantity,
         },
       ],
     };
@@ -100,17 +137,16 @@ $(document).ready(function () {
     chart.render();
   }
 
-  // Tạo tùy chọn cấu hình cho biểu đồ vùng.
-  // AREA CHART
+  // ==========================================> area chart <=========================================================
   const areaChartOptions = {
     series: [
       {
         name: "Purchase Orders",
-        data: [31, 40, 28, 51, 42, 109, 100],
+        data: [],
       },
       {
         name: "Sales Orders",
-        data: [11, 32, 45, 32, 34, 52, 41],
+        data: [],
       },
     ],
     chart: {
@@ -127,7 +163,20 @@ $(document).ready(function () {
     stroke: {
       curve: "smooth",
     },
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+    labels: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ],
     markers: {
       size: 0,
     },
@@ -150,7 +199,6 @@ $(document).ready(function () {
     },
   };
 
-  // chèn biểu đồ vào #area-chart
   const areaChart = new ApexCharts(
     document.querySelector("#area-chart"),
     areaChartOptions
@@ -161,4 +209,5 @@ $(document).ready(function () {
   fetchProducts();
   fetchOrder();
   getBestSellingProduct();
+  getUser();
 });
